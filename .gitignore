@@ -131,4 +131,5 @@ dmypy.json
 # Added by Tae
 DEBUG
 arcface/pretrained_models
-age-gender/pretrained_models
+agegender/pretrained_models
+.vscode
