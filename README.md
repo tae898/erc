@@ -90,6 +90,8 @@ None of the models used were trained by me. I copied the codes and the binary fi
 6. Better docstring. 
 7. GPU support.
 8. Create a server in docker.
+9. Decouple face detection (bounding box) and face landmark detection. They are technically two separate things.
+10. Think about extending the visual features from faces to full-sized humans (e.g. human poses)
 
 
 ## Contributing
