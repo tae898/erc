@@ -88,7 +88,8 @@ None of the models used were trained by me. I copied the codes and the binary fi
 4. Find a better face detector. This package supports some face detectors (e.g. sfd, blazeface, and dlib).
 5. Clean and readable code.
 6. Better docstring. 
-7. GPU support
+7. GPU support.
+8. Create a server in docker.
 
 
 ## Contributing
