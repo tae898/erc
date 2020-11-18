@@ -1,62 +1,94 @@
-# cltl-facedetection
-A face detection (micro) service.
-This services expects a numpy array as input (an RGB image) and outputs bounding boxes, probs, and five face landmarks. Currenty the model is implemented in [pytorch-based mtcnn](https://github.com/timesler/facenet-pytorch). The service acts as a server, and you'd have to implement a small client to talk to it. I used [mlsocket](https://github.com/k2sebeom/mlsocket) for this.
+# cltl-face-all
+
+This python package was initially made to improve robot-human communication, but the use cases can vary. Given an image with a face, useful features are extracted with which robots / agents can better engage in a conversation with humans. 
+
+This python package contains four models to get visual features from human faces:
+
+1. **face detection** gives you bounding boxes around the faces and their probabilities.
+2. **face landmark detection** gives you 68 face landmarks. This depends on (1)
+3. **age/gender detection** gives you estimated gender and age. This depends on (1) and (2).
+4. **face recognition** gives you 512-D face embedding vectors. This depends on (1) and (2).
+
 
 ## Prerequisites
 
-[Docker Engine](https://docs.docker.com/engine/install/)
+* A x86 Unix or Unix-like machines 
+* Python 3.7.9 environment
+* (Optional) [Docker Engine](https://docs.docker.com/engine/install/)
 
-I recommend x86 Unix or Unix-like machines. 
-
-## Installation
+## Python package installation
 
 1. Clone this repo
 
     ```
-    git clone https://github.com/leolani/cltl-facedetection.git
+    git clone https://github.com/leolani/cltl-face-all
     ```
-2. At the root directory of the repo (e.g. `cltl-facedetection`), build a docker image by running
+
+2. Install the requirements (virtual python environment is highly recommended)
     ```
-    docker build -t cltl-facedetection .
+    pip install -r requirements.txt
     ```
+
+3. Go to the directory where this `README.md` is located. Install the `cltl-face-all` repo by running
+    ```
+    pip install .
+    ```
+
+
+## (Optional) Building and running the docker image 
+
+
+1. Clone this repo
+
+    ```
+    git clone https://github.com/leolani/cltl-face-all
+    ```
+
+2. Go to the directory where this `README.md` is located.
+    ```
+    docker build -t cltl-face-all .
+    ```
+
+3. Run the docker container.
+    ```
+    docker run -p 27004:27004 -it --rm cltl-face-all /bin/bash
+    ```
+
 ## Usage
 
-For most of the time, CPU might be enough.
-
-### CPU
+In your python environment, import the module `cltl-face-all` to use the classes and functions. Below is a code snippet.
 
 ```
-docker run -p 27004:27004 -it --rm cltl-facedetection
+from cltl_face_all.face_alignment import FaceDetection
+from cltl_face_all.arcface import ArcFace
+from cltl_face_all.agegender import AgeGender
+
+
+ag = AgeGender(device='cpu')
+af = ArcFace(device='cpu')
+fd = FaceDetection(device='cpu', face_detector='blazeface')
 ```
 
-### GPU
+## Examples
 
-```
-docker run -p 27004:27004 -it --rm --gpus all cltl-facedetection
-```
+Go to the `examples` folder to and take a look at some of the jupyter notebooks. 
 
-If you want to use a GPU, your system has to have a CUDA GPU with nvidia-driver installed. This might not work so well. Follow [Setting up NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#setting-up-nvidia-container-toolkit). 
+* Watch [this video](https://youtu.be/4i0s_dnylZ0) for registering your face and webcam demo.
+* Watch [this video](https://youtu.be/asJtjhDJ5ZM) for obtaining face features from videos and inference on images.
 
-## Server-Client Example
+## Disclaimer
 
-1. Start the server in one terminal.
+None of the models used were trained by me. I copied the codes and the binary files from already existing repos. The original sources are mentioned in my code.
 
-    ```
-    docker run -p 27004:27004 -it --rm cltl-facedetection
-    ```
-2. Open up another terminal. Preferably install a new python virtualenv for this client.
+## TODOs
 
-3. Install the necessary packages for this client example.
-    ```
-    pip install -r requirements_example.txt  
-    ```
-4. Run the `client.py`
-    ```
-    python client.py
-    ```
-
-[See this video](https://youtu.be/0zYOsTlfPFY), for a step by step guide.
-[See this video](https://youtu.be/EIDBSBH1avU), to see how to use what the model outputs.
+1. Create a test dataset to set a baseline.
+2. Currently both tensorflow and pytorch are used. Stick to one (preferably pytorch) and make it compatible.
+3. Better organize the binary weights file downloading. They are stored everywhere at the moment.
+4. Find a better face detector. This package supports some face detectors (e.g. sfd, blazeface, and dlib).
+5. Clean and readable code.
+6. Better docstring. 
+7. GPU support
 
 
 ## Contributing
