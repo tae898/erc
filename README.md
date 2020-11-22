@@ -5,9 +5,9 @@ This python package was initially made to improve robot-human communication, but
 This python package contains four models to get visual features from human faces:
 
 1. **face detection** gives you bounding boxes around the faces and their probabilities.
-2. **face landmark detection** gives you 68 face landmarks. This depends on (1)
-3. **age/gender detection** gives you estimated gender and age. This depends on (1) and (2).
-4. **face recognition** gives you 512-D face embedding vectors. This depends on (1) and (2).
+1. **face landmark detection** gives you 68 face landmarks. This depends on (1)
+1. **age/gender detection** gives you estimated gender and age. This depends on (1) and (2).
+1. **face recognition** gives you 512-D face embedding vectors. This depends on (1) and (2).
 
 
 ## Prerequisites
@@ -24,12 +24,12 @@ This python package contains four models to get visual features from human faces
     git clone https://github.com/leolani/cltl-face-all
     ```
 
-2. Install the requirements (virtual python environment is highly recommended)
+1. Install the requirements (virtual python environment is highly recommended)
     ```
     pip install -r requirements.txt
     ```
 
-3. Go to the directory where this `README.md` is located. Install the `cltl-face-all` repo by running
+1. Go to the directory where this `README.md` is located. Install the `cltl-face-all` repo by running
     ```
     pip install .
     ```
@@ -44,12 +44,12 @@ This python package contains four models to get visual features from human faces
     git clone https://github.com/leolani/cltl-face-all
     ```
 
-2. Go to the directory where this `README.md` is located.
+1. Go to the directory where this `README.md` is located.
     ```
     docker build -t cltl-face-all .
     ```
 
-3. Run the docker container.
+1. Run the docker container.
     ```
     docker run -p 27004:27004 -it --rm cltl-face-all /bin/bash
     ```
@@ -83,15 +83,16 @@ None of the models used were trained by me. I copied the codes and the binary fi
 ## TODOs
 
 1. Create a test dataset to set a baseline.
-2. Currently both tensorflow and pytorch are used. Stick to one (preferably pytorch) and make it compatible.
-3. Better organize the binary weights file downloading. They are stored everywhere at the moment.
-4. Find a better face detector. This package supports some face detectors (e.g. sfd, blazeface, and dlib).
-5. Clean and readable code.
-6. Better docstring. 
-7. GPU support.
-8. Create a server in docker.
-9. Decouple face detection (bounding box) and face landmark detection. They are technically two separate things.
-10. Think about extending the visual features from faces to full-sized humans (e.g. human poses)
+1. Currently both tensorflow and pytorch are used. Stick to one (preferably pytorch) and make it compatible.
+1. Better organize the binary weights file downloading. They are stored everywhere at the moment.
+1. Find a better face detector. This package supports some face detectors (e.g. sfd, blazeface, and dlib), but there's gotta be a better one.
+1. Include facial emotion detection.
+1. Clean and readable code.
+1. Better docstring. 
+1. GPU support.
+1. Create a server in docker.
+1. Decouple face detection (bounding box) and face landmark detection. They are technically two separate things.
+1. Think about extending the visual features from faces to full-sized humans (e.g. human poses)
 
 
 ## Contributing
@@ -99,10 +100,10 @@ None of the models used were trained by me. I copied the codes and the binary fi
 Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
 1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+1. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+1. Push to the Branch (`git push origin feature/AmazingFeature`)
+1. Open a Pull Request
 
 ## Authors
 * Taewoon Kim (t.kim@vu.nl)
