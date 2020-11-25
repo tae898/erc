@@ -1,5 +1,6 @@
-# Multimodal
-This directory includes works by Taewoon Kim (t.kim@vu.nl).
+# examples
+This directory includes a lot of examples that you can run either locally (`./local`) or on google colab (`./colab`).
+You have to have `requirements.txt` installed to run examples on your local machine, whereas you don't have requirements for colab.
 
 ## MELD Datasets
 
@@ -16,8 +17,9 @@ I've also created smaller datasets from the original train dataset.
 The smaller dataset is part of the bigger dataset's train data.
 
 Run below to download and unzip the `smaller-dataset.zip`
+
 ```
-pip install gdown
+!pip install gdown
 !gdown --id 16ck7plW9v9eSHGCs5wuB2AhhufPRt3Wi
 !unzip smaller-dataset.zip
 !rm smaller-dataset.zip
@@ -36,7 +38,7 @@ Refer to this python package https://github.com/leolani/cltl-face-all. It gives 
 Run below to download and unzip the already extracted visual features of the smaller-datset.
 
 ```
-pip install gdown
+!pip install gdown
 !gdown --id 1-2LeHC_5Cm2gWWT6vBrVhp8jorbjkN1_
 !unzip visual-features.zip
 !rm visual-features.zip
