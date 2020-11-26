@@ -57,12 +57,18 @@ The utterance also comes with an annotated text as well. Let’s assume that for
 The three different modalities all give us different time length. Of course we can just resample them so that they can have the same time length, but there’s gotta be a better and smarter way.
 
 ## `./local` (run this locally)
-* `smaller-datasets.ipynb` to reproduce the smaller datasets.
-* `visual-features-extraction.ipynb` to extract visual features from the entire datasets.
-* `visual-features-check.ipynb` to check the extracted visual features.
-* ...
+* `1.smaller-datasets.ipynb` to reproduce the smaller datasets.
+* `2.visual-features-extraction.ipynb` to extract visual features from the entire datasets.
+* `3.visual-features-check.ipynb` to check the extracted visual features.
+* `register-your-face.ipynb` to register your face.
+* `webcam.ipynb` to run on your webcam.
+* `create-embeddings.ipynb` to create face embeddings.
+* `run-on-images.ipynb` to run on still images.
+* `friends2gmrc.ipynb` See to https://github.com/cltl/GRMCAnnotation
+
+
 
 ## `./colab` (run this on colab)
-* `visual-features-extraction-colab.ipynb` to extract visual features from the smaller datasets.
-* `visual-features-check-colab.ipynb` to check the extracted visual features.
-* `find-relevant-faces-colab.ipynb` to see how to cluster face embeddings.
+* `1.visual-features-extraction-colab.ipynb` to extract visual features from the smaller dataset
+* `2.visual-features-check-colab.ipynb` to check the extracted visual features.
+* `3.find-relevant-faces-colab.ipynb` to cluster the face embedding vectors.
