@@ -44,6 +44,6 @@ for path in list(friends_time_):
         else:
             friends_time[seasonno][episodeno] = date
 
-with open('friends_time.pkl', 'wb') as stream:
+with open('friends-time.pkl', 'wb') as stream:
     pickle.dump(friends_time, stream)
 
