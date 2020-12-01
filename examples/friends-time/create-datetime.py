@@ -39,7 +39,6 @@ for path in list(friends_time_):
             episodeno_2 = episodeno[len(episodeno)//2:]
             friends_time[seasonno][episodeno_1] = date
             friends_time[seasonno][episodeno_2] = date + timedelta(days=7)
-            
 
         else:
             friends_time[seasonno][episodeno] = date
