@@ -39,9 +39,9 @@ Run below to download and unzip the already extracted visual features of the sma
 
 ```
 !pip install gdown
-!gdown --id 1-2LeHC_5Cm2gWWT6vBrVhp8jorbjkN1_
-!unzip visual-features.zip
-!rm visual-features.zip
+!gdown --id 1rsLbfgQYztDtrPFqEmkh-2d_0ap1qd_s
+!unzip visual-features-smaller-dataset.zip
+!rm visual-features-smaller-dataset.zip
 ```
 
 ## Signal time-alignment
