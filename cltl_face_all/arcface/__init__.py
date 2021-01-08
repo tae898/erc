@@ -16,7 +16,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 class ArcFace():
-    def __init__(self, device='cpu'):
+    def __init__(self, device=None):
         logger = tf.get_logger()
         logger.disabled = True
         logger.setLevel(logging.FATAL)
