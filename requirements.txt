@@ -56,3 +56,4 @@ urllib3==1.26.2
 Werkzeug==1.0.1
 wrapt==1.12.1
 zipp==3.4.0
+av==8.0.2
