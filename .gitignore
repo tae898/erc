@@ -129,7 +129,4 @@ dmypy.json
 .pyre/
 
 # Added by Tae
-DEBUG
-arcface/pretrained_models
-agegender/pretrained_models
 .vscode
