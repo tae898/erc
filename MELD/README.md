@@ -18,7 +18,5 @@ This directory includes jupyter notebooks. They are pretty much self-explanatory
     This will give you a good overview.
 - `6.extract-face-videos.ipynb` is to extract the video of the faces, if the face matches the speaker. I do face recognition here. Currently I only matched the main 6 chracters (i.e. ['Chandler', 'Joey', 'Monica', 'Phoebe', 'Rachel', 'Ross']), which account for the majority.
 
-    The generated videos are saved along with the pre-computed visual features from `2.visual-features-extraction.ipynb`. 
-
-    The generated face videos can be downloaded from [here](https://drive.google.com/file/d/1jS2ufbIovxg8umkZM5UKzsvtSp4UJJyt/view?usp=sharing), or using `gdown`,
-    > `gdown --id 1jS2ufbIovxg8umkZM5UKzsvtSp4UJJyt`
+    The generated face videos can be downloaded from [here](https://drive.google.com/file/d/18zbjkuHJTU1fUGKAO6pCwCDSVxN2fK06/view?usp=sharing), or using `gdown`,
+    > `gdown --id 18zbjkuHJTU1fUGKAO6pCwCDSVxN2fK06`
