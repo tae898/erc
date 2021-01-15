@@ -1,1 +1,0 @@
-# Most of the codes and the weights are copied from here: https://github.com/yu4u/age-gender-estimation
