@@ -1,0 +1,3 @@
+[submodule "cltl-face-all"]
+	path = cltl-face-all
+	url = https://github.com/leolani/cltl-face-all.git
