@@ -9,7 +9,7 @@ Below is an example.
 ## Things to note
 
 - The unit of the unix time stamps is milliseconds.
-- Probably this is not perfect.
+- Probably this is not perfect (work in progress).
 
 ## Requirements
 
