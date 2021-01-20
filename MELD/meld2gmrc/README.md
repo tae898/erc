@@ -1,10 +1,14 @@
-# friends
+# meld2gmrc
 
-This directory includes jupyter notebooks with which you can save MELD friends videos into GMRC annotation format.
+This directory includes jupyter notebook with which you can save MELD friends videos into GMRC annotation format. Running `meld2gmrc.ipynb` will give you the GMRC annotations, which you can read from the GUI app. You can run it yourself, or download from
+```
+gdown --id 1c13rqBWRoJ0boJCY2qvLv7vQ0VfqE7-8
+```
+
 Below is an example.
 
 ![meld2gmrc example](meld2gmrc.png)
-> Age (a floating point number from 0 to 100), gender (femaleness on a scale from 0 to 1), and the face recognition (somehow not displayed. It's a TODO) are predicted by machine, not human! See https://github.com/leolani/cltl-face-all for more details.
+> Age (a floating point number from 0 to 100), gender (femaleness on a scale from 0 to 1 where 1 being "absolute" female), and the face recognition) are predicted by machine, not human! See https://github.com/leolani/cltl-face-all for more details.
 
 ## Things to note
 
@@ -19,14 +23,12 @@ Below is an example.
     ```
     I highly recommend you to run above command in your virtual python environment.
 
-1. To test this on the GUI webapp, read the `README.md` in the root directory of this git repo. 
-
 
 ## jupyter notebooks
 
 - `meld2gmrc.ipynb`
 
-  Run this locally to do everything at one go (You still have to manually load the GUI webapp later though.)
+  Run this locally to do everything at one go (You stil have to manually load the GUI webapp later though.)
 
 ## Authors
 
