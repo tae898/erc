@@ -5,6 +5,8 @@ This directory includes jupyter notebook with which you can save MELD friends vi
 gdown --id 1c13rqBWRoJ0boJCY2qvLv7vQ0VfqE7-8
 ```
 
+[Watch this introductory video](https://youtu.be/mBt4akSrP0k). 
+
 Below is an example.
 
 ![meld2gmrc example](meld2gmrc.png)
