@@ -5,6 +5,17 @@ This directory includes jupyter notebook with which you can save MELD friends vi
 gdown --id 1c13rqBWRoJ0boJCY2qvLv7vQ0VfqE7-8
 ```
 
+The directory you downloaded above will look like this:
+
+```
+├── dev [114 entries exceeds filelimit, not opening dir]
+├── test [280 entries exceeds filelimit, not opening dir]
+└── train [1038 entries exceeds filelimit, not opening dir]
+```
+For example, the directory `train` contains 1038 dialogues, or chats, whatever
+you call it. Every dialogue contains multiple utterances, which are typically 
+a couple of sentences spoken by the speaker. One dialogue contains approximately 9 utterances.
+
 [Watch this introductory video](https://youtu.be/mBt4akSrP0k). 
 
 Below is an example.
