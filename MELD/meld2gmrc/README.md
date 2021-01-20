@@ -4,6 +4,11 @@ This directory includes jupyter notebook with which you can save MELD friends vi
 ```
 gdown --id 1c13rqBWRoJ0boJCY2qvLv7vQ0VfqE7-8
 ```
+or on your web browswer
+
+```
+https://drive.google.com/uc?id=1c13rqBWRoJ0boJCY2qvLv7vQ0VfqE7-8
+```
 
 The directory you downloaded above will look like this:
 
