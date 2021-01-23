@@ -1,0 +1,54 @@
+id: <train instance identifier>
+pretrained: <path/to/pretrained>
+seed: <random seed>
+model:
+    name: <model class name>
+    args:
+        <argument keyword>: <argument value>
+        # ... more args
+optimizer:
+    name: <optimizer class name>
+    args:
+        <argument keyword>: <argument value>
+        # ... more args
+loss:
+    name: <loss class name>
+    args:
+        <argument keyword>: <argument value>
+        # ... more args
+metric:
+    - name: <metric class name>
+      args:
+          <argument keyword>: <argument value>
+          # ... more args
+    # ... more metrics
+scheduler:
+    name: <scheduler class name>
+    args:
+        <argument keyword>: <argument value>
+        # ... more args
+dataset:
+    train:
+        name: <dataset class name>
+        args:
+            <argument keyword>: <argument value>
+            # ... more args
+        loader:
+            name: <dataloader class name>
+            args:
+                <dataloader argument keyword>: <argument value>
+                # ... more args
+    val:
+        name: <dataset class name>
+        args:
+            <argument keyword>: <argument value>
+            # ... more args
+        loader:
+            name: <dataloader class name>
+            args:
+                <dataloader argument keyword>: <argument value>
+                # ... more args
+trainer:
+    nepochs: <max number of epochs>
+    val_step: <validation interval>
+    log_step: <training log interval>

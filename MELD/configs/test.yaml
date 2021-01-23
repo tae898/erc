@@ -1,0 +1,22 @@
+pretrained: <path/to/pretrained>
+model:
+    name: <model class name>
+    args:
+        <argument keyword>: <argument value>
+        # ... more args
+metric:
+    - name: <metric class name>
+      args:
+          <argument keyword>: <argument value>
+          # ... more args
+    # ... more metrics
+dataset:
+    name: <dataset class name>
+    args:
+        <argument keyword>: <argument value>
+        # ... more args
+    loader:
+        name: <dataloader class name>
+        args:
+            <dataloader argument keyword>: <argument value>
+            # ... more args

@@ -1,6 +1,14 @@
 # MELD
 
-This directory includes jupyter notebooks. They are pretty much self-explanatory.
+This directory includes jupyter notebooks. They are pretty much self-explanatory. You must install some python packages. If you haven't, go back to `README.md` of the root repo.
+
+## meld2gmrc
+
+You probably don't have to care about this. This is actually [part of the GMRC repo](https://github.com/cltl/GMRCAnnotation). I just didn't really know where to put this, and thus it is here.
+
+## configs
+
+This directory includes yaml files. They help you write configs and set the hyper parameter values. Once they are set right, you don't have to set paths every time using command arguments, which can be very tedious.
 
 ## Jupyter notebooks.
 

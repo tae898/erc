@@ -24,23 +24,32 @@ The datasets to work on include
 
 ## Installing the necessary python packages
 
-Since we deal with multimodal data, there are three different packages to install. Each modality is a separate repo. They are all submodules of this repo `erc`. Use the `git submodule` commands properly.
+The functions and classes, mostly pytorch stuff, you need to for train, test, and inference are bundled into a package `erc`. In addition, since we deal with multimodal data, there are three different packages to install. Each modality is a separate repo. They are all submodules of this repo `erc`. Use the `git submodule` commands properly.
 
+
+1. erc
+
+    In the root directory of this repo, where this `README.md` is located in, run
+
+    ```
+    pip install .
+    ```
+    I highly recommend you to run everything in a virtual environment.
 1. Vision
 
     Go to the directory `cltl-face-all` and follow the instructions.
 
-2. Text
+1. Text
 
     TBD
 
-3. Audio
+1. Audio
 
     TBD
 
-## pytorch-template
+## templates
 
-I just added this repo as a submoudle. You don't have to care about it. I just use this as a reference to my own modules.
+This directory includes some templates that I follow. They are submodules and linked to the original repos. You don't have to care about them. They are just for references.
 
 
 ## Contributing
