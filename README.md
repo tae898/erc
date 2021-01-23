@@ -10,6 +10,12 @@ The datasets to work on include
 
 2. [IEMOCAP](https://sail.usc.edu/iemocap/) (not yet started)
 
+    I do have the datasets in my storage.
+
+3. [AFEW](https://cs.anu.edu.au/few/AFEW.html) (not yet started)
+
+    I sent a mail to the authors if I can get the dataset. I haven't got any responses yet.
+
 
 ## Prerequisites
 
@@ -18,19 +24,32 @@ The datasets to work on include
 
 ## Installing the necessary python packages
 
-Since we deal with multimodal data, there are three different packages to install. Ideally, all of them should be in separate repos but I just put all of them here at the moment.
+The functions and classes, mostly pytorch stuff, you need to for train, test, and inference are bundled into a package `erc`. In addition, since we deal with multimodal data, there are three different packages to install. Each modality is a separate repo. They are all submodules of this repo `erc`. Use the `git submodule` commands properly.
 
+
+1. erc
+
+    In the root directory of this repo, where this `README.md` is located in, run
+
+    ```
+    pip install .
+    ```
+    I highly recommend you to run everything in a virtual environment.
 1. Vision
 
     Go to the directory `cltl-face-all` and follow the instructions.
 
-2. Text
+1. Text
 
     TBD
 
-3. Audio
+1. Audio
 
     TBD
+
+## templates
+
+This directory includes some templates that I follow. They are submodules and linked to the original repos. You don't have to care about them. They are just for references.
 
 
 ## Contributing
@@ -45,6 +64,7 @@ Contributions are what make the open source community such an amazing place to b
 
 ## Authors
 * Taewoon Kim (t.kim@vu.nl)
+* Khanh Nguyen Vu (k2.vu@student.vu.nl)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
