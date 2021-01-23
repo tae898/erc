@@ -10,6 +10,12 @@ The datasets to work on include
 
 2. [IEMOCAP](https://sail.usc.edu/iemocap/) (not yet started)
 
+    I do have the datasets in my storage.
+
+3. [AFEW](https://cs.anu.edu.au/few/AFEW.html) (not yet started)
+
+    I sent a mail to the authors if I can get the dataset. I haven't got any responses yet.
+
 
 ## Prerequisites
 
@@ -18,7 +24,7 @@ The datasets to work on include
 
 ## Installing the necessary python packages
 
-Since we deal with multimodal data, there are three different packages to install. Ideally, all of them should be in separate repos but I just put all of them here at the moment.
+Since we deal with multimodal data, there are three different packages to install. Each modality is a separate repo. They are all submodules of this repo `erc`. Use the `git submodule` commands properly.
 
 1. Vision
 
@@ -31,6 +37,10 @@ Since we deal with multimodal data, there are three different packages to instal
 3. Audio
 
     TBD
+
+## pytorch-template
+
+I just added this repo as a submoudle. You don't have to care about it. I just use this as a reference to my own modules.
 
 
 ## Contributing
@@ -45,6 +55,7 @@ Contributions are what make the open source community such an amazing place to b
 
 ## Authors
 * Taewoon Kim (t.kim@vu.nl)
+* Khanh Nguyen Vu (k2.vu@student.vu.nl)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
