@@ -29,9 +29,10 @@ scheduler:
         # ... more args
 dataset:
     train:
-        name: <dataset class name>
+        name: MeldDataset
         args:
-            <argument keyword>: <argument value>
+            choose_frames: random_consecutive
+            num_frames: 1
             # ... more args
         loader:
             name: <dataloader class name>

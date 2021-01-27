@@ -6,7 +6,7 @@ import torch
 
 
 class MeldDataset(data.Dataset):
-    def __init__(self, list_vid_paths, labels):
+    def __init__(self, list_vid_paths, labels, choose_frames, num_frames):
         """Initialize.
 
         Attributes
@@ -29,6 +29,9 @@ class MeldDataset(data.Dataset):
         self.sentiment2num = {'neutral': 0,
                               'positive': 1,
                               'negative': 2}
+
+        self.choose_frames = choose_frames
+        self.num_frames = num_frames
 
         self.labels = [self.emotion2num[lbl] for lbl in labels]
         self.list_vid_paths = list_vid_paths
@@ -56,6 +59,36 @@ class MeldDataset(data.Dataset):
 
         X = X.permute(0, 3, 1, 2)  # from THWC to TCHW
 
+        if self.choose_frames == 'random_consecutive':
+            frame_indexes = [i for i in range(X.shape[0])]
+            if X.shape[0] < self.num_frames:
+                indexes = upsample_indexes(
+                    [idx for idx in range(X.shape[0])], self.num_frames)
+                X = torch.stack([X[idx] for idx in indexes])
+            elif X.shape[0] == self.num_frames:
+                pass
+            else:
+                idx_start = np.random.randint(
+                    0, X.shape[0] - self.num_frames + 1)
+                X = X[idx_start:idx_start+self.num_frames]
+
+        if X.shape[0] == 1:
+            X = torch.squeeze(X)
+
         y = self.labels[index]
 
         return X, y
+
+
+def upsample_indexes(indexes, len_desired):
+    """Upsample linearly."""
+    assert len(indexes) < len_desired, f"The number of indexes should be " \
+        f"smaller than the desired length"
+
+    duplicates = np.linspace(0, len(indexes) - 1, len_desired).round()
+
+    indexes = [indexes[int(dup)] for dup in duplicates]
+
+    assert len(indexes) == len_desired, f"Sampling gone wrong."
+
+    return indexes
