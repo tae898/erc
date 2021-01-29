@@ -2,39 +2,34 @@
 
 This repo is is to reach the SOTA of multimodal ERC challenges. The authors aim to publish a paper in 2021. 
 
-The datasets to work on include
-
-1. [MELD](https://affective-meld.github.io/) (ongoing)
-
-    Go to the directory `MELD` to see the ongoing results.
-
-2. [IEMOCAP](https://sail.usc.edu/iemocap/) (not yet started)
-
-    I do have the datasets in my storage.
-
-3. [AFEW](https://cs.anu.edu.au/few/AFEW.html) (not yet started)
-
-    I sent a mail to the authors if I can get the dataset. I haven't got any responses yet.
-
-
 ## Prerequisites
 
 * An x86-64 Unix or Unix-like machines 
 * Python 3.6x, 3.7x, or 3.8x
 
+
+## Datasets
+
+There are in total of three datasets that server our purpose. They are all in `datasets` directory.
+
+1. [MELD](https://affective-meld.github.io/) (ongoing)
+
+    Go to the directory `datasets/MELD` to see the ongoing results.
+
+2. [IEMOCAP](https://sail.usc.edu/iemocap/) (not yet started)
+
+    Go to the directory `datasets/IEMOCAP` to see the ongoing results.
+
+3. [AFEW](https://cs.anu.edu.au/few/AFEW.html) (not yet started)
+
+    Go to the directory `datasets/AFEW` to see the ongoing results.
+
+There might be some python files or config files in those directories, but they are only to pre-process or extract features from them. Training and testing are not done there.
+
 ## Installing the necessary python packages
 
-The functions and classes, mostly pytorch stuff, you need to for train, test, and inference are bundled into a package `erc`. In addition, since we deal with multimodal data, there are three different packages to install. Each modality is a separate repo. They are all submodules of this repo `erc`. Use the `git submodule` commands properly.
+Since we deal with multimodal data, there are three different packages to install. Each modality is a separate repo. They are all submodules of this repo `erc`. Use the `git submodule` commands properly. If you just want to train / test erc models, you probably dont' have to install them.
 
-
-1. erc
-
-    In the root directory of this repo, where this `README.md` is located in, run
-
-    ```
-    pip install .
-    ```
-    I highly recommend you to run everything in a virtual environment.
 1. Vision
 
     Go to the directory `cltl-face-all` and follow the instructions.
@@ -46,11 +41,6 @@ The functions and classes, mostly pytorch stuff, you need to for train, test, an
 1. Audio
 
     TBD
-
-## templates
-
-This directory includes some templates that I follow. They are submodules and linked to the original repos. You don't have to care about them. They are just for references.
-
 
 ## Contributing
 
