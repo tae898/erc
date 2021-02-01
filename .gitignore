@@ -130,3 +130,7 @@ dmypy.json
 
 # Added by Tae
 .vscode
+
+# Dataset
+meld/
+single-frame-dataset/
