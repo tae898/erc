@@ -133,4 +133,6 @@ dmypy.json
 
 # Dataset
 meld/
-single-frame-dataset/
+single-frame-dataset/dev/
+single-frame-dataset/train/
+single-frame-dataset/test/
