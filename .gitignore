@@ -130,3 +130,9 @@ dmypy.json
 
 # Added by Tae
 .vscode
+
+# Dataset
+meld/
+single-frame-dataset/dev/
+single-frame-dataset/train/
+single-frame-dataset/test/
