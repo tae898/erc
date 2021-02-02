@@ -10,21 +10,7 @@ This repo is is to reach the SOTA of multimodal ERC challenges. The authors aim 
 
 ## Datasets
 
-There are in total of three datasets that server our purpose. They are all in `Datasets` directory.
-
-1. [MELD](https://affective-meld.github.io/) (ongoing)
-
-    Go to the directory `Datasets/MELD` to see the ongoing results.
-
-2. [IEMOCAP](https://sail.usc.edu/iemocap/) (not yet started)
-
-    Go to the directory `Datasets/IEMOCAP` to see the ongoing results.
-
-3. [AFEW](https://cs.anu.edu.au/few/AFEW.html) (not yet started)
-
-    Go to the directory `Datasets/AFEW` to see the ongoing results.
-
-There might be some python files or config files in those directories, but they are only to pre-process or extract features from them. Training and testing are not done there.
+There are multiple datasets that we experimented on. You check check them out in the `Datasets` directory.
 
 ## Installing the necessary python packages
 
