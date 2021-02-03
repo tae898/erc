@@ -1,9 +1,9 @@
-id:                             effnet_b3
+id:                             effnet_b4
 pretrained:                     Null
 model:
     name:                       BaseModel
     args:
-        version:                3
+        version:                4
         num_classes:            7
         freeze_backbone:        False
         from_pretrained:        True
@@ -37,7 +37,7 @@ dataset:
         loader:
             name: DataLoader
             args:
-                batch_size:     2
+                batch_size:     32
                 shuffle:        True
                 drop_last:      False 
     val:
@@ -50,7 +50,7 @@ dataset:
         loader:
             name: DataLoader
             args:
-                batch_size:     2
+                batch_size:     32
                 shuffle:        True
 
 trainer: 
