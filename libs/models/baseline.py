@@ -9,7 +9,7 @@ from .extractors import EfficientNetExtractor
 
 
 class BaseModel(nn.Module):
-    def __init__(self, num_classes=5, version=3, freeze_backbone=False, from_pretrained=True):
+    def __init__(self, num_classes, version, freeze_backbone=False, from_pretrained=True):
         super().__init__()
         self.extractor = EfficientNetExtractor(version, from_pretrained=from_pretrained)
 
@@ -30,7 +30,7 @@ class BaseModel(nn.Module):
         return x
 
 class BaseTimmModel(nn.Module):
-    def __init__(self, num_classes, name, from_pretrained=True, freeze_backbone=False):
+    def __init__(self, num_classes, name, freeze_backbone=False, from_pretrained=True):
         super().__init__()
         self.model = timm.create_model(name, pretrained=from_pretrained)
         try:
