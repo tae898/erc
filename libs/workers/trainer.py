@@ -1,24 +1,18 @@
+import os
+from datetime import datetime
+
+import numpy as np
 import torch
+from loggers import TensorboardLogger
 from torch import nn, optim
 from torch.utils import data
 from torchnet import meter
 from tqdm import tqdm
-import numpy as np
-import os
-from datetime import datetime
-
-from loggers import TensorboardLogger
-from utils.device import move_to, detach
-
+from utils.device import detach, move_to
+from utils.utils import vprint
 
 class Trainer():
-    def __init__(self, device,
-                 config,
-                 model,
-                 criterion,
-                 optimier,
-                 scheduler,
-                 metric):
+    def __init__(self, device, config, model, criterion, optimier, scheduler, metric):
         super(Trainer, self).__init__()
 
         self.config = config
@@ -78,15 +72,13 @@ class Trainer():
                 print(
                     f'{k} is not improved from {self.best_metric[k]:.6f}.')
 
-        # print('Saving current model...')
-        # torch.save(data, os.path.join(self.save_dir, 'current.pth'))
-
     def train_epoch(self, epoch, dataloader):
         # 0: Record loss during training process
         running_loss = meter.AverageValueMeter()
         total_loss = meter.AverageValueMeter()
         for m in self.metric.values():
             m.reset()
+
         self.model.train()
         print('Training........')
         progress_bar = tqdm(dataloader)
@@ -94,24 +86,29 @@ class Trainer():
             # 1: Load img_inputs and labels
             inp = move_to(inp, self.device)
             lbl = move_to(lbl, self.device)
+
             # 2: Clear gradients from previous iteration
             self.optimizer.zero_grad()
-            # 3: Get network outputs
+            
+			# 3: Get network outputs
             outs = self.model(inp)
-            # 4: Calculate the loss
+            
+			# 4: Calculate the loss
             loss = self.criterion(outs, lbl)
-            # 5: Calculate gradients
+            
+			# 5: Calculate gradients
             loss.backward()
-            # 6: Performing backpropagation
+            
+			# 6: Performing backpropagation
             self.optimizer.step()
-            with torch.no_grad():
+            
+			with torch.no_grad():
                 # 7: Update loss
                 running_loss.add(loss.item())
                 total_loss.add(loss.item())
 
                 if (i + 1) % self.log_step == 0 or (i + 1) == len(dataloader):
-                    self.tsboard.update_loss(
-                        'train', running_loss.value()[0], epoch * len(dataloader) + i)
+                    self.tsboard.update_loss('train', running_loss.value()[0], epoch * len(dataloader) + i)
                     running_loss.reset()
 
                 # 8: Update metric
@@ -140,13 +137,17 @@ class Trainer():
             # 1: Load inputs and labels
             inp = move_to(inp, self.device)
             lbl = move_to(lbl, self.device)
-            # 2: Get network outputs
+            
+			# 2: Get network outputs
             outs = self.model(inp)
-            # 3: Calculate the loss
+            
+			# 3: Calculate the loss
             loss = self.criterion(outs, lbl)
-            # 4: Update loss
+            
+			# 4: Update loss
             running_loss.add(loss.item())
-            # 5: Update metric
+            
+			# 5: Update metric
             outs = detach(outs)
             lbl = detach(lbl)
             for m in self.metric.values():
@@ -169,15 +170,9 @@ class Trainer():
         for epoch in range(self.nepochs):
             print('\nEpoch {:>3d}'.format(epoch))
             print('-----------------------------------')
-
-            # Note learning rate
-            for i, group in enumerate(self.optimizer.param_groups):
-                self.tsboard.update_lr(i, group['lr'], epoch)
-
+			
             # 1: Training phase
             self.train_epoch(epoch=epoch, dataloader=train_dataloader)
-
-            print()
 
             # 2: Evalutation phase
             if (epoch + 1) % self.val_step == 0:
