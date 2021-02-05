@@ -1,0 +1,59 @@
+id:                             effnet_b4
+pretrained:                     Null
+model:
+    name:                       BaseModel
+    args:
+        version:                4
+        num_classes:            7
+        freeze_backbone:        False
+        from_pretrained:        True
+optimizer:
+    name:                       Adam
+    args:
+        lr:                     0.0001
+loss:
+    name:                       CrossEntropyLoss 
+    args:                       Null
+metric:
+    -   name:                   Accuracy
+        args:                   Null
+scheduler:
+    name:                       StepLR
+    args:
+        step_size:              3
+        gamma:                  0.2
+        last_epoch:             -1  
+dataset:
+    num_folds:                  
+    folds_train_dir:            
+    folds_test_dir:             
+    train:
+        name:                   DatasetAdvance
+        args:
+            data_dir:           data/train/         
+            csv_path:           Datasets/MELD-single-frame/train.csv
+            IMG_SIZE:           224
+            is_train:           True  
+        loader:
+            name: DataLoader
+            args:
+                batch_size:     32
+                shuffle:        True
+                drop_last:      False 
+    val:
+        name:                   DatasetAdvance
+        args:
+            data_dir:           data/dev/         
+            csv_path:           Datasets/MELD-single-frame/dev.csv
+            IMG_SIZE:           224
+            is_train:           False  
+        loader:
+            name: DataLoader
+            args:
+                batch_size:     32
+                shuffle:        True
+
+trainer: 
+    nepochs: 20
+    val_step: 1
+    log_step: 1
