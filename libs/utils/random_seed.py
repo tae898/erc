@@ -1,14 +1,16 @@
 import torch
 import numpy as np
 import random
+import os
+
+SEED = 42
 
 
-def set_seed(seed):
-    np.random.seed(seed)
+def set_seed(seed=SEED):
     random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
     torch.manual_seed(seed)
-
-
-def set_determinism():
-    torch.backends.cudnn.benchmark = False
+    torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
