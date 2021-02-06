@@ -10,23 +10,7 @@ This repo is is to reach the SOTA of multimodal ERC challenges. The authors aim 
 
 ## Datasets
 
-There are multiple datasets that we experimented on. You check check them out in the `Datasets` directory.
-
-## Installing the necessary python packages
-
-Since we deal with multimodal data, there are three different packages to install. Each modality is a separate repo. They are all submodules of this repo `erc`. Use the `git submodule` commands properly. If you just want to train / test erc models, you probably dont' have to install them.
-
-1. Vision
-
-    Go to the directory `cltl-face-all` and follow the instructions.
-
-1. Text
-
-    TBD
-
-1. Audio
-
-    TBD
+There are multiple datasets that we experimented on. You check check them out in the `Datasets/` directory.
 
 ## Contributing
 

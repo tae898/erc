@@ -25,7 +25,9 @@ with open(f"./CAER/labels.json", 'w') as stream:
     json.dump(labels, stream, indent=4, sort_keys=True, ensure_ascii=False)
 
 README = \
-    f"This dataset doesn't have text modality. Maybe I'll do some ASR to get the texts.\n"
-    
+    f"This dataset doesn't have text modality. Maybe I'll do some ASR to get the texts.\n\n"\
+    f"This README is written by Taewoon Kim (https://tae898.github.io/)"
+
+
 with open(f"./CAER/README.txt", 'w') as stream:
     stream.write(README)

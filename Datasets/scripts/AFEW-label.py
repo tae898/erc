@@ -29,7 +29,8 @@ with open(f"./AFEW/labels.json", 'w') as stream:
 
 README = \
     f"This dataset doesn't have text modality. Maybe I'll do some ASR to get the texts.\n"\
-    f"What's more annoying is that the test dataset is not labeled ..."
+    f"What's more annoying is that the test dataset is not labeled ...\n\n"\
+    f"This README is written by Taewoon Kim (https://tae898.github.io/)"
 
 with open(f"./AFEW/README.txt", 'w') as stream:
     stream.write(README)
