@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# sudo apt-get install libsndfile1-dev
+pip install av librosa
 mkdir -p DEBUG
 
 FILE=MELD.Raw.tar.gz
