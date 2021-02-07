@@ -9,6 +9,7 @@ import av
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
+import argparse
 import multiprocessing
 from joblib import Parallel, delayed
 from insightface.app.face_analysis import FaceAnalysis
@@ -84,9 +85,19 @@ def process_paths(all_vids_path, gpu_id):
 
 
 # %%
-NUM_CORES = multiprocessing.cpu_count()
-n_jobs = NUM_CORES // 2
-gpu_id = -1
+parser = argparse.ArgumentParser(description='extract faces')
+# general
+parser.add_argument('--num-jobs', default=1, help='number of jobs')
+parser.add_argument('--gpu-id', default=-1, type=int,
+                    help='gpu id. -1 means CPU')
+args = parser.parse_args()
+
+n_jobs = int(args.num_jobs)
+gpu_id = int(args.gpu_id)
+
+print(f"n_jobs: {n_jobs}, gpu_id: {gpu_id}")
+
+
 batched = batch_paths(get_paths(), n_jobs)
 
 Parallel(n_jobs=n_jobs)(delayed(process_paths)(batch, gpu_id)

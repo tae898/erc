@@ -54,8 +54,9 @@ You can either compute the features yourself or download them.
 
 
 - If you want to compute them in your machine (not recommended. might take some time)
+`face.sh` takes three positional arguments $1, $2, and $3. $1 should be either download or compute. $2 should be number of jobs (e.g. 4). $3 should be the gpu-id (-1 means CPU). For example, you want to compute with 4 jobs and use the gpu-id of 0,
     ```
-    bash scripts/face.sh compute
+    bash scripts/face.sh compute 4 0
     ```
 
 ## Some useful stats of the datasets
