@@ -9,20 +9,19 @@ if test -f "$FILE"; then
     rm -rf MELD
     echo "$FILE exists."
     tar -zxvf $FILE
-    rm $FILE
 
     cd MELD.Raw
-    FILE=train.tar.gz
-    tar -zxvf $FILE
-    rm $FILE
+    FILE_=train.tar.gz
+    tar -zxvf $FILE_
+    rm $FILE_
 
-    FILE=dev.tar.gz
-    tar -zxvf $FILE
-    rm $FILE
+    FILE_=dev.tar.gz
+    tar -zxvf $FILE_
+    rm $FILE_
 
-    FILE=test.tar.gz
-    tar -zxvf $FILE
-    rm $FILE
+    FILE_=test.tar.gz
+    tar -zxvf $FILE_
+    rm $FILE_
 
     cd ..
 
@@ -83,6 +82,9 @@ if test -f "$FILE"; then
     mkdir -p MELD/raw-texts/test
 
     python3 scripts/MELD-utterance.py
+
+    rm $FILE
+
 fi
 
 FILE=IEMOCAP_full_release.tar.gz
@@ -90,7 +92,6 @@ if test -f "$FILE"; then
     rm -rf IEMOCAP
     echo "$FILE exists."
     tar -zxvf $FILE
-    rm $FILE
 
     rm -rf DEBUG/IEMOCAP_full_release
     mv -f IEMOCAP_full_release DEBUG/
@@ -156,6 +157,8 @@ if test -f "$FILE"; then
     mv -f IEMOCAP/raw-texts/test/*/*.json IEMOCAP/raw-texts/test/
 
     find IEMOCAP/raw-texts/ -type d -empty -delete
+
+    rm $FILE
 fi
 
 FILE=EmotiW_2018.zip
@@ -164,39 +167,38 @@ if test -f "$FILE"; then
     echo "$FILE exists."
     mkdir -p AFEW
     unzip -o $FILE -d AFEW
-    rm $FILE
 
     cd AFEW
     mkdir -p Train
-    FILE=Train_AFEW.zip
-    unzip -o $FILE -d Train
-    rm $FILE
+    FILE_=Train_AFEW.zip
+    unzip -o $FILE_ -d Train
+    rm $FILE_
 
     mkdir -p Val
-    FILE=Val_AFEW.zip
-    unzip -o $FILE -d Val
-    rm $FILE
+    FILE_=Val_AFEW.zip
+    unzip -o $FILE_ -d Val
+    rm $FILE_
 
     cd Test
-    FILE=OneDrive-2018-06-22.zip
-    unzip -o $FILE
-    rm $FILE
+    FILE_=OneDrive-2018-06-22.zip
+    unzip -o $FILE_
+    rm $FILE_
 
-    FILE=LBPTOP.zip
-    unzip -o $FILE
-    rm $FILE
+    FILE_=LBPTOP.zip
+    unzip -o $FILE_
+    rm $FILE_
 
-    FILE=Test_2017_Faces_Distribute.zip
-    unzip -o $FILE
-    rm $FILE
+    FILE_=Test_2017_Faces_Distribute.zip
+    unzip -o $FILE_
+    rm $FILE_
 
-    FILE=Test_2017_points_distribute.zip
-    unzip -o $FILE
-    rm $FILE
+    FILE_=Test_2017_points_distribute.zip
+    unzip -o $FILE_
+    rm $FILE_
 
-    FILE=Test_vid_Distribute.rar
-    unrar x -o+ $FILE
-    rm $FILE
+    FILE_=Test_vid_Distribute.rar
+    unrar x -o+ $FILE_
+    rm $FILE_
 
     cd ../..
 
@@ -252,6 +254,9 @@ if test -f "$FILE"; then
     done
 
     python3 scripts/AFEW-label.py
+
+    rm $FILE
+
 fi
 
 FILE=CAER.zip
@@ -259,7 +264,6 @@ if test -f "$FILE"; then
     rm -rf CAER
     echo "$FILE exists."
     unzip $FILE
-    rm $FILE
 
     rm -rf DEBUG/CAER
     mv -f CAER DEBUG/
@@ -361,6 +365,8 @@ if test -f "$FILE"; then
     done
 
     python3 scripts/CAER-label.py
+    rm $FILE
+
 fi
 
 echo DONE
