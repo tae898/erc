@@ -103,7 +103,7 @@ print(f"n_jobs: {n_jobs}, gpu_id: {gpu_id}")
 
 
 all_vids_paths = get_paths()
-all_vids_paths = [foo for foo in all_vids_paths if 'CAER' in foo]
+all_vids_paths = [foo for foo in all_vids_paths if 'IEMOCAP' in foo]
 print(all_vids_paths)
 batched = batch_paths(all_vids_paths, n_jobs)
 

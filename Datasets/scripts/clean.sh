@@ -255,12 +255,12 @@ fi
 FILE=CAER.zip
 if test -f "$FILE"; then
     rm -rf CAER
-    # echo "$FILE exists."
-    # unzip $FILE
-    # rm $FILE
+    echo "$FILE exists."
+    unzip $FILE
+    rm $FILE
 
-    # rm -rf DEBUG/CAER
-    # mv -f CAER DEBUG/
+    rm -rf DEBUG/CAER
+    mv -f CAER DEBUG/
 
     mkdir -p CAER/raw-videos/train
     for filename in DEBUG/CAER/train/*/*.avi; do
