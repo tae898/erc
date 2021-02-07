@@ -66,7 +66,6 @@ def process_paths(all_vids_path, gpu_id):
 
     fa.prepare(ctx_id=gpu_id)
     for videopath in tqdm(all_vids_path):
-        frames = video2numpy(videopath)
         if '.mp4' in videopath:
             savepath = videopath.replace(
                 'raw-videos', 'faces').replace('.mp4', '.pkl')
@@ -75,6 +74,11 @@ def process_paths(all_vids_path, gpu_id):
                 'raw-videos', 'faces').replace('.avi', '.pkl')
         else:
             raise FileNotFoundError(f"{videopath} not a legit video")
+
+        if os.path.isfile(savepath) and os.path.getsize(savepath) > 256:
+            continue
+
+        frames = video2numpy(videopath)
 
         detections = {}
         for idx, frame in frames.items():
@@ -98,7 +102,10 @@ gpu_id = int(args.gpu_id)
 print(f"n_jobs: {n_jobs}, gpu_id: {gpu_id}")
 
 
-batched = batch_paths(get_paths(), n_jobs)
+all_vids_paths = get_paths()
+all_vids_paths = [foo for foo in all_vids_paths if 'CAER' in foo]
+print(all_vids_paths)
+batched = batch_paths(all_vids_paths, n_jobs)
 
 Parallel(n_jobs=n_jobs)(delayed(process_paths)(batch, gpu_id)
                         for batch in tqdm(batched))
