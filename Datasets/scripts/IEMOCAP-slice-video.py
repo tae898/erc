@@ -37,6 +37,7 @@ def video2numpy(path):
     for idx, frame in enumerate(container.decode(video=0)):
         numpy_RGB = np.array(frame.to_image())
         frames.append(numpy_RGB)
+    container.close()
     return frames
 
 

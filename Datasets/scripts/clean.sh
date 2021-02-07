@@ -255,12 +255,12 @@ fi
 FILE=CAER.zip
 if test -f "$FILE"; then
     rm -rf CAER
-    echo "$FILE exists."
-    unzip $FILE
-    rm $FILE
+    # echo "$FILE exists."
+    # unzip $FILE
+    # rm $FILE
 
-    rm -rf DEBUG/CAER
-    mv -f CAER DEBUG/
+    # rm -rf DEBUG/CAER
+    # mv -f CAER DEBUG/
 
     mkdir -p CAER/raw-videos/train
     for filename in DEBUG/CAER/train/*/*.avi; do
@@ -272,6 +272,8 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
+        datatype=train
+        f="${datatype}-${f}"
         echo $f
         ln -sf $filename CAER/raw-videos/train/$f
     done
@@ -286,6 +288,8 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
+        datatype=train
+        f="${datatype}-${f}"
         echo $f
         ln -sf $filename CAER/raw-videos/val/$f
     done
@@ -300,6 +304,8 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
+        datatype=train
+        f="${datatype}-${f}"
         echo $f
         ln -sf $filename CAER/raw-videos/test/$f
     done
@@ -313,6 +319,8 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
+        datatype=train
+        f="${datatype}-${f}"
         f="$(basename -- "$f" .avi).mp3"
         echo $f
         ffmpeg -y -i $filename -q:a 0 -map a CAER/raw-audios/train/$f
@@ -327,6 +335,8 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
+        datatype=train
+        f="${datatype}-${f}"
         f="$(basename -- "$f" .avi).mp3"
         echo $f
         ffmpeg -y -i $filename -q:a 0 -map a CAER/raw-audios/val/$f
@@ -341,6 +351,8 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
+        datatype=train
+        f="${datatype}-${f}"
         f="$(basename -- "$f" .avi).mp3"
         echo $f
         ffmpeg -y -i $filename -q:a 0 -map a CAER/raw-audios/test/$f
