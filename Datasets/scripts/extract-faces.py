@@ -66,31 +66,30 @@ def process_paths(all_vids_path, gpu_id):
 
     fa.prepare(ctx_id=gpu_id)
     for videopath in tqdm(all_vids_path):
-        if '.mp4' in videopath:
-            savepath = videopath.replace(
-                'raw-videos', 'faces').replace('.mp4', '.pkl')
-        elif '.avi' in videopath:
-            savepath = videopath.replace(
-                'raw-videos', 'faces').replace('.avi', '.pkl')
-        else:
-            raise FileNotFoundError(f"{videopath} not a legit video")
-
-        if os.path.isfile(savepath) and os.path.getsize(savepath) > 256:
-            continue
-
         try:
-            frames = video2numpy(videopath)
+            if '.mp4' in videopath:
+                savepath = videopath.replace(
+                    'raw-videos', 'faces').replace('.mp4', '.pkl')
+            elif '.avi' in videopath:
+                savepath = videopath.replace(
+                    'raw-videos', 'faces').replace('.avi', '.pkl')
+            else:
+                raise FileNotFoundError(f"{videopath} not a legit video")
+
+            if os.path.isfile(savepath) and os.path.getsize(savepath) > 256:
+                continue
+
+                frames = video2numpy(videopath)
+
+            detections = {}
+            for idx, frame in frames.items():
+                results = fa.get(frame)
+                detections[idx] = results
+
+            pickle.dump(detections, open(savepath, 'wb'))
         except Exception as e:
             print(f"{e}, {videopath}")
-            continue
-
-
-        detections = {}
-        for idx, frame in frames.items():
-            results = fa.get(frame)
-            detections[idx] = results
-
-        pickle.dump(detections, open(savepath, 'wb'))
+            pass
 
 
 # %%
