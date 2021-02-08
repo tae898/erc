@@ -78,7 +78,12 @@ def process_paths(all_vids_path, gpu_id):
         if os.path.isfile(savepath) and os.path.getsize(savepath) > 256:
             continue
 
-        frames = video2numpy(videopath)
+        try:
+            frames = video2numpy(videopath)
+        except Exception as e:
+            print(f"{e}, {videopath}")
+            continue
+
 
         detections = {}
         for idx, frame in frames.items():
