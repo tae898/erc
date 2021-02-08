@@ -73,7 +73,7 @@ def process_paths(all_vids_path, gpu_id):
             savepath = videopath.replace(
                 'raw-videos', 'faces').replace('.avi', '.pkl')
         else:
-            raise FileNotFoundError(f"{videopath} not a legit video")
+            continue
 
         if os.path.isfile(savepath) and os.path.getsize(savepath) > 256:
             continue
