@@ -294,7 +294,7 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
-        datatype=train
+        datatype=val
         f="${datatype}-${f}"
         echo $f
         ln -sf $filename CAER/raw-videos/val/$f
@@ -310,7 +310,7 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
-        datatype=train
+        datatype=test
         f="${datatype}-${f}"
         echo $f
         ln -sf $filename CAER/raw-videos/test/$f
@@ -341,7 +341,7 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
-        datatype=train
+        datatype=val
         f="${datatype}-${f}"
         f="$(basename -- "$f" .avi).mp3"
         echo $f
@@ -357,7 +357,7 @@ if test -f "$FILE"; then
         echo $emotion
         f="$(basename -- $filename)"
         f="${emotion}-${f}"
-        datatype=train
+        datatype=test
         f="${datatype}-${f}"
         f="$(basename -- "$f" .avi).mp3"
         echo $f

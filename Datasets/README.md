@@ -15,6 +15,19 @@ Out of the three modalities (text, audio, and visual), the above datasets have a
 
 ## Instructions
 
+**If you want to skip the tedious boring instructions below, then just download the pre-computed files from here.**
+
+[MELD](https://drive.google.com/file/d/1CP9t999QBZ3G_J9vGYx9H9ZnoyVJAmBk/view?usp=sharing)
+
+[IEMOCAP](https://drive.google.com/file/d/1_-esLOMkygmwzk75BxH-7T1_HnNyqEVU/view?usp=sharing)
+
+[AFEW](https://drive.google.com/file/d/1lRm-27X0UqZk0784IPmEi_-gt04mVq4c/view?usp=sharing)
+
+[CAER](https://drive.google.com/file/d/1GNw69vEfpekubFssu6FfmcJjBNNHPcfB/view?usp=sharing)
+
+
+
+
 ### Download the original datasets
 
 You have to download the original datasets yourselves from the original authors. If you click on the links, the authors tell you how to download them. Some of them can be downloaded directly while some ask you to write them emails. Anyways, if you get them, they'll look like this:
@@ -58,6 +71,91 @@ You can either compute the features yourself or download them.
     ```
     bash scripts/face.sh compute 4 0
     ```
+    >`insightface` has to be installed before running this. See this repo:https://github.com/deepinsight/insightface. After cloning this repo, go to the `python-package` from the root repo directory and install it by `pip install -e `.
+
+### After everything
+
+After you've either downloaded or computed, your current directory `Datasets` should look like this:
+
+```
+AFEW
+├── faces
+│   ├── test [653 entries exceeds filelimit, not opening dir]
+│   ├── train [773 entries exceeds filelimit, not opening dir]
+│   └── val [383 entries exceeds filelimit, not opening dir]
+├── raw-audios
+│   ├── test [653 entries exceeds filelimit, not opening dir]
+│   ├── train [773 entries exceeds filelimit, not opening dir]
+│   └── val [383 entries exceeds filelimit, not opening dir]
+├── raw-videos
+│   ├── test [653 entries exceeds filelimit, not opening dir]
+│   ├── train [773 entries exceeds filelimit, not opening dir]
+│   └── val [383 entries exceeds filelimit, not opening dir]
+├── labels.json
+└── README.txt
+CAER
+├── faces
+│   ├── test [2637 entries exceeds filelimit, not opening dir]
+│   ├── train [9222 entries exceeds filelimit, not opening dir]
+│   └── val [1316 entries exceeds filelimit, not opening dir]
+├── raw-audios
+│   ├── test [2637 entries exceeds filelimit, not opening dir]
+│   ├── train [9222 entries exceeds filelimit, not opening dir]
+│   └── val [1316 entries exceeds filelimit, not opening dir]
+├── raw-videos
+│   ├── test [2637 entries exceeds filelimit, not opening dir]
+│   ├── train [9222 entries exceeds filelimit, not opening dir]
+│   └── val [1316 entries exceeds filelimit, not opening dir]
+├── labels.json
+└── README.txt
+IEMOCAP
+├── faces
+│   ├── test [2170 entries exceeds filelimit, not opening dir]
+│   ├── train [6378 entries exceeds filelimit, not opening dir]
+│   └── val [1491 entries exceeds filelimit, not opening dir]
+├── raw-audios
+│   ├── test [2170 entries exceeds filelimit, not opening dir]
+│   ├── train [6378 entries exceeds filelimit, not opening dir]
+│   └── val [1491 entries exceeds filelimit, not opening dir]
+├── raw-texts
+│   ├── test [2170 entries exceeds filelimit, not opening dir]
+│   ├── train [6378 entries exceeds filelimit, not opening dir]
+│   └── val [1491 entries exceeds filelimit, not opening dir]
+├── raw-videos
+│   ├── test [2170 entries exceeds filelimit, not opening dir]
+│   ├── train [6378 entries exceeds filelimit, not opening dir]
+│   └── val [1491 entries exceeds filelimit, not opening dir]
+├── labels.json
+├── README.txt
+├── undecided.json
+└── utterance-ordered.json
+MELD
+├── faces
+│   ├── test [2747 entries exceeds filelimit, not opening dir]
+│   ├── train [9988 entries exceeds filelimit, not opening dir]
+│   └── val [1112 entries exceeds filelimit, not opening dir]
+├── raw-audios
+│   ├── test [2747 entries exceeds filelimit, not opening dir]
+│   ├── train [9988 entries exceeds filelimit, not opening dir]
+│   └── val [1112 entries exceeds filelimit, not opening dir]
+├── raw-texts
+│   ├── test [2610 entries exceeds filelimit, not opening dir]
+│   ├── train [9989 entries exceeds filelimit, not opening dir]
+│   └── val [1109 entries exceeds filelimit, not opening dir]
+├── raw-videos
+│   ├── test [2747 entries exceeds filelimit, not opening dir]
+│   ├── train [9989 entries exceeds filelimit, not opening dir]
+│   └── val [1112 entries exceeds filelimit, not opening dir]
+├── labels.json
+├── README.txt
+└── utterance-ordered.json
+README.md [error opening dir]
+scripts [19 entries exceeds filelimit, not opening dir]
+```
+
+### How to use the datasets
+
+Check out `scripts/datasets-demo.ipynb`
 
 ## Some useful stats of the datasets
 
