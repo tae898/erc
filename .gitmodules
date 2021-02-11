@@ -1,4 +1,0 @@
-[submodule "pytorch-template"]
-	path = templates/pytorch-template
-	url = https://github.com/vltanh/pytorch-template.git
-	branch = master
