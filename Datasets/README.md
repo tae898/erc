@@ -49,7 +49,7 @@ bash scripts/clean.sh
 ```
 This might take a while ...
 
-- You need to have some Unix programs installed (i.e. ffmpeg, unrar, untar, unzip, and python3). They are probably already installed if you are an average Unix user. The original datasets will be saved at `DEBUG/` and symbolic links to them will be made to save space.
+- You need to have some Unix programs installed (i.e. ffmpeg, unrar, untar, unzip, and python3, gdown). They are probably already installed if you are an average Unix user. The original datasets will be saved at `DEBUG/` and symbolic links to them will be made to save space.
 
 - Although the quality of IEMOCAP is decent, the way the things are organized is very messy. That's why there is a file `iemocap-DeCLaRe.json` to help with this. This was not made by me, but by [DeCLaRe](https://github.com/declare-lab/conv-emotion). I took the same train / val / test splits as them.
 
@@ -66,12 +66,11 @@ You can either compute the features yourself or download them.
     ```
 
 
-- If you want to compute them in your machine (not recommended. might take some time)
-`face.sh` takes three positional arguments $1, $2, and $3. $1 should be either download or compute. $2 should be number of jobs (e.g. 4). $3 should be the gpu-id (-1 means CPU). For example, you want to compute with 4 jobs and use the gpu-id of 0,
+- If you want to compute them in your machine (not recommended. might take some time), `face.sh` takes three positional arguments $1, $2, and $3. $1 should be either `download` or `compute`. $2 should be number of jobs (e.g. 4). $3 should be the gpu-id (-1 means CPU). For example, if you want to compute with 4 jobs and use the gpu-id of 0,
     ```
     bash scripts/face.sh compute 4 0
     ```
-    >`insightface` has to be installed before running this. See this repo:https://github.com/deepinsight/insightface. After cloning this repo, go to the `python-package` from the root repo directory and install it by `pip install -e `.
+    >`insightface` has to be installed before running this. See this repo:https://github.com/deepinsight/insightface. After cloning this repo, go to the `python-package` from the root repo directory and install it by `pip install .` Btw, this is the best human face repo I've seen so far. The only caveat is that the core deep learning framework used is neither pytorch nor tensorflow, but mxnet.
 
 ### After everything
 
@@ -212,3 +211,30 @@ Check out `scripts/datasets-demo.ipynb`
 | CAER | anger | disgust | fear | happy | neutral | sad | surprise | SUM  |
 | ---- | ----- | ------- | ---- | ----- | ------- | --- | -------- | ---- |
 | test | 325   | 145     | 102  | 544   | 915     | 294 | 312      | 2637 |
+
+
+## Some more useful stats of the datasets
+
+You can see how I get this stats at `scripts/get-more-stats.ipynb`
+
+### MELD
+
+![MELD-fps](scripts/images/MELD-fps.png)
+![MELD-num-frames](scripts/images/MELD-num-frames.png)
+![MELD-num-tokens](scripts/images/MELD-num-tokens.png)
+
+### IEMOCAP
+
+![IEMOCAP-fps](scripts/images/IEMOCAP-fps.png)
+![IEMOCAP-num-frames](scripts/images/IEMOCAP-num-frames.png)
+![IEMOCAP-num-tokens](scripts/images/IEMOCAP-num-tokens.png)
+
+### AFEW
+
+![AFEW-fps](scripts/images/AFEW-fps.png)
+![AFEW-num-frames](scripts/images/AFEW-num-frames.png)
+
+### CAER
+
+![CAER-fps](scripts/images/CAER-fps.png)
+![CAER-num-frames](scripts/images/CAER-num-frames.png)
