@@ -1,4 +1,4 @@
-# ERC (Emotion Recognition in Coversation)
+# Multimodal Emotion Recognition in Coversation (ERC)
 
 This repo is is to reach the SOTA of multimodal ERC challenges. The authors aim to publish a paper in 2021. 
 
