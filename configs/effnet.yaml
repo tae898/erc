@@ -30,7 +30,7 @@ dataset:
     train:
         name:                   DatasetAdvance
         args:
-            data_dir:           data/train/         
+            data_dir:           Datasets/MELD-single-frame/train/         
             csv_path:           Datasets/MELD-single-frame/train.csv
             IMG_SIZE:           224
             is_train:           True  
@@ -43,7 +43,7 @@ dataset:
     val:
         name:                   DatasetAdvance
         args:
-            data_dir:           data/dev/         
+            data_dir:           Datasets/MELD-single-frame/dev/         
             csv_path:           Datasets/MELD-single-frame/dev.csv
             IMG_SIZE:           224
             is_train:           False  

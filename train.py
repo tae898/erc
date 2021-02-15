@@ -1,17 +1,18 @@
-from workers.trainer import Trainer
-from utils.random_seed import set_seed
-from utils.getter import get_instance
-from tqdm import tqdm
-from torch.utils.data import DataLoader
-from torch.utils import data
-import yaml
-import torch.nn as nn
-import torch
-import os
-import pprint
-import argparse
 import sys
 sys.path.append("./libs/")
+
+import argparse
+import pprint
+import os
+import torch
+import torch.nn as nn
+import yaml
+from torch.utils import data
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from utils.getter import get_instance
+from utils.random_seed import set_seed
+from workers.trainer import Trainer
 
 
 def train(config):
