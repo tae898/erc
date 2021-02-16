@@ -14,7 +14,7 @@ for DATASET in ['train', 'val', 'test']:
 
         basename = os.path.basename(filename).split('.avi')[0]
 
-        labels[DATASET][str(basename)] = basename.split('-')[0].lower()
+        labels[DATASET][str(basename)] = basename.split('-')[1].lower()
 
     print(
         f"{len(set([foo for foo in labels[DATASET]]))} labeled videos in {DATASET}")
