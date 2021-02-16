@@ -1,0 +1,68 @@
+id: timesformer
+pretrained: Null
+model:
+  name: TimeSformer
+  args:
+    dim: 512
+    image_size: 224
+    patch_size: 16
+    num_frames: 8
+    num_classes: 11
+    depth: 12
+    heads: 8
+    dim_head: 64
+    attn_dropout: 0.1
+    ff_dropout: 0.1
+optimizer:
+  name: Adam
+  args:
+    lr: 0.0001
+loss:
+  name: CrossEntropyLoss
+  args: Null
+metric:
+  - name: Accuracy
+    args: Null
+scheduler:
+  name: StepLR
+  args:
+    step_size: 3
+    gamma: 0.2
+    last_epoch: -1
+dataset:
+  train:
+    name: IEMOCAP
+    args:
+      data_dir: /home/tk/repos/erc/Datasets/IEMOCAP/raw-videos/train/
+      faces_dir: /home/tk/repos/erc/Datasets/IEMOCAP/faces/train/
+      label_path: /home/tk/repos/erc/Datasets/IEMOCAP/labels.json
+      every_N: 15
+      num_frames: 8
+      image_size: 224
+      datatype: train
+    loader:
+      name: DataLoader
+      args:
+        batch_size: 4
+        shuffle: True
+        drop_last: False
+  val:
+    name: IEMOCAP
+    args:
+      data_dir: /home/tk/repos/erc/Datasets/IEMOCAP/raw-videos/val/
+      faces_dir: /home/tk/repos/erc/Datasets/IEMOCAP/faces/val/
+      label_path: /home/tk/repos/erc/Datasets/IEMOCAP/labels.json
+      every_N: 15
+      num_frames: 8
+      image_size: 224
+      datatype: val
+    loader:
+      name: DataLoader
+      args:
+        batch_size: 4
+        shuffle: True
+
+trainer:
+  nepochs: 20
+  val_step: 1
+  log_step: 1

@@ -15,7 +15,7 @@ Out of the three modalities (text, audio, and visual), the above datasets have a
 
 ## Instructions
 
-**If you want to skip the tedious boring instructions below, then just download the pre-computed files from here. Once you downloaded the below for archives, then proceed to [After everything](#After-everything)**
+**If you want to skip the tedious boring instructions below, then just download the pre-computed files from here. Once you downloaded the below four archives, then proceed to [After everything](#After-everything)**
 
 1. [MELD](https://drive.google.com/file/d/1YZ9Zz_TdRaYsM6Lwx34IwpFgiVLNIAZ6/view?usp=sharing)
 
