@@ -82,8 +82,21 @@ def process_paths(all_vids_path, gpu_id):
             frames = video2numpy(videopath)
             detections = {}
             for idx, frame in frames.items():
-                results = fa.get(frame)
+                list_of_features = fa.get(frame)
+                
+                results = []
+                for features in list_of_features:
+                    feature_dict = {'age': features.age,
+                                    'bbox': features.bbox,
+                                    'det_score': features.det_score,
+                                    'gender': features.gender,
+                                    'landmark': features.landmark,
+                                    'normed_embedding': features.normed_embedding
+                                    }
+                    results.append(feature_dict)
+
                 detections[idx] = results
+
             pickle.dump(detections, open(savepath, 'wb'))
 
         except Exception as e:
