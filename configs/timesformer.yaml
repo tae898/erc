@@ -4,10 +4,10 @@ model:
   name: TimeSformer
   args:
     dim: 512
-    image_size: 224
+    image_size: 384
     patch_size: 16
     num_frames: 8
-    num_classes: 7
+    num_classes: 3
     depth: 12
     heads: 8
     dim_head: 64
@@ -16,9 +16,9 @@ model:
 optimizer:
   name: Adam
   args:
-    lr: 0.0001
+    lr: 0.00001
 loss:
-  name: CrossEntropyLoss
+  name: FocalLoss
   args: Null
 metric:
   - name: Accuracy
@@ -31,39 +31,39 @@ scheduler:
     last_epoch: -1
 dataset:
   train:
-    name: AFEW
+    name: CAER
     args:
-      videos_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-videos/train/
-      audios_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-audios/train/
-      # texts_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-texts/train/
-      faces_dir: /home/tkm290/repos/erc/Datasets/AFEW/faces/train/
-      label_path: /home/tkm290/repos/erc/Datasets/AFEW/labels.json
-      every_N: 16
+      videos_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-videos/train/
+      audios_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-audios/train/
+      # texts_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-texts/train/
+      faces_dir: /home/tkm290/repos/erc/Datasets/CAER/faces/train/
+      label_path: /home/tkm290/repos/erc/Datasets/CAER/labels.json
+      every_N: 8
       num_frames: 8
-      image_size: 224
+      image_size: 384
       datatype: train
     loader:
       name: DataLoader
       args:
-        batch_size: 4
+        batch_size: 1
         shuffle: True
         drop_last: False
   val:
-    name: AFEW
+    name: CAER
     args:
-      videos_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-videos/val/
-      audios_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-audios/val/
-      # texts_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-texts/val/
-      faces_dir: /home/tkm290/repos/erc/Datasets/AFEW/faces/val/
-      label_path: /home/tkm290/repos/erc/Datasets/AFEW/labels.json
-      every_N: 16
+      videos_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-videos/val/
+      audios_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-audios/val/
+      # texts_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-texts/val/
+      faces_dir: /home/tkm290/repos/erc/Datasets/CAER/faces/val/
+      label_path: /home/tkm290/repos/erc/Datasets/CAER/labels.json
+      every_N: 8
       num_frames: 8
-      image_size: 224
+      image_size: 384
       datatype: val
     loader:
       name: DataLoader
       args:
-        batch_size: 4
+        batch_size: 1
         shuffle: True
 
 trainer:

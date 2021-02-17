@@ -154,6 +154,10 @@ class Label(data.Dataset):
         with open(label_path, 'r') as stream:
             self.uttid2emotion = json.load(stream)[datatype]
 
+        self.uttid2emotion = {uttid: emotion for uttid,
+                              emotion in self.uttid2emotion.items()
+                              if emotion in emotions}
+
         self.uttid2num = {uttid: self.emotion2num[emotion]
                           for uttid, emotion in self.uttid2emotion.items()}
         self.uttids = None
@@ -397,7 +401,6 @@ class CAER(Label, VideoModality, AudioModality):
                          'neutral',
                          'sad',
                          'surprise']
-
         Label.__init__(self, label_path, self.emotions, datatype)
         VideoModality.__init__(self, videos_dir, faces_dir,
                                list(self.uttid2num.keys()), every_N,
