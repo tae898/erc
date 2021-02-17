@@ -7,7 +7,7 @@ model:
     image_size: 224
     patch_size: 16
     num_frames: 8
-    num_classes: 11
+    num_classes: 7
     depth: 12
     heads: 8
     dim_head: 64
@@ -31,12 +31,14 @@ scheduler:
     last_epoch: -1
 dataset:
   train:
-    name: IEMOCAP
+    name: AFEW
     args:
-      data_dir: /home/tk/repos/erc/Datasets/IEMOCAP/raw-videos/train/
-      faces_dir: /home/tk/repos/erc/Datasets/IEMOCAP/faces/train/
-      label_path: /home/tk/repos/erc/Datasets/IEMOCAP/labels.json
-      every_N: 15
+      videos_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-videos/train/
+      audios_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-audios/train/
+      # texts_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-texts/train/
+      faces_dir: /home/tkm290/repos/erc/Datasets/AFEW/faces/train/
+      label_path: /home/tkm290/repos/erc/Datasets/AFEW/labels.json
+      every_N: 16
       num_frames: 8
       image_size: 224
       datatype: train
@@ -47,12 +49,14 @@ dataset:
         shuffle: True
         drop_last: False
   val:
-    name: IEMOCAP
+    name: AFEW
     args:
-      data_dir: /home/tk/repos/erc/Datasets/IEMOCAP/raw-videos/val/
-      faces_dir: /home/tk/repos/erc/Datasets/IEMOCAP/faces/val/
-      label_path: /home/tk/repos/erc/Datasets/IEMOCAP/labels.json
-      every_N: 15
+      videos_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-videos/val/
+      audios_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-audios/val/
+      # texts_dir: /home/tkm290/repos/erc/Datasets/AFEW/raw-texts/val/
+      faces_dir: /home/tkm290/repos/erc/Datasets/AFEW/faces/val/
+      label_path: /home/tkm290/repos/erc/Datasets/AFEW/labels.json
+      every_N: 16
       num_frames: 8
       image_size: 224
       datatype: val
@@ -63,6 +67,6 @@ dataset:
         shuffle: True
 
 trainer:
-  nepochs: 20
+  nepochs: 10
   val_step: 1
   log_step: 1
