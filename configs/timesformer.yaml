@@ -4,10 +4,10 @@ model:
   name: TimeSformer
   args:
     dim: 512
-    image_size: 384
-    patch_size: 16
+    image_size: 112
+    patch_size: 8
     num_frames: 8
-    num_classes: 3
+    num_classes: 7
     depth: 12
     heads: 8
     dim_head: 64
@@ -16,9 +16,9 @@ model:
 optimizer:
   name: Adam
   args:
-    lr: 0.00001
+    lr: 0.001
 loss:
-  name: FocalLoss
+  name: CrossEntropyLoss
   args: Null
 metric:
   - name: Accuracy
@@ -33,37 +33,38 @@ dataset:
   train:
     name: CAER
     args:
-      videos_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-videos/train/
-      audios_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-audios/train/
-      # texts_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-texts/train/
-      faces_dir: /home/tkm290/repos/erc/Datasets/CAER/faces/train/
+      balancing: over
       label_path: /home/tkm290/repos/erc/Datasets/CAER/labels.json
-      every_N: 8
+      videos_dir: /home/tkm290/repos/erc/Datasets/CAER/face-videos/train/
+      # audios_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-audios/train/
+      # texts_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-texts/train/
+      # faces_dir: 
+      every_N: 16
       num_frames: 8
-      image_size: 384
+      image_size: 112
       datatype: train
     loader:
       name: DataLoader
       args:
-        batch_size: 1
+        batch_size: 4
         shuffle: True
         drop_last: False
   val:
     name: CAER
     args:
-      videos_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-videos/val/
-      audios_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-audios/val/
-      # texts_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-texts/val/
-      faces_dir: /home/tkm290/repos/erc/Datasets/CAER/faces/val/
       label_path: /home/tkm290/repos/erc/Datasets/CAER/labels.json
-      every_N: 8
+      videos_dir: /home/tkm290/repos/erc/Datasets/CAER/face-videos/val/
+      # audios_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-audios/val/
+      # texts_dir: /home/tkm290/repos/erc/Datasets/CAER/raw-texts/val/
+      # faces_dir: 
+      every_N: 16
       num_frames: 8
-      image_size: 384
+      image_size: 112
       datatype: val
     loader:
       name: DataLoader
       args:
-        batch_size: 1
+        batch_size: 4
         shuffle: True
 
 trainer:

@@ -7,12 +7,16 @@ import os
 from glob import glob
 import json
 import av
+import math
 from torchvision.transforms.functional import pad
 from torchvision import transforms
 import numpy as np
 import numbers
 from PIL import Image
 import torch
+from tqdm import tqdm
+import pprint
+from collections import Counter
 
 
 def loadN(path, every_N=1):
@@ -78,10 +82,10 @@ def loadvideo(path, every_N, num_frames, frame_width=224, frame_height=224,
         Path to the video.
     every_N: int
         The original video will first be resampled by sampling every Nth frame
-        of the original video. Choose this value considering the fps of the 
+        of the original video. Choose this value considering the fps of the
         original video.
     num_frames: int
-        The total number of frames you wish to retrieve. 
+        The total number of frames you wish to retrieve.
 
         if num_frames < length of video:
             randomly crop in time.
@@ -142,14 +146,15 @@ def get_existing_paths(dir, uttids, extensions):
 
 
 def find_common_uttids(*args):
-    uttids_all = [[uttid for uttid, _ in arg.items()] for arg in args]
+    uttids_all = [[uttid for uttid, _ in arg.items()]
+                  for arg in args if arg is not None]
     return set(uttids_all[0]).intersection(*uttids_all)
 
 
 class Label(data.Dataset):
     def __init__(self, label_path, emotions, datatype):
-        self.emotion2num = {emo: idx for idx, emo in enumerate(emotions)}
-        self.num2emotion = {idx: emo for idx, emo in self.emotion2num.items()}
+        self.emotion2num = {emo: num for num, emo in enumerate(emotions)}
+        self.num2emotion = {num: emo for num, emo in enumerate(emotions)}
 
         with open(label_path, 'r') as stream:
             self.uttid2emotion = json.load(stream)[datatype]
@@ -160,6 +165,7 @@ class Label(data.Dataset):
 
         self.uttid2num = {uttid: self.emotion2num[emotion]
                           for uttid, emotion in self.uttid2emotion.items()}
+
         self.uttids = None
         self.labels = None
 
@@ -171,20 +177,33 @@ class Label(data.Dataset):
 
 
 class VideoModality(data.Dataset):
-    def __init__(self, videos_dir, faces_dir, uttids, every_N, num_frames,
-                 frame_height, frame_width):
+    def __init__(self, videos_dir, uttids, every_N, num_frames,
+                 frame_height, frame_width, faces_dir=None):
         self.uttid2videopath = get_existing_paths(
             videos_dir, uttids, ['.avi', '.mp4'])
-        self.uttid2facepath = get_existing_paths(faces_dir, uttids, ['.pkl'])
 
-        uttids = find_common_uttids(self.uttid2videopath, self.uttid2facepath)
+        if faces_dir is not None:
+            self.uttid2facepath = get_existing_paths(
+                faces_dir, uttids, ['.pkl'])
+            uttids = find_common_uttids(
+                self.uttid2videopath, self.uttid2facepath)
+            self.uttid2facepath = {
+                uttid: self.uttid2facepath[uttid] for uttid in uttids}
+            assert len(self.uttid2videopath) == len(self.uttid2facepath)
 
-        self.uttid2videopath = {
-            uttid: self.uttid2videopath[uttid] for uttid in uttids}
-        self.uttid2facepath = {
-            uttid: self.uttid2facepath[uttid] for uttid in uttids}
+        # This means that the videos are pre-cropped face videos.
+        if len(self.uttid2videopath) == 0:
+            assert faces_dir is None
+            self.is_video_cropped_face = True
+            self.uttid2videopath = {uttid: glob(os.path.join(
+                videos_dir, uttid, '*.mp4')) for uttid in uttids}
+            self.uttid2videopath = {
+                uttid: list_of_paths for uttid, list_of_paths
+                in self.uttid2videopath.items() if len(list_of_paths) != 0}
+            uttids = [uttid for uttid, _ in self.uttid2videopath.items()]
 
-        assert len(self.uttid2videopath) == len(self.uttid2facepath)
+        else:
+            self.is_video_cropped_face = False
 
         self.videopaths = None
         self.facepaths = None
@@ -195,11 +214,18 @@ class VideoModality(data.Dataset):
         self.frame_width = frame_width
 
     def __getitem__(self, index):
-        with open(self.facepaths[index], 'rb') as stream:
-            face = pickle.load(stream)
+        if self.facepaths is not None:
+            with open(self.facepaths[index], 'rb') as stream:
+                face = pickle.load(stream)
+        else:
+            face = None
 
-        # TODO: use face in the video.
-        video = loadvideo(path=self.videopaths[index], every_N=self.every_N,
+        if self.is_video_cropped_face:
+            path = self.select_emotional_person(self.videopaths[index])
+        else:
+            path = self.videopaths[index]
+
+        video = loadvideo(path=path, every_N=self.every_N,
                           num_frames=self.num_frames,
                           frame_width=self.image_size,
                           frame_height=self.image_size,
@@ -208,6 +234,14 @@ class VideoModality(data.Dataset):
 
     def __len__(self):
         return len(self.videopaths)
+
+    def select_emotional_person(self, list_of_paths):
+        persons = [loadN(path, every_N=1) for path in list_of_paths]
+        persons = [sum([1 if np.sum(frame) < 1 else 0 for frame in person])
+                   for person in persons]
+        person_id = np.argmin(persons)
+
+        return list_of_paths[person_id]
 
 
 class AudioModality(data.Dataset):
@@ -239,9 +273,181 @@ class TextModality(data.Dataset):
         return len(self.textpaths)
 
 
-class MELD(Label, VideoModality, TextModality, AudioModality):
-    def __init__(self, videos_dir, faces_dir, audios_dir, texts_dir,
-                 label_path, every_N, num_frames, image_size, datatype):
+class MultiModalDataset(Label, VideoModality, TextModality, AudioModality):
+    def __init__(self, label_path, every_N, num_frames, image_size, datatype,
+                 videos_dir=None, faces_dir=None, audios_dir=None,
+                 texts_dir=None, balancing=None):
+        if all(dir is None for dir in [videos_dir, audios_dir, texts_dir]):
+            raise ValueError("You should provide at least one modality!!!")
+
+        self.modalities = [foo for foo, bar
+                           in zip(['video', 'audio', 'text'],
+                                  [videos_dir, audios_dir, texts_dir])
+                           if bar is not None]
+        Label.__init__(self, label_path, self.emotions, datatype)
+
+        if videos_dir is not None:
+            VideoModality.__init__(self, videos_dir,
+                                   list(self.uttid2num.keys()), every_N,
+                                   num_frames, image_size, image_size,
+                                   faces_dir)
+        else:
+            self.uttid2videopath = None
+
+        if audios_dir is not None:
+            AudioModality.__init__(
+                self, audios_dir, list(self.uttid2num.keys()))
+        else:
+            self.uttid2audiopath = None
+
+        if texts_dir is not None:
+            TextModality.__init__(self, texts_dir, list(self.uttid2num.keys()))
+        else:
+            self.uttid2textpath = None
+
+        print(f"finding common utterances in {self.modalities} modalities, "
+              f"in the {datatype} dataset ...")
+        self.uttids = find_common_uttids(self.uttid2videopath,
+                                         self.uttid2audiopath,
+                                         self.uttid2textpath)
+
+        self.labels = [self.uttid2num[uttid] for uttid in self.uttids]
+
+        self.videopaths, self.facepaths, self.audiopaths, self.textpaths = \
+            None, None, None, None
+        if self.uttid2videopath is not None:
+            self.videopaths = [self.uttid2videopath[uttid]
+                               for uttid in self.uttids]
+        if faces_dir is not None:
+            self.facepaths = [self.uttid2facepath[uttid]
+                              for uttid in self.uttids]
+        if self.uttid2audiopath is not None:
+            self.audiopaths = [self.uttid2audiopath[uttid]
+                               for uttid in self.uttids]
+        if self.uttid2textpath is not None:
+            self.textpaths = [self.uttid2textpath[uttid]
+                              for uttid in self.uttids]
+
+        print(f"In total there are {len(self.labels)} utterances in common, "
+              f"across the {self.modalities} modalities, in the {datatype} "
+              f"dataset")
+
+        if datatype == 'train':
+            self.balance_class(balancing)
+
+        self.every_N = every_N
+        self.num_frames = num_frames
+        self.image_size = image_size
+
+    def __getitem__(self, index):
+
+        label = Label.__getitem__(self, index)
+
+        if self.videopaths is not None:
+            video = VideoModality.__getitem__(self, index)
+        if self.audiopaths is not None:
+            audio = AudioModality.__getitem__(self, index)
+        if self.textpaths is not None:
+            text = TextModality.__getitem__(self, index)
+
+        return video, label
+
+    def __len__(self):
+        return len(self.labels)
+
+    def count_classes(self):
+        self.counts = {num: count
+                       for num, count in dict(Counter(self.labels)).items()}
+
+    def balance_class(self, balancing):
+        self.count_classes()
+        print(f"class distributions before balancing:")
+        pprint.PrettyPrinter(indent=2).pprint(
+            {self.num2emotion[num]: count
+                for num, count in self.counts.items()})
+
+        if balancing is None:
+            print(f"Training will be done without class balancing")
+
+        elif 'under' in balancing or 'down' in balancing:
+            print(f"Training will be done with downsampling classes")
+
+            min_class = min(self.counts, key=self.counts.get)
+            count_to_fix = self.counts[min_class]
+            indexes = []
+
+            for num in list(self.counts.keys()):
+                candidates = np.where(np.array(self.labels) == num)[0]
+                candidates = np.random.permutation(candidates)[:count_to_fix]
+                for cand in candidates:
+                    indexes.append(cand)
+
+            self.labels = [self.labels[i] for i in indexes]
+            new_length = len(self.labels)
+            if self.videopaths is not None:
+                self.videopaths = [self.videopaths[i] for i in indexes]
+                assert len(self.videopaths) == new_length
+            if self.facepaths is not None:
+                self.facepaths = [self.facepaths[i] for i in indexes]
+                assert len(self.facepaths) == new_length
+            if self.audiopaths is not None:
+                self.audiopaths = [self.audiopaths[i] for i in indexes]
+                assert len(self.audiopaths) == new_length
+            if self.textpaths is not None:
+                self.textpaths = [self.textpaths[i] for i in indexes]
+                assert len(self.textpaths) == new_length
+
+        elif 'over' in balancing:
+            print(f"Training will be done with oversampling classes")
+
+            max_class = max(self.counts, key=self.counts.get)
+            count_to_fix = self.counts[max_class]
+            indexes = []
+
+            for num in list(self.counts.keys()):
+                candidates = np.where(np.array(self.labels) == num)[0]
+                candidates = candidates.tolist()
+
+                for cand in np.random.choice(candidates,
+                                             size=(count_to_fix - len(candidates))):
+                    candidates.append(cand)
+                assert len(candidates) == count_to_fix
+                assert len(np.unique(candidates)) == (
+                    np.array(self.labels) == num).sum()
+
+                for cand in candidates:
+                    indexes.append(cand)
+
+            self.labels = [self.labels[i] for i in indexes]
+            new_length = len(self.labels)
+            if self.videopaths is not None:
+                self.videopaths = [self.videopaths[i] for i in indexes]
+                assert len(self.videopaths) == new_length
+            if self.facepaths is not None:
+                self.facepaths = [self.facepaths[i] for i in indexes]
+                assert len(self.facepaths) == new_length
+            if self.audiopaths is not None:
+                self.audiopaths = [self.audiopaths[i] for i in indexes]
+                assert len(self.audiopaths) == new_length
+            if self.textpaths is not None:
+                self.textpaths = [self.textpaths[i] for i in indexes]
+                assert len(self.textpaths) == new_length
+
+        else:
+            raise ValueError
+
+        self.count_classes()
+
+        print(f"class distributions after balancing:")
+        pprint.PrettyPrinter(indent=2).pprint(
+            {self.num2emotion[num]: count
+                for num, count in self.counts.items()})
+
+
+class MELD(MultiModalDataset):
+    def __init__(self, label_path, every_N, num_frames, image_size, datatype,
+                 videos_dir=None, faces_dir=None, audios_dir=None,
+                 texts_dir=None, balancing=None):
         self.emotions = ['anger',
                          'disgust',
                          'fear',
@@ -249,50 +455,47 @@ class MELD(Label, VideoModality, TextModality, AudioModality):
                          'neutral',
                          'sadness',
                          'surprise']
-
-        Label.__init__(self, label_path, self.emotions, datatype)
-        VideoModality.__init__(self, videos_dir, faces_dir,
-                               list(self.uttid2num.keys()), every_N,
-                               num_frames, image_size, image_size)
-
-        AudioModality.__init__(self, audios_dir, list(self.uttid2num.keys()))
-        TextModality.__init__(self, texts_dir, list(self.uttid2num.keys()))
-
-        print(f"finding common utterances in video, face, audio, and text ...")
-        self.uttids = find_common_uttids(self.uttid2videopath,
-                                         self.uttid2audiopath,
-                                         self.uttid2textpath)
-
-        self.labels = [self.uttid2num[uttid] for uttid in self.uttids]
-        self.videopaths = [self.uttid2videopath[uttid]
-                           for uttid in self.uttids]
-        self.facepaths = [self.uttid2facepath[uttid] for uttid in self.uttids]
-        self.audiopaths = [self.uttid2audiopath[uttid]
-                           for uttid in self.uttids]
-        self.textpaths = [self.uttid2textpath[uttid] for uttid in self.uttids]
-
-        print(f"In total there are {len(self.labels)} utterances in common, "
-              f"across the three modalities")
-
-        self.every_N = every_N
-        self.num_frames = num_frames
-        self.image_size = image_size
-
-    def __getitem__(self, index):
-        audio = AudioModality.__getitem__(self, index)
-        text = TextModality.__getitem__(self, index)
-        video = VideoModality.__getitem__(self, index)
-        label = Label.__getitem__(self, index)
-
-        return video, label
-
-    def __len__(self):
-        return len(self.labels)
+        super().__init__(label_path, every_N, num_frames, image_size, datatype,
+                         videos_dir, faces_dir, audios_dir,
+                         texts_dir, balancing)
 
 
-class IEMOCAP(Label, VideoModality, TextModality, AudioModality):
-    def __init__(self, videos_dir, faces_dir, audios_dir, texts_dir,
-                 label_path, every_N, num_frames, image_size, datatype):
+class AFEW(MultiModalDataset):
+    def __init__(self, label_path, every_N, num_frames, image_size, datatype,
+                 videos_dir=None, faces_dir=None, audios_dir=None,
+                 texts_dir=None, balancing=None):
+        self.emotions = ['angry',
+                         'disgust',
+                         'fear',
+                         'happy',
+                         'neutral',
+                         'sad',
+                         'surprise']
+        super().__init__(label_path, every_N, num_frames, image_size, datatype,
+                         videos_dir, faces_dir, audios_dir,
+                         texts_dir, balancing)
+
+
+class CAER(MultiModalDataset):
+    def __init__(self, label_path, every_N, num_frames, image_size, datatype,
+                 videos_dir=None, faces_dir=None, audios_dir=None,
+                 texts_dir=None, balancing=None):
+        self.emotions = ['anger',
+                         'disgust',
+                         'fear',
+                         'happy',
+                         'neutral',
+                         'sad',
+                         'surprise']
+        super().__init__(label_path, every_N, num_frames, image_size, datatype,
+                         videos_dir, faces_dir, audios_dir,
+                         texts_dir, balancing)
+
+
+class IEMOCAP(MultiModalDataset):
+    def __init__(self, label_path, every_N, num_frames, image_size, datatype,
+                 videos_dir=None, faces_dir=None, audios_dir=None,
+                 texts_dir=None, balancing=None):
         self.emotions = ['anger',
                          'disgust',
                          'excited',
@@ -304,134 +507,6 @@ class IEMOCAP(Label, VideoModality, TextModality, AudioModality):
                          'sadness',
                          'surprise',
                          'undecided']
-        Label.__init__(self, label_path, self.emotions, datatype)
-        VideoModality.__init__(self, videos_dir, faces_dir,
-                               list(self.uttid2num.keys()), every_N,
-                               num_frames, image_size, image_size)
-
-        AudioModality.__init__(self, audios_dir, list(self.uttid2num.keys()))
-        TextModality.__init__(self, texts_dir, list(self.uttid2num.keys()))
-
-        print(f"finding common utterances in video, face, audio, and text ...")
-        self.uttids = find_common_uttids(self.uttid2videopath,
-                                         self.uttid2audiopath,
-                                         self.uttid2textpath)
-
-        self.labels = [self.uttid2num[uttid] for uttid in self.uttids]
-        self.videopaths = [self.uttid2videopath[uttid]
-                           for uttid in self.uttids]
-        self.facepaths = [self.uttid2facepath[uttid] for uttid in self.uttids]
-        self.audiopaths = [self.uttid2audiopath[uttid]
-                           for uttid in self.uttids]
-        self.textpaths = [self.uttid2textpath[uttid] for uttid in self.uttids]
-
-        print(f"In total there are {len(self.labels)} utterances in common, "
-              f"across the three modalities")
-
-        self.every_N = every_N
-        self.num_frames = num_frames
-        self.image_size = image_size
-
-    def __getitem__(self, index):
-        audio = AudioModality.__getitem__(self, index)
-        text = TextModality.__getitem__(self, index)
-        video = VideoModality.__getitem__(self, index)
-        label = Label.__getitem__(self, index)
-
-        return video, label
-
-    def __len__(self):
-        return len(self.labels)
-
-
-class AFEW(Label, VideoModality, AudioModality):
-    def __init__(self, videos_dir, faces_dir, audios_dir, label_path, every_N,
-                 num_frames, image_size, datatype):
-        self.emotions = ['angry',
-                         'disgust',
-                         'fear',
-                         'happy',
-                         'neutral',
-                         'sad',
-                         'surprise']
-
-        Label.__init__(self, label_path, self.emotions, datatype)
-        VideoModality.__init__(self, videos_dir, faces_dir,
-                               list(self.uttid2num.keys()), every_N,
-                               num_frames, image_size, image_size)
-
-        AudioModality.__init__(self, audios_dir, list(self.uttid2num.keys()))
-
-        print(f"finding common utterances in video, face, and audio ...")
-        self.uttids = find_common_uttids(self.uttid2videopath,
-                                         self.uttid2audiopath)
-
-        self.labels = [self.uttid2num[uttid] for uttid in self.uttids]
-        self.videopaths = [self.uttid2videopath[uttid]
-                           for uttid in self.uttids]
-        self.facepaths = [self.uttid2facepath[uttid] for uttid in self.uttids]
-        self.audiopaths = [self.uttid2audiopath[uttid]
-                           for uttid in self.uttids]
-
-        print(f"In total there are {len(self.labels)} utterances in common, "
-              f"across the two modalities")
-
-        self.every_N = every_N
-        self.num_frames = num_frames
-        self.image_size = image_size
-
-    def __getitem__(self, index):
-        audio = AudioModality.__getitem__(self, index)
-        video = VideoModality.__getitem__(self, index)
-        label = Label.__getitem__(self, index)
-
-        return video, label
-
-    def __len__(self):
-        return len(self.labels)
-
-
-class CAER(Label, VideoModality, AudioModality):
-    def __init__(self, videos_dir, faces_dir, audios_dir, label_path, every_N,
-                 num_frames, image_size, datatype):
-        self.emotions = ['anger',
-                         'disgust',
-                         'fear',
-                         'happy',
-                         'neutral',
-                         'sad',
-                         'surprise']
-        Label.__init__(self, label_path, self.emotions, datatype)
-        VideoModality.__init__(self, videos_dir, faces_dir,
-                               list(self.uttid2num.keys()), every_N,
-                               num_frames, image_size, image_size)
-
-        AudioModality.__init__(self, audios_dir, list(self.uttid2num.keys()))
-
-        print(f"finding common utterances in video, face, and audio ...")
-        self.uttids = find_common_uttids(self.uttid2videopath,
-                                         self.uttid2audiopath)
-
-        self.labels = [self.uttid2num[uttid] for uttid in self.uttids]
-        self.videopaths = [self.uttid2videopath[uttid]
-                           for uttid in self.uttids]
-        self.facepaths = [self.uttid2facepath[uttid] for uttid in self.uttids]
-        self.audiopaths = [self.uttid2audiopath[uttid]
-                           for uttid in self.uttids]
-
-        print(f"In total there are {len(self.labels)} utterances in common, "
-              f"across the two modalities")
-
-        self.every_N = every_N
-        self.num_frames = num_frames
-        self.image_size = image_size
-
-    def __getitem__(self, index):
-        audio = AudioModality.__getitem__(self, index)
-        video = VideoModality.__getitem__(self, index)
-        label = Label.__getitem__(self, index)
-
-        return video, label
-
-    def __len__(self):
-        return len(self.labels)
+        super().__init__(label_path, every_N, num_frames, image_size, datatype,
+                         videos_dir, faces_dir, audios_dir,
+                         texts_dir, balancing)
