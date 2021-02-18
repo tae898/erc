@@ -13,7 +13,7 @@ import os
 CURRENT_DIR = './'
 DET_THRESHOLD = 0.90
 COS_THRESHOLD = 0.80
-IMAGE_SIZE = 112
+IMAGE_SIZE = 224
 DATABASES = ['MELD', 'IEMOCAP', 'CAER', 'AFEW']
 
 
@@ -51,7 +51,7 @@ def align_and_crop_faces(frame, face):
     faces_aligned = []
     for fc in face:
         img_aligned = face_align.norm_crop(
-            frame, landmark=fc['landmark'], image_size=IMAGE_SIZE)
+            frame, landmark=fc['landmark'], image_size=IMAGE_SIZE, mode='foo')
         faces_aligned.append(img_aligned)
     return faces_aligned
 
