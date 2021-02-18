@@ -41,4 +41,6 @@ fi
 if [ $1 = "compute" ]; then
     echo computing ...
     python3 scripts/extract-faces.py --num-jobs=$2 --gpu-id=$3
+    rm -rf */face-videos
+    python3 scripts/crop-faces.py --num-jobs=$2
 fi

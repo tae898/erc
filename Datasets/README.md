@@ -74,79 +74,95 @@ You can either compute the features yourself or download them.
 After you've either downloaded or computed, your current directory `Datasets` should look like this:
 
 ```
-AFEW
-├── faces
-│   ├── test [653 entries exceeds filelimit, not opening dir]
-│   ├── train [773 entries exceeds filelimit, not opening dir]
-│   └── val [383 entries exceeds filelimit, not opening dir]
-├── raw-audios
-│   ├── test [653 entries exceeds filelimit, not opening dir]
-│   ├── train [773 entries exceeds filelimit, not opening dir]
-│   └── val [383 entries exceeds filelimit, not opening dir]
-├── raw-videos
-│   ├── test [653 entries exceeds filelimit, not opening dir]
-│   ├── train [773 entries exceeds filelimit, not opening dir]
-│   └── val [383 entries exceeds filelimit, not opening dir]
-├── labels.json
-└── README.txt
-CAER
-├── faces
-│   ├── test [2637 entries exceeds filelimit, not opening dir]
-│   ├── train [9222 entries exceeds filelimit, not opening dir]
-│   └── val [1316 entries exceeds filelimit, not opening dir]
-├── raw-audios
-│   ├── test [2637 entries exceeds filelimit, not opening dir]
-│   ├── train [9222 entries exceeds filelimit, not opening dir]
-│   └── val [1316 entries exceeds filelimit, not opening dir]
-├── raw-videos
-│   ├── test [2637 entries exceeds filelimit, not opening dir]
-│   ├── train [9222 entries exceeds filelimit, not opening dir]
-│   └── val [1316 entries exceeds filelimit, not opening dir]
-├── labels.json
-└── README.txt
-IEMOCAP
-├── faces
-│   ├── test [2170 entries exceeds filelimit, not opening dir]
-│   ├── train [6378 entries exceeds filelimit, not opening dir]
-│   └── val [1491 entries exceeds filelimit, not opening dir]
-├── raw-audios
-│   ├── test [2170 entries exceeds filelimit, not opening dir]
-│   ├── train [6378 entries exceeds filelimit, not opening dir]
-│   └── val [1491 entries exceeds filelimit, not opening dir]
-├── raw-texts
-│   ├── test [2170 entries exceeds filelimit, not opening dir]
-│   ├── train [6378 entries exceeds filelimit, not opening dir]
-│   └── val [1491 entries exceeds filelimit, not opening dir]
-├── raw-videos
-│   ├── test [2170 entries exceeds filelimit, not opening dir]
-│   ├── train [6378 entries exceeds filelimit, not opening dir]
-│   └── val [1491 entries exceeds filelimit, not opening dir]
-├── labels.json
-├── README.txt
-├── undecided.json
-└── utterance-ordered.json
-MELD
-├── faces
-│   ├── test [2747 entries exceeds filelimit, not opening dir]
-│   ├── train [9988 entries exceeds filelimit, not opening dir]
-│   └── val [1112 entries exceeds filelimit, not opening dir]
-├── raw-audios
-│   ├── test [2747 entries exceeds filelimit, not opening dir]
-│   ├── train [9988 entries exceeds filelimit, not opening dir]
-│   └── val [1112 entries exceeds filelimit, not opening dir]
-├── raw-texts
-│   ├── test [2610 entries exceeds filelimit, not opening dir]
-│   ├── train [9989 entries exceeds filelimit, not opening dir]
-│   └── val [1109 entries exceeds filelimit, not opening dir]
-├── raw-videos
-│   ├── test [2747 entries exceeds filelimit, not opening dir]
-│   ├── train [9989 entries exceeds filelimit, not opening dir]
-│   └── val [1112 entries exceeds filelimit, not opening dir]
-├── labels.json
-├── README.txt
-└── utterance-ordered.json
-README.md [error opening dir]
-scripts [19 entries exceeds filelimit, not opening dir]
+├── AFEW
+│   ├── faces
+│   │   ├── test [653 entries exceeds filelimit, not opening dir]
+│   │   ├── train [773 entries exceeds filelimit, not opening dir]
+│   │   └── val [383 entries exceeds filelimit, not opening dir]
+│   ├── face-videos
+│   │   ├── test [653 entries exceeds filelimit, not opening dir]
+│   │   ├── train [772 entries exceeds filelimit, not opening dir]
+│   │   └── val [383 entries exceeds filelimit, not opening dir]
+│   ├── raw-audios
+│   │   ├── test [653 entries exceeds filelimit, not opening dir]
+│   │   ├── train [773 entries exceeds filelimit, not opening dir]
+│   │   └── val [383 entries exceeds filelimit, not opening dir]
+│   ├── raw-videos
+│   │   ├── test [653 entries exceeds filelimit, not opening dir]
+│   │   ├── train [773 entries exceeds filelimit, not opening dir]
+│   │   └── val [383 entries exceeds filelimit, not opening dir]
+│   ├── labels.json
+│   └── README.txt
+├── CAER
+│   ├── faces
+│   │   ├── test [2637 entries exceeds filelimit, not opening dir]
+│   │   ├── train [9222 entries exceeds filelimit, not opening dir]
+│   │   └── val [1316 entries exceeds filelimit, not opening dir]
+│   ├── face-videos
+│   │   ├── test [2637 entries exceeds filelimit, not opening dir]
+│   │   ├── train [9222 entries exceeds filelimit, not opening dir]
+│   │   └── val [1316 entries exceeds filelimit, not opening dir]
+│   ├── raw-audios
+│   │   ├── test [2637 entries exceeds filelimit, not opening dir]
+│   │   ├── train [9222 entries exceeds filelimit, not opening dir]
+│   │   └── val [1316 entries exceeds filelimit, not opening dir]
+│   ├── raw-videos
+│   │   ├── test [2637 entries exceeds filelimit, not opening dir]
+│   │   ├── train [9222 entries exceeds filelimit, not opening dir]
+│   │   └── val [1316 entries exceeds filelimit, not opening dir]
+│   ├── labels.json
+│   └── README.txt
+├── IEMOCAP
+│   ├── faces
+│   │   ├── test [2170 entries exceeds filelimit, not opening dir]
+│   │   ├── train [6378 entries exceeds filelimit, not opening dir]
+│   │   └── val [1491 entries exceeds filelimit, not opening dir]
+│   ├── face-videos
+│   │   ├── test [2170 entries exceeds filelimit, not opening dir]
+│   │   ├── train [6378 entries exceeds filelimit, not opening dir]
+│   │   └── val [1491 entries exceeds filelimit, not opening dir]
+│   ├── raw-audios
+│   │   ├── test [2170 entries exceeds filelimit, not opening dir]
+│   │   ├── train [6378 entries exceeds filelimit, not opening dir]
+│   │   └── val [1491 entries exceeds filelimit, not opening dir]
+│   ├── raw-texts
+│   │   ├── test [2170 entries exceeds filelimit, not opening dir]
+│   │   ├── train [6378 entries exceeds filelimit, not opening dir]
+│   │   └── val [1491 entries exceeds filelimit, not opening dir]
+│   ├── raw-videos
+│   │   ├── test [2170 entries exceeds filelimit, not opening dir]
+│   │   ├── train [6378 entries exceeds filelimit, not opening dir]
+│   │   └── val [1491 entries exceeds filelimit, not opening dir]
+│   ├── labels.json
+│   ├── README.txt
+│   ├── undecided.json
+│   └── utterance-ordered.json
+├── MELD
+│   ├── faces
+│   │   ├── test [2747 entries exceeds filelimit, not opening dir]
+│   │   ├── train [9988 entries exceeds filelimit, not opening dir]
+│   │   └── val [1112 entries exceeds filelimit, not opening dir]
+│   ├── face-videos
+│   │   ├── test [2741 entries exceeds filelimit, not opening dir]
+│   │   ├── train [9949 entries exceeds filelimit, not opening dir]
+│   │   └── val [1109 entries exceeds filelimit, not opening dir]
+│   ├── raw-audios
+│   │   ├── test [2747 entries exceeds filelimit, not opening dir]
+│   │   ├── train [9988 entries exceeds filelimit, not opening dir]
+│   │   └── val [1112 entries exceeds filelimit, not opening dir]
+│   ├── raw-texts
+│   │   ├── test [2610 entries exceeds filelimit, not opening dir]
+│   │   ├── train [9989 entries exceeds filelimit, not opening dir]
+│   │   └── val [1109 entries exceeds filelimit, not opening dir]
+│   ├── raw-videos
+│   │   ├── test [2747 entries exceeds filelimit, not opening dir]
+│   │   ├── train [9989 entries exceeds filelimit, not opening dir]
+│   │   └── val [1112 entries exceeds filelimit, not opening dir]
+│   ├── labels.json
+│   ├── README.txt
+│   └── utterance-ordered.json
+├── scripts [25 entries exceeds filelimit, not opening dir]
+└── README.md
 ```
 
 ### How to use the datasets
