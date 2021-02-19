@@ -17,6 +17,7 @@ import torch
 from tqdm import tqdm
 import pprint
 from collections import Counter
+from utils.random_seed import set_seed
 
 
 def loadN(path, every_N=1):
@@ -107,6 +108,7 @@ def loadvideo(path, every_N, num_frames, frame_width=224, frame_height=224,
     """
     assert isinstance(every_N, int)
     frames = loadN(path, every_N)
+    original_width, original_height = frames[0].shape[1], frames[0].shape[0]
 
     if len(frames) < num_frames:
         for i in range(num_frames - len(frames)):
@@ -119,12 +121,20 @@ def loadvideo(path, every_N, num_frames, frame_width=224, frame_height=224,
     assert len(frames) == num_frames
 
     frames = [Image.fromarray(frame) for frame in frames]
-    tf = transforms.Compose([
-        LetterBoxPad(fill=0, padding_mode='constant'),
-        transforms.Resize((frame_height, frame_width)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
+
+    tf_list = []
+
+    if original_width != original_height:
+        tf_list.append(LetterBoxPad(fill=0, padding_mode='constant'))
+
+    if original_width != frame_width or original_height != frame_height:
+        tf_list.append(transforms.Resize((frame_height, frame_width)))
+
+    tf_list.append(transforms.ToTensor())
+    tf_list.append(transforms.Normalize(
+        [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
+
+    tf = transforms.Compose(tf_list)
 
     frames = [tf(frame) for frame in frames]
     frames = torch.stack(frames)
@@ -335,6 +345,10 @@ class MultiModalDataset(Label, VideoModality, TextModality, AudioModality):
         if datatype == 'train':
             self.balance_class(balancing)
 
+            print(f"After class balancing, there are now {len(self.labels)} "
+                  f"utterances in common, across the {self.modalities} "
+                  f"modalities, in the {datatype} dataset")
+
         self.every_N = every_N
         self.num_frames = num_frames
         self.image_size = image_size
@@ -378,6 +392,7 @@ class MultiModalDataset(Label, VideoModality, TextModality, AudioModality):
 
             for num in list(self.counts.keys()):
                 candidates = np.where(np.array(self.labels) == num)[0]
+                set_seed()
                 candidates = np.random.permutation(candidates)[:count_to_fix]
                 for cand in candidates:
                     indexes.append(cand)
@@ -407,7 +422,7 @@ class MultiModalDataset(Label, VideoModality, TextModality, AudioModality):
             for num in list(self.counts.keys()):
                 candidates = np.where(np.array(self.labels) == num)[0]
                 candidates = candidates.tolist()
-
+                set_seed()
                 for cand in np.random.choice(candidates,
                                              size=(count_to_fix - len(candidates))):
                     candidates.append(cand)
