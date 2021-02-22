@@ -132,10 +132,7 @@ dmypy.json
 .vscode
 
 # Dataset
-meld/
-data/dev/
-data/train/
-data/test/
+data/
 
 # Checkpoints
 runs/
