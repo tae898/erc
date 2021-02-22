@@ -9,7 +9,7 @@ import cv2
 import os
 
 class AudioDataset(data.Dataset):
-	def __init__(self, csv_path, data_dir, format='.mp3', is_train, sr, n_mels=128, duration):
+	def __init__(self, csv_path, data_dir, format, is_train, sr, duration, n_mels):
 		self.csv = pd.read_csv(csv_path)
 		self.data_dir = data_dir
 		self.format = format
