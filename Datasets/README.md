@@ -39,7 +39,7 @@ Btw, AFEW is `EmotiW_2018.zip`. Have them here in this directory (i.e. `root/of/
 
 ### Clean the datasets
 
-Run the bash script by
+Run the shell script by
 
 ```
 bash scripts/clean.sh
