@@ -10,7 +10,7 @@ import os
 
 class AudioDataset(data.Dataset):
 	def __init__(self, csv_path, data_dir, format, is_train, sr, duration, n_mels):
-		self.csv = pd.read_csv(csv_path)
+		self.csv = pd.read_csv(csv_path, dtype={'audio_id': 'string'})
 		self.data_dir = data_dir
 		self.format = format
 		self.is_train = is_train
@@ -55,12 +55,12 @@ class AudioDataset(data.Dataset):
 		else:
 			img = np.zeros_like(img, dtype=np.uint8)
 
-		img /= 255.0
+		img = img / 255.0
 		return np.moveaxis(img, 2, 0).astype(np.float32)
 
 	def __getitem__(self, index):
 		df_row = self.csv.iloc[index]
-		audio_id, label, duration = df_row['audio_id'], df_row['label'], df_row['duration']
+		audio_id, label = df_row['audio_id'], df_row['label']
 		audio_path = os.path.join(self.data_dir, audio_id)
 		audio_path_w_format = audio_path + self.format
 		y = self.get_audio(audio_path_w_format)
