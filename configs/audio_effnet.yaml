@@ -3,7 +3,7 @@ pretrained:                     Null
 model:
     name:                       BaseTimmModel
     args:
-        name:                   tf_efficientnet_b0_ns
+        name:                   tf_efficientnet_b3_ns
         num_classes:            3
         freeze_backbone:        False
         from_pretrained:        True 
@@ -12,7 +12,7 @@ optimizer:
     args:
         lr:                     0.0001
 loss:
-    name:                       CrossEntropyLoss 
+    name:                       FocalLoss
     args:                       Null
 metric:
     -   name:                   Accuracy
@@ -57,6 +57,6 @@ dataset:
                 shuffle:        True
 
 trainer: 
-    nepochs: 5
+    nepochs: 10
     val_step: 1
     log_step: 1
