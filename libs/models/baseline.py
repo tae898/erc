@@ -32,24 +32,14 @@ class BaseTimmModel(nn.Module):
     def __init__(self, num_classes, name, freeze_backbone=False, from_pretrained=True):
         super().__init__()
         self.model = timm.create_model(name, pretrained=from_pretrained)
-        self.embedding_size = 512
-        self.classifier = nn.Sequential(
-            nn.Dropout(0.2),
-            nn.BatchNorm1d(512),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(512, num_classes),
-        )
-
         try:
-            self.model.head = nn.Linear(self.model.head.in_features, self.embedding_size)
+            self.model.head = nn.Linear(self.model.head.in_features, num_classes)
         except:
             try:
-                self.model.fc = nn.Linear(self.model.fc.in_features, self.embedding_size)
+                self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
             except:
-                self.model.classifier = nn.Linear(self.model.classifier.in_features, self.embedding_size)
+                self.model.classifier = nn.Linear(self.model.classifier.in_features, num_classes)
 
     def forward(self, x):
         x = self.model(x)
-        x = self.classifier(x)
         return x
