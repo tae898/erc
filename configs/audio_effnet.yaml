@@ -39,7 +39,7 @@ dataset:
             args:
                 batch_size:     4
                 shuffle:        True
-                drop_last:      False 
+                drop_last:      True
     val:
         name:                   AudioDataset
         args:
