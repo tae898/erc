@@ -3,8 +3,8 @@ pretrained:                     Null
 model:
     name:                       BaseTimmModel
     args:
-        name:                   tf_efficientnet_b3_ns
-        num_classes:            3
+        name:                   tf_efficientnet_b0_ns
+        num_classes:            7
         freeze_backbone:        False
         from_pretrained:        True 
 optimizer:
