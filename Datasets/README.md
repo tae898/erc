@@ -44,7 +44,7 @@ This might take a while ...
 
 - You need to have some Unix programs installed (i.e. ffmpeg, unrar, untar, unzip, and python3, gdown). They are probably already installed if you are an average Unix user. The original datasets will be saved at `DEBUG/` and symbolic links to them will be made to save space.
 
-- Although the quality of IEMOCAP is decent, the way the things are organized is very messy. That's why there is a file `iemocap-DeCLaRe.json` to help with this. This was not made by me, but by [DeCLaRe](https://github.com/declare-lab/conv-emotion). I took the same train / val / test splits as them.
+- Although the quality of IEMOCAP is decent, the way the things are organized is very messy. I've organized it in a way that [DeCLaRe](https://github.com/declare-lab/conv-emotion) did. I took the same train / val / test splits as them.
 
 - The AFEW dataset officially does not have the test labels.
 
