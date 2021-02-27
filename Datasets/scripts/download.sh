@@ -3,18 +3,22 @@
 for arg in "$@"; do
     echo $arg
     if [ $arg = "IEMOCAP" ]; then
-        FILEID="1iq6ocRu3jkQgyVMmKj5EGb9A_wBmxzGh"
+        LINK="https://surfdrive.surf.nl/files/index.php/s/EcIkP4iRzoJpBzR/download"
+        FILENAME="IEMOCAP.zip"
     elif [ $arg = "MELD" ]; then
-        FILEID="1YZ9Zz_TdRaYsM6Lwx34IwpFgiVLNIAZ6"
+        LINK="https://surfdrive.surf.nl/files/index.php/s/nnjxH1oboRN3996/download"
+        FILENAME="MELD.zip"
     elif [ $arg = "AFEW" ]; then
-        FILEID="1vQqFgc1jNW7t5Y7JhsmyoWwNISG5LkwU"
+        LINK="https://surfdrive.surf.nl/files/index.php/s/Y90LClcdqqrRAhz/download"
+        FILENAME="AFEW.zip"
     elif [ $arg = "CAER" ]; then
-        FILEID="1olBRpquSwORBrork9mbsJ9EQXY9n2y9u"
+        LINK="https://surfdrive.surf.nl/files/index.php/s/TrgLYrGFwmBawBi/download"
+        FILENAME="CAER.zip"
     else
         echo "Currently only IEMOCAP, MELD, AFEW, and CAER datasets are supported"
         continue
     fi
-    gdown --id $FILEID
+    wget -O $FILENAME $LINK
 done
 
 for FILE in "IEMOCAP.zip" "MELD.zip" "AFEW.zip" "CAER.zip"
