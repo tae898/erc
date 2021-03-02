@@ -14,7 +14,17 @@ There are multiple datasets that we experimented on. You check check them out in
 
 ## fairseq
 
-The fairseq is an amazing repo from Facebook. I only wanted to copy what's necessary from their repo to my repo, but it wasn't as straightforward as I hoped, so I just submoduled it. How to train our erc models, etc. are documented at `fairseq/examples/roberta/README.md`
+The fairseq is an amazing repo from Facebook. I only wanted to copy what's necessary from their repo to my repo, but it wasn't as straightforward as I hoped, so I just submoduled it.
+
+### Prerequisites
+
+You have to [install fairseq](fairseq/README.md#Requirements-and-Installation).
+
+### Training
+In this directory run training by
+```
+bash scripts/train-roberta.sh
+```
 
 ## Contributing
 
