@@ -12,6 +12,10 @@ This repo is is to reach the SOTA of multimodal ERC challenges. The authors aim 
 
 There are multiple datasets that we experimented on. You check check them out in the `Datasets/` directory.
 
+## fairseq
+
+The fairseq is an amazing repo from Facebook. I only wanted to copy what's necessary from their repo to my repo, but it wasn't as straightforward as I hoped, so I just submoduled it. How to train our erc models, etc. are documented at `fairseq/examples/roberta/README.md`
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
