@@ -139,3 +139,7 @@ data/test/
 
 # Checkpoints
 runs/
+
+# Pytorch models
+checkpoints/
+*.pt

@@ -12,6 +12,20 @@ This repo is is to reach the SOTA of multimodal ERC challenges. The authors aim 
 
 There are multiple datasets that we experimented on. You check check them out in the `Datasets/` directory.
 
+## fairseq
+
+The fairseq is an amazing repo from Facebook.
+
+### Prerequisites
+
+You have to [install fairseq](https://github.com/pytorch/fairseq#requirements-and-installation).
+
+### Training
+In this directory run training by
+```
+bash scripts/train-roberta.sh <DATASET>
+```
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.

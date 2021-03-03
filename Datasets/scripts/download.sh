@@ -28,8 +28,7 @@ do
         DS=$(basename -- "$FILE")
         extension="${DS##*.}"
         DS="${DS%.*}"
-        unzip -o $FILE -d ./Datasets/
-        rm -rf ./Datasets/$DS/face-videos
+        unzip -o $FILE -d ./
         rm $FILE
     fi
 done
