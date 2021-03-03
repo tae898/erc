@@ -14,16 +14,16 @@ There are multiple datasets that we experimented on. You check check them out in
 
 ## fairseq
 
-The fairseq is an amazing repo from Facebook. I only wanted to copy what's necessary from their repo to my repo, but it wasn't as straightforward as I hoped, so I just submoduled it.
+The fairseq is an amazing repo from Facebook.
 
 ### Prerequisites
 
-You have to [install fairseq](fairseq/README.md#Requirements-and-Installation).
+You have to [install fairseq](https://github.com/pytorch/fairseq#requirements-and-installation).
 
 ### Training
 In this directory run training by
 ```
-bash scripts/train-roberta.sh
+bash scripts/train-roberta.sh <DATASET>
 ```
 
 ## Contributing
