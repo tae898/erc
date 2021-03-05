@@ -74,6 +74,7 @@ fairseq-preprocess \
     --destdir "Datasets/${DATASET}/roberta/bin/label" \
     --workers $WORKERS
 
+HEAD_NAME="${DATASET}_head"  # Custom name for the classification head. 
 
 for SEED in ${SEEDS//,/ }; do
     echo "SEED number: ${SEED}"
