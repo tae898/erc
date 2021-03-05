@@ -107,6 +107,7 @@ for SEED in ${SEEDS//,/ }; do
         --seed $SEED
 
     # remove every trained model except the best one (val).
+    mkdir -p $CHECKPOINT_DIR
     cd $CHECKPOINT_DIR
     find . ! -name 'checkpoint_best.pt' -type f -exec rm -f {} +
     cd ..
@@ -117,6 +118,6 @@ for SEED in ${SEEDS//,/ }; do
     python3 scripts/evaluate.py --DATASET $DATASET --model-path "${BASE_DIR}/${SEED}.pt" --num-utt $NUM_UTT --use-cuda
 done
 
-python3 scripts/evaluate.py --DATASET MELD --model-path  models/roberta.base/MELD/20210305_10131614939181/2.pt --evaluate-seeds
+python3 scripts/evaluate.py --DATASET MELD --model-path  "${BASE_DIR}/${SEED}.pt" --evaluate-seeds
 
 echo 'DONE!'
