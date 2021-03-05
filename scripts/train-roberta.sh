@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-if [[ "$@" =~ ^(MELD|IEMOCAP|AFEW|CAER)$ ]]; then
-    DATASET=$@
-    echo "Processing $DATASET ..."
-else
-    echo "$@ dataset is not supported"
-    echo "Only MELD, IEMOCAP, AFEW, and CAER are supported!!!"
-    exit 1
-fi
+
+# load config
+. scripts/train-roberta.config
+
+CURRENT_TIME=$(date +%Y%m%d_%H%M%s);
+CHECKPOINT_DIR='checkpoints_${CURRENT_TIME}'
+
+rm -rf $CHECKPOINT_DIR
+
+echo "Training will be done over the SEEDS ${SEEDS}"
 
 rm -rf Datasets/$DATASET/roberta/
 mkdir -p Datasets/$DATASET/roberta/
@@ -19,107 +21,101 @@ wget -N 'https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/vocab.bpe' -P 'models/g
 # Download fairseq dictionary.
 wget -N 'https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/dict.txt' -P 'models/gpt2-bpe'
 
-mkdir -p models/roberta.base
+BASE_DIR="models/roberta.base/${DATASET}/${CURRENT_TIME}"
+rm -rf $BASE_DIR
+mkdir -p $BASE_DIR
+cp scripts/train-roberta.config $BASE_DIR
 
-FILE='models/roberta.base/model.pt'
-if test -f "$FILE"; then
-    echo "$FILE exists."
+if test -f "${ROBERTA_PATH}"; then
+    echo "${ROBERTA_PATH} exists."
 else
-    echo "$FILE does not exist."
+    echo "${ROBERTA_PATH} does not exist."
     # Download RoBERTa-base
     wget -N 'https://dl.fbaipublicfiles.com/fairseq/models/roberta.base.tar.gz' -P 'models/'
     tar zxvf models/roberta.base.tar.gz --directory models/
 fi
 
-FILE='models/roberta.base.tar.gz'
-if test -f "$FILE"; then
-    rm $FILE
+roberta_archive='models/roberta.base.tar.gz'
+if test -f "${roberta_archive}"; then
+    rm $roberta_archive
 fi
 
 # format data for roberta
-python3 scripts/roberta-format-data.py --dataset $DATASET --num-past-utterances 1
+python3 scripts/roberta-format-data.py --DATASET $DATASET --num-utt $NUM_UTT
 
 # BPE encode for roberta
-for SPLIT in train val test; do
-    python -m examples.roberta.multiprocessing_bpe_encoder \
-        --encoder-json models/gpt2-bpe/encoder.json \
-        --vocab-bpe models/gpt2-bpe/vocab.bpe \
-        --inputs "Datasets/$DATASET/roberta/$SPLIT.input0" \
-        --outputs "Datasets/$DATASET/roberta/$SPLIT.input0.bpe" \
-        --workers 60 \
-        --keep-empty
+for INPUT_ORDER in $(seq 0 $(expr $NUM_UTT - 1)); do
+    for SPLIT in train val test; do
+        python -m examples.roberta.multiprocessing_bpe_encoder \
+            --encoder-json models/gpt2-bpe/encoder.json \
+            --vocab-bpe models/gpt2-bpe/vocab.bpe \
+            --inputs "Datasets/${DATASET}/roberta/$SPLIT.input${INPUT_ORDER}" \
+            --outputs "Datasets/${DATASET}/roberta/$SPLIT.input${INPUT_ORDER}.bpe" \
+            --workers $WORKERS \
+            --keep-empty
+    done
 done
 
 # Preprocess data into binary format for roberta
-fairseq-preprocess \
-    --only-source \
-    --trainpref "Datasets/$DATASET/roberta/train.input0.bpe" \
-    --validpref "Datasets/$DATASET/roberta/val.input0.bpe" \
-    --destdir "Datasets/$DATASET/roberta/bin/input0" \
-    --workers 60 \
-    --srcdict models/gpt2-bpe/dict.txt
+for INPUT_ORDER in $(seq 0 $(expr $NUM_UTT - 1)); do
+    fairseq-preprocess \
+        --only-source \
+        --trainpref "Datasets/${DATASET}/roberta/train.input${INPUT_ORDER}.bpe" \
+        --validpref "Datasets/${DATASET}/roberta/val.input${INPUT_ORDER}.bpe" \
+        --destdir "Datasets/${DATASET}/roberta/bin/input${INPUT_ORDER}" \
+        --workers $WORKERS \
+        --srcdict models/gpt2-bpe/dict.txt
+done
 
 fairseq-preprocess \
     --only-source \
-    --trainpref "Datasets/$DATASET/roberta/train.label" \
-    --validpref "Datasets/$DATASET/roberta/val.label" \
-    --destdir "Datasets/$DATASET/roberta/bin/label" \
-    --workers 60
+    --trainpref "Datasets/${DATASET}/roberta/train.label" \
+    --validpref "Datasets/${DATASET}/roberta/val.label" \
+    --destdir "Datasets/${DATASET}/roberta/bin/label" \
+    --workers $WORKERS
 
-TOTAL_NUM_UPDATES=10000                    # 10 epochs through IMDB for bsz 32
-WARMUP_UPDATES=600                         # 6 percent of the number of updates
-LR=1e-05                                   # Peak LR for polynomial LR scheduler.
-HEAD_NAME="${DATASET}_head"                # Custom name for the classification head.
-MAX_SENTENCES=8                            # Batch size.
-ROBERTA_PATH=models/roberta.base/model.pt # pre-trained roberta
-SEED=0
-GPU_IDS=0,1
-MAX_EPOCH=10
 
-if [ $DATASET = MELD ]; then
-    NUM_CLASSES=7
-else
-    # TODO
-    NUM_CLASSES=7
-fi
+for SEED in ${SEEDS//,/ }; do
+    echo "SEED number: ${SEED}"
 
-CUDA_VISIBLE_DEVICES=$GPU_IDS fairseq-train Datasets/$DATASET/roberta/bin/ \
-    --restore-file $ROBERTA_PATH \
-    --max-positions 512 \
-    --batch-size $MAX_SENTENCES \
-    --max-tokens 4400 \
-    --task sentence_prediction \
-    --reset-optimizer --reset-dataloader --reset-meters \
-    --required-batch-size-multiple 1 \
-    --init-token 0 --separator-token 2 \
-    --arch roberta_base \
-    --criterion sentence_prediction \
-    --classification-head-name $HEAD_NAME \
-    --num-classes $NUM_CLASSES \
-    --dropout 0.1 --attention-dropout 0.1 \
-    --weight-decay 0.1 --optimizer adam --adam-betas "(0.9, 0.98)" --adam-eps 1e-06 \
-    --clip-norm 0.0 \
-    --lr-scheduler polynomial_decay --lr $LR --total-num-update $TOTAL_NUM_UPDATES --warmup-updates $WARMUP_UPDATES \
-    --fp16 --fp16-init-scale 4 --threshold-loss-scale 1 --fp16-scale-window 128 \
-    --max-epoch $MAX_EPOCH \
-    --best-checkpoint-metric accuracy --maximize-best-checkpoint-metric \
-    --shorten-method "truncate" \
-    --find-unused-parameters \
-    --update-freq 4 \
-    --seed $SEED
+    CUDA_VISIBLE_DEVICES=$GPU_IDS fairseq-train Datasets/$DATASET/roberta/bin/ \
+        --save-dir $CHECKPOINT_DIR \
+        --restore-file $ROBERTA_PATH \
+        --max-positions 512 \
+        --batch-size $MAX_SENTENCES \
+        --max-tokens 4400 \
+        --task sentence_prediction \
+        --reset-optimizer --reset-dataloader --reset-meters \
+        --required-batch-size-multiple 1 \
+        --init-token 0 --separator-token 2 \
+        --arch roberta_base \
+        --criterion sentence_prediction \
+        --classification-head-name $HEAD_NAME \
+        --num-classes $NUM_CLASSES \
+        --dropout $DROP_OUT --attention-dropout $ATTENTION_DROP_OUT \
+        --weight-decay $WEIGHT_DECAY --optimizer adam --adam-betas "(0.9, 0.98)" --adam-eps 1e-06 \
+        --clip-norm 0.0 \
+        --lr-scheduler polynomial_decay --lr $LR --total-num-update $TOTAL_NUM_UPDATES --warmup-updates $WARMUP_UPDATES \
+        --fp16 --fp16-init-scale 4 --threshold-loss-scale 1 --fp16-scale-window 128 \
+        --max-epoch $MAX_EPOCH \
+        --save-interval $SAVE_INTERVAL \
+        --shorten-method "truncate" \
+        --find-unused-parameters \
+        --update-freq $UPDATE_FREQ \
+        --patience $PATIENCE \
+        --seed $SEED
 
-# remove every trained model except the best one (val).
-cd checkpoints
-find . ! -name 'checkpoint_best.pt' -type f -exec rm -f {} +
-cd ..
+    # remove every trained model except the best one (val).
+    cd $CHECKPOINT_DIR
+    find . ! -name 'checkpoint_best.pt' -type f -exec rm -f {} +
+    cd ..
 
-FILE='models/roberta.base/$DATASET.pt'
-if test -f "$FILE"; then
-    echo "$FILE exists."
-    rm $FILE
-fi
-mkdir -p models/roberta.base/
-mv checkpoints/checkpoint_best.pt models/roberta.base/$DATASET.pt
+    mv '${CHECKPOINT_DIR}/checkpoint_best.pt' "${BASE_DIR}/${SEED}.pt"
 
-# evaluate with f1 scores
-python3 scripts/evaluate.py --dataset $DATASET --use_cuda
+    # evaluate with weighted f1 scores and accuracy
+    python3 scripts/evaluate.py --DATASET $DATASET --model-path "${BASE_DIR}/${SEED}.pt" --num-utt $NUM_UTT --use-cuda
+done
+
+python3 scripts/evaluate.py --DATASET MELD --model-path  models/roberta.base/MELD/20210305_10131614939181/2.pt --evaluate-seeds
+
+echo 'DONE!'
