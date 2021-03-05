@@ -3,10 +3,11 @@
 # load config
 . scripts/train-roberta.config
 
-CURRENT_TIME=$(date +%Y%m%d_%H%M%s);
-CHECKPOINT_DIR='checkpoints_${CURRENT_TIME}'
+CURRENT_TIME=$(date +%Y%m%d_%H%M%s)
+CHECKPOINT_DIR="checkpoints_${CURRENT_TIME}"
 
 rm -rf $CHECKPOINT_DIR
+mkdir -p $CHECKPOINT_DIR
 
 echo "Training will be done over the SEEDS ${SEEDS}"
 
@@ -107,17 +108,18 @@ for SEED in ${SEEDS//,/ }; do
         --seed $SEED
 
     # remove every trained model except the best one (val).
-    mkdir -p $CHECKPOINT_DIR
     cd $CHECKPOINT_DIR
     find . ! -name 'checkpoint_best.pt' -type f -exec rm -f {} +
     cd ..
 
-    mv '${CHECKPOINT_DIR}/checkpoint_best.pt' "${BASE_DIR}/${SEED}.pt"
+    mv "${CHECKPOINT_DIR}/checkpoint_best.pt" "${BASE_DIR}/${SEED}.pt"
 
     # evaluate with weighted f1 scores and accuracy
     python3 scripts/evaluate.py --DATASET $DATASET --model-path "${BASE_DIR}/${SEED}.pt" --num-utt $NUM_UTT --use-cuda
+    rm "${BASE_DIR}/${SEED}.pt"
 done
 
 python3 scripts/evaluate.py --DATASET MELD --model-path  "${BASE_DIR}/${SEED}.pt" --evaluate-seeds
 
+rm -rf $CHECKPOINT_DIR
 echo 'DONE!'

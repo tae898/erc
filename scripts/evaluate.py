@@ -52,7 +52,7 @@ def evaluate_model(DATASET, model_path, num_utt, use_cuda):
         with open(Y, 'r') as stream:
             Y = [line.strip() for line in stream.readlines()]
 
-        for idx, label in enumerate(tqdm(Y[:100])):
+        for idx, label in enumerate(tqdm(Y)):
             to_encode = [X[i][idx] for i in range(num_utt)]
             # print(to_encode)
             tokens = roberta.encode(*to_encode)
