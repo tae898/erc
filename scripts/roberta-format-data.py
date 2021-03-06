@@ -61,7 +61,7 @@ def get_uttid_speaker_utterance_emotion(labels, SPLIT, json_path):
     emotion = labels[SPLIT][uttid]
 
     # very important here.
-    utterance = speaker.title() + ': ' + utterance
+    utterance = speaker.upper() + ': ' + utterance
 
     return uttid, speaker, utterance, emotion
 

@@ -1,7 +1,4 @@
-from sklearn.metrics import (
-    f1_score,
-    accuracy_score,
-)
+from sklearn.metrics import f1_score
 from tqdm import tqdm
 import os
 from glob import glob
@@ -38,12 +35,17 @@ def make_markdown_table(array):
         markdown += str("-------------- | ")
     markdown += "\n"
 
-    for entry in array[1:]:
+    for entry in array[1:-1]:
         markdown += str("| ")
         for e in entry:
             to_add = str(e) + str(" | ")
             markdown += to_add
         markdown += "\n"
+
+    for e in array[-1]:
+        to_add = "**" + str(e) + "**" + str(" |")
+        markdown += to_add
+    markdown += "\n"
 
     return markdown + "\n"
 
@@ -106,8 +108,6 @@ def evaluate_model(DATASET, model_path, num_utt, use_cuda):
             y_true[SPLIT], y_pred[SPLIT], average='micro')
         scores_all[SPLIT]['f1_macro'] = f1_score(
             y_true[SPLIT], y_pred[SPLIT], average='macro')
-        scores_all[SPLIT]['accuracy'] = accuracy_score(
-            y_true[SPLIT], y_pred[SPLIT])
 
     pprint.PrettyPrinter(indent=4).pprint(scores_all)
 
@@ -124,7 +124,7 @@ def evaluate_all_seeds(model_path):
     jsonpaths = [path for path in glob(os.path.join(DIR_NAME, '*.json'))
                  if hasNumbers(os.path.basename(path))]
 
-    metrics = ['f1_weighted', 'f1_micro', 'f1_macro', 'accuracy']
+    metrics = ['f1_weighted', 'f1_micro', 'f1_macro']
     scores_all = {SPLIT: {metric: [] for metric in metrics}
                   for SPLIT in ['train', 'val', 'test']}
 

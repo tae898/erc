@@ -1,9 +1,8 @@
 DATASET="MELD"
 NUM_CLASSES=7
-SEEDS=0,1,2,3,4 # random seeds
-NUM_UTT=1       # number of utterances in one sequence
-WORKERS=60
-
+SEEDS=0,1,2,3,4                           # random seeds
+NUM_UTT=2                                 # number of utterances in one sequence
+WORKERS=60                                # number of workers for preprocessing RoBERTa
 TOTAL_NUM_UPDATES=1600                    # one epoch is around 160 updates for MELD, when MAX_SENTENCES=8 and UPDATE_FREQ=4
 WARMUP_UPDATES=320                        # 20 percent of the number of updates
 LR=1e-05                                  # Peak LR for polynomial LR scheduler.
