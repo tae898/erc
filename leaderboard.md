@@ -8,5 +8,5 @@ The metric is f1_weighted (%)
 | roberta.base | Speaker-utt-two | 75.14 | 60.516 | 63.273 | 
 | roberta.base | one-utt | 72.248 | 59.371 | 63.294 | 
 | roberta.base | two-utt | 74.237 | 60.161 | 63.416 | 
-**roberta.base** |**SPEAKER-two-utt** |**75.561** |**60.519** |**64.0** |
-
+| **roberta.base** |**SPEAKER-two-utt** |**75.561** |**60.519** |**64.0** |
+| COSMIC | SOTA |   |   | 65.21 |
