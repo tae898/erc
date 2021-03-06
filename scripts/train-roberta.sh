@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # load config
-. scripts/train-roberta.config
+. scripts/train-roberta.config.sh
 
 CURRENT_TIME=$(date +%Y%m%d_%H%M%s)
 CHECKPOINT_DIR="checkpoints_${CURRENT_TIME}"
@@ -25,7 +25,7 @@ wget -N 'https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/dict.txt' -P 'models/gp
 BASE_DIR="models/roberta.base/${DATASET}/${CURRENT_TIME}"
 rm -rf $BASE_DIR
 mkdir -p $BASE_DIR
-cp scripts/train-roberta.config $BASE_DIR
+cp scripts/train-roberta.config.sh $BASE_DIR
 
 if test -f "${ROBERTA_PATH}"; then
     echo "${ROBERTA_PATH} exists."
@@ -83,14 +83,14 @@ for SEED in ${SEEDS//,/ }; do
     CUDA_VISIBLE_DEVICES=$GPU_IDS fairseq-train Datasets/$DATASET/roberta/bin/ \
         --save-dir $CHECKPOINT_DIR \
         --restore-file $ROBERTA_PATH \
-        --max-positions 512 \
+        --max-positions $MAX_POSITIONS \
         --batch-size $MAX_SENTENCES \
-        --max-tokens 4400 \
+        --max-tokens $MAX_TOKENS \
         --task sentence_prediction \
         --reset-optimizer --reset-dataloader --reset-meters \
         --required-batch-size-multiple 1 \
         --init-token 0 --separator-token 2 \
-        --arch roberta_base \
+        --arch $ROBERTA_SIZE \
         --criterion sentence_prediction \
         --classification-head-name $HEAD_NAME \
         --num-classes $NUM_CLASSES \
@@ -122,4 +122,7 @@ done
 python3 scripts/evaluate.py --DATASET MELD --model-path  "${BASE_DIR}/${SEED}.pt" --evaluate-seeds
 
 rm -rf $CHECKPOINT_DIR
+
+python3 scripts/evaluate.py --leaderboard
+
 echo 'DONE!'
