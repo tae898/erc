@@ -11,6 +11,18 @@ import numpy as np
 DATASET_DIR = "Datasets/"
 MODEL_DIR = 'models/'
 
+def add_markdown_sota(sota_values):
+    markdown = str("| ")
+    markdown += str(sota_values['model']) + " | "
+    markdown += "SOTA" + " | "
+    markdown += " " + " | "
+    markdown += " " + " | "
+    markdown += str(sota_values['value']) + " |"
+    markdown += "\n"
+
+    return markdown
+
+
 
 def make_markdown_table(array):
     """ Input: Python list with rows of table as lists
@@ -23,31 +35,32 @@ def make_markdown_table(array):
          ["Mary", 21, 5'7]] 
     """
 
-    markdown = "\n" + str("| ")
+    markdown = "\n" + "| "
 
     for e in array[0]:
-        to_add = " " + str(e) + str(" |")
+        to_add = " " + str(e) + " |"
         markdown += to_add
     markdown += "\n"
 
     markdown += '|'
     for i in range(len(array[0])):
-        markdown += str("-------------- | ")
+        markdown += "-------------- | "
     markdown += "\n"
 
     for entry in array[1:-1]:
-        markdown += str("| ")
+        markdown += "| "
         for e in entry:
-            to_add = str(e) + str(" | ")
+            to_add = str(e) + " | "
             markdown += to_add
         markdown += "\n"
 
+    markdown += "| "
     for e in array[-1]:
-        to_add = "**" + str(e) + "**" + str(" |")
+        to_add = "**" + str(e) + "**" + " |"
         markdown += to_add
     markdown += "\n"
 
-    return markdown + "\n"
+    return markdown
 
 
 def evaluate_model(DATASET, model_path, num_utt, use_cuda):
@@ -151,6 +164,8 @@ def evaluate_all_seeds(model_path):
 
 
 def leaderboard():
+    with open('scripts/sota.json', 'r') as stream:
+        sota = json.load(stream)
     results_paths = glob(os.path.join(MODEL_DIR, '*/*/*/results.json'))
     print(results_paths)
 
@@ -185,10 +200,13 @@ def leaderboard():
         table = leaderboard[DATASET]
         table.insert(0, ["base model", "method", "train", "val", "test"])
 
-        table = make_markdown_table(table)
         with open('leaderboard.md', 'a') as stream:
+            table = make_markdown_table(table)
+
             stream.write(f"## Dataset: {DATASET} \n")
             stream.write(f"The metric is {metric} (%)")
+            stream.write(table)
+            table = add_markdown_sota(sota[DATASET])
             stream.write(table)
 
 
