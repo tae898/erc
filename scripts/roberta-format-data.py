@@ -10,34 +10,39 @@ DATASET_DIR = "Datasets/"
 
 
 def get_emotion2num(DATASET):
-    emotions_MELD = ['anger',
-                     'disgust',
-                     'fear',
-                     'joy',
-                     'neutral',
-                     'sadness',
-                     'surprise']
 
-    emotions_IEMOCAP = ['anger',
+    emotions = {}
+    emotions['MELD'] = ['anger',
                         'disgust',
-                        'excited',
                         'fear',
-                        'frustration',
-                        'happiness',
+                        'joy',
                         'neutral',
-                        'other',
                         'sadness',
-                        'surprise',
-                        'undecided']
+                        'surprise']
 
-    emotion2num_MELD = {emotion: idx for idx,
-                        emotion in enumerate(emotions_MELD)}
-    emotion2num_IEMOCAP = {emotion: idx for idx,
-                           emotion in enumerate(emotions_IEMOCAP)}
+    emotions['IEMOCAP'] = ['anger',
+                           'disgust',
+                           'excited',
+                           'fear',
+                           'frustration',
+                           'happiness',
+                           'neutral',
+                           'other',
+                           'sadness',
+                           'surprise',
+                           'undecided']
 
-    emotion2num = {}
-    emotion2num['MELD'] = emotion2num_MELD
-    emotion2num['IEMOCAP'] = emotion2num_IEMOCAP
+    emotions['CAER'] = ['anger',
+                        'disgust',
+                        'fear',
+                        'happy',
+                        'neutral',
+                        'sad',
+                        'surprise']
+
+    emotion2num = {DATASET: {emotion: idx for idx, emotion in enumerate(
+        emotions_)} for DATASET, emotions_ in emotions.items()}
+
 
     return emotion2num[DATASET]
 
@@ -107,7 +112,7 @@ def write_input_label(DATASET, SPLIT, input_order, num_utt, labels,
     f2.close()
 
 
-def main(DATASET, num_utt=1):
+def format_classification(DATASET, num_utt=1):
     if DATASET not in ['MELD', 'IEMOCAP', 'AFEW', 'CAER']:
         sys.exit(f"{DATASET} is not supported!")
 
@@ -119,15 +124,21 @@ def main(DATASET, num_utt=1):
             write_input_label(DATASET, SPLIT, input_order, num_utt, labels,
                               utterance_ordered, emotion2num)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Format data for roberta')
     parser.add_argument('--DATASET', help='e.g. IEMOCAP, MELD, AFEW, CAER')
     parser.add_argument('--num-utt', default=1, type=int,
                         help='e.g. 1, 2, 3, etc.')
+    parser.add_argument('--pretrain-nsp', action='store_true')
 
     args = parser.parse_args()
+    args = vars(args)
 
-    print(f"arguments given to {__file__}: {vars(args)}")
+    print(f"arguments given to {__file__}: {args}")
 
-    main(**vars(args))
+    if args['pretrain_nsp']:
+        args.pop('pretrain_nsp')
+        format_nsp(**args)
+    else:
+        args.pop('pretrain_nsp')
+        format_classification(**args)

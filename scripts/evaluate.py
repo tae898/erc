@@ -10,6 +10,9 @@ import json
 import numpy as np
 DATASET_DIR = "Datasets/"
 MODEL_DIR = 'models/'
+DATASETS_SUPPORTED = ['MELD', 'IEMOCAP',
+                      'CAER', 'EmoryNLP', 'DailyDialog']
+
 
 def add_markdown_sota(sota_values):
     markdown = str("| ")
@@ -21,7 +24,6 @@ def add_markdown_sota(sota_values):
     markdown += "\n"
 
     return markdown
-
 
 
 def make_markdown_table(array):
@@ -54,17 +56,18 @@ def make_markdown_table(array):
             markdown += to_add
         markdown += "\n"
 
-    markdown += "| "
-    for e in array[-1]:
-        to_add = "**" + str(e) + "**" + " |"
-        markdown += to_add
-    markdown += "\n"
+    if len(array) > 1:
+        markdown += "| "
+        for e in array[-1]:
+            to_add = "**" + str(e) + "**" + " |"
+            markdown += to_add
+        markdown += "\n"
 
     return markdown
 
 
 def evaluate_model(DATASET, model_path, num_utt, use_cuda):
-    if DATASET not in ['MELD', 'IEMOCAP', 'AFEW', 'CAER']:
+    if DATASET not in DATASETS_SUPPORTED:
         sys.exit(f"{DATASET} is not supported!")
 
     roberta = RobertaModel.from_pretrained(
@@ -169,9 +172,7 @@ def leaderboard():
     results_paths = glob(os.path.join(MODEL_DIR, '*/*/*/results.json'))
     print(results_paths)
 
-    DATASETS = sorted(list(set([path.split('/')[2]
-                                for path in results_paths])))
-    leaderboard = {DATASET: [] for DATASET in DATASETS}
+    leaderboard = {DATASET: [] for DATASET in DATASETS_SUPPORTED}
     for path in results_paths:
         BASE_MODEL = path.split('/')[1]
         DATASET = path.split('/')[2]
@@ -192,15 +193,31 @@ def leaderboard():
                                            ['mean']*100, 3),
                                      round(results['test'][metric]['mean']*100, 3)])
 
-    with open('leaderboard.md', 'w') as stream:
+    with open('LEADERBOARD.md', 'w') as stream:
         stream.write('# Leaderboard\n')
+        stream.write("Note that only DailyDialog uses a different metric "
+                     "(f1_micro) from others (f1_weighted). f1_micro is the "
+                     "same as accuracy when every data point is assigned only "
+                     "one class.\n\nThe reported performance of my models are "
+                     "the mean values of the 5 random seed trainings. I "
+                     "expect the other authors have done the same thing or "
+                     "something similar, since the numbers are stochastic in "
+                     "nature.\n\n")
 
-    for DATASET in DATASETS:
+            
+
+    for DATASET in DATASETS_SUPPORTED:
+
+        if DATASET == 'DailyDialog':
+            metric = 'f1_micro'
+        else:
+            metric = 'f1_weighted'
+
         leaderboard[DATASET].sort(key=lambda x: x[-1])
         table = leaderboard[DATASET]
         table.insert(0, ["base model", "method", "train", "val", "test"])
 
-        with open('leaderboard.md', 'a') as stream:
+        with open('LEADERBOARD.md', 'a') as stream:
             table = make_markdown_table(table)
 
             stream.write(f"## Dataset: {DATASET} \n")
