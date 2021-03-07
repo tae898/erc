@@ -3,7 +3,7 @@ Note that only DailyDialog uses a different metric (f1_micro) from others (f1_we
 
 The reported performance of my models are the mean values of the 5 random seed trainings. I expect the other authors have done the same thing or something similar, since the numbers are stochastic in nature.
 
-## Dataset: MELD 
+## MELD 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
@@ -12,24 +12,25 @@ The metric is f1_weighted (%)
 | roberta.base | Speaker-utt-two | 75.14 | 60.516 | 63.273 | 
 | roberta.base | one-utt | 72.248 | 59.371 | 63.294 | 
 | roberta.base | two-utt | 74.237 | 60.161 | 63.416 | 
-| **roberta.base** |**SPEAKER-two-utt** |**75.561** |**60.519** |**64.0** |
+| roberta.base | SPEAKER-two-utt | 75.561 | 60.519 | 64.0 | 
+| **roberta.large** |**SPEAKER-two-utt** |**78.521** |**61.956** |**64.694** |
 | COSMIC | SOTA |   |   | 65.21 |
-## Dataset: IEMOCAP 
+## IEMOCAP 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | CESTa | SOTA |   |   | 67.1 |
-## Dataset: CAER 
+## CAER 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | CAER-Net | SOTA |   |   | 77.04 |
-## Dataset: EmoryNLP 
+## EmoryNLP 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | COSMIC | SOTA |   |   | 38.11 |
-## Dataset: DailyDialog 
+## DailyDialog 
 The metric is f1_micro (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 

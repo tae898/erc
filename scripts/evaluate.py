@@ -204,8 +204,6 @@ def leaderboard():
                      "something similar, since the numbers are stochastic in "
                      "nature.\n\n")
 
-            
-
     for DATASET in DATASETS_SUPPORTED:
 
         if DATASET == 'DailyDialog':
@@ -220,7 +218,7 @@ def leaderboard():
         with open('LEADERBOARD.md', 'a') as stream:
             table = make_markdown_table(table)
 
-            stream.write(f"## Dataset: {DATASET} \n")
+            stream.write(f"## {DATASET} \n")
             stream.write(f"The metric is {metric} (%)")
             stream.write(table)
             table = add_markdown_sota(sota[DATASET])

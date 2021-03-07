@@ -32,7 +32,6 @@ else
     rm "models/roberta.${ROBERTA_SIZE}.tar.gz"
 fi
 
-
 echo "Training will be done over the SEEDS ${SEEDS}"
 
 if [ "$PRETRAIN_NSP" = true ]; then
@@ -114,32 +113,32 @@ mkdir -p $CHECKPOINT_DIR
 for SEED in ${SEEDS//,/ }; do
     echo "SEED number: ${SEED}"
 
-CUDA_VISIBLE_DEVICES=$GPU_IDS fairseq-train Datasets/$DATASET/roberta/bin/ \
-    --save-dir $CHECKPOINT_DIR \
-    --restore-file $ROBERTA_PATH \
-    --max-positions $MAX_POSITIONS \
-    --batch-size $MAX_SENTENCES \
-    --max-tokens $MAX_TOKENS \
-    --task sentence_prediction \
-    --reset-optimizer --reset-dataloader --reset-meters \
-    --required-batch-size-multiple 1 \
-    --init-token 0 --separator-token 2 \
-    --arch "roberta_${ROBERTA_SIZE}" \
-    --criterion sentence_prediction \
-    --classification-head-name $HEAD_NAME \
-    --num-classes $NUM_CLASSES \
-    --dropout $DROP_OUT --attention-dropout $ATTENTION_DROP_OUT \
-    --weight-decay $WEIGHT_DECAY --optimizer adam --adam-betas "(0.9, 0.98)" --adam-eps 1e-06 \
-    --clip-norm 0.0 \
-    --lr-scheduler polynomial_decay --lr $LR --total-num-update $TOTAL_NUM_UPDATES --warmup-updates $WARMUP_UPDATES \
-    --fp16 --fp16-init-scale 4 --threshold-loss-scale 1 --fp16-scale-window 128 \
-    --max-epoch $MAX_EPOCH \
-    --save-interval $SAVE_INTERVAL \
-    --shorten-method "truncate" \
-    --find-unused-parameters \
-    --update-freq $UPDATE_FREQ \
-    --patience $PATIENCE \
-    --seed $SEED
+    CUDA_VISIBLE_DEVICES=$GPU_IDS fairseq-train Datasets/$DATASET/roberta/bin/ \
+        --save-dir $CHECKPOINT_DIR \
+        --restore-file $ROBERTA_PATH \
+        --max-positions $MAX_POSITIONS \
+        --batch-size $MAX_SENTENCES \
+        --max-tokens $MAX_TOKENS \
+        --task sentence_prediction \
+        --reset-optimizer --reset-dataloader --reset-meters \
+        --required-batch-size-multiple 1 \
+        --init-token 0 --separator-token 2 \
+        --arch "roberta_${ROBERTA_SIZE}" \
+        --criterion sentence_prediction \
+        --classification-head-name $HEAD_NAME \
+        --num-classes $NUM_CLASSES \
+        --dropout $DROP_OUT --attention-dropout $ATTENTION_DROP_OUT \
+        --weight-decay $WEIGHT_DECAY --optimizer adam --adam-betas "(0.9, 0.98)" --adam-eps 1e-06 \
+        --clip-norm 0.0 \
+        --lr-scheduler polynomial_decay --lr $LR --total-num-update $TOTAL_NUM_UPDATES --warmup-updates $WARMUP_UPDATES \
+        --fp16 --fp16-init-scale 4 --threshold-loss-scale 1 --fp16-scale-window 128 \
+        --max-epoch $MAX_EPOCH \
+        --save-interval $SAVE_INTERVAL \
+        --shorten-method "truncate" \
+        --find-unused-parameters \
+        --update-freq $UPDATE_FREQ \
+        --patience $PATIENCE \
+        --seed $SEED
 
     # remove every trained model except the best one (val).
     cd $CHECKPOINT_DIR
@@ -150,10 +149,10 @@ CUDA_VISIBLE_DEVICES=$GPU_IDS fairseq-train Datasets/$DATASET/roberta/bin/ \
 
     # evaluate with weighted f1 scores and accuracy
     python3 scripts/evaluate.py --DATASET $DATASET --model-path "${BASE_DIR}/${SEED}.pt" --num-utt $NUM_UTT --use-cuda
-    rm "${BASE_DIR}/${SEED}.pt"
+    # rm "${BASE_DIR}/${SEED}.pt"
 done
 
-python3 scripts/evaluate.py --DATASET MELD --model-path "${BASE_DIR}/${SEED}.pt" --evaluate-seeds
+python3 scripts/evaluate.py --DATASET $DATASET --model-path "${BASE_DIR}/${SEED}.pt" --evaluate-seeds
 
 rm -rf $CHECKPOINT_DIR
 
