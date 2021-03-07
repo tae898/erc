@@ -1,19 +1,20 @@
 # Leaderboard
 Note that only DailyDialog uses a different metric (f1_micro) from others (f1_weighted). f1_micro is the same as accuracy when every data point is assigned only one class.
 
-The reported performance of my models are the mean values of the 5 random seed trainings. I expect the other authors have done the same thing or something similar, since the numbers are stochastic in nature.
+The reported performance of my models are the mean values of the 5 random seed runs. I expect the other authors have done the same thing or something similar, since the numbers are stochastic in nature.
 
+The rows are sorted by the validation performance, not test performance, because otherwise it's cheating.
 ## MELD 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.base | SPEAKER-one-utt | 70.956 | 58.873 | 63.039 | 
 | roberta.base | Speaker-one-utt | 70.333 | 58.835 | 63.258 | 
-| roberta.base | Speaker-utt-two | 75.14 | 60.516 | 63.273 | 
+| roberta.base | SPEAKER-one-utt | 70.956 | 58.873 | 63.039 | 
 | roberta.base | one-utt | 72.248 | 59.371 | 63.294 | 
 | roberta.base | two-utt | 74.237 | 60.161 | 63.416 | 
+| roberta.base | Speaker-utt-two | 75.14 | 60.516 | 63.273 | 
 | roberta.base | SPEAKER-two-utt | 75.561 | 60.519 | 64.0 | 
-| **roberta.large** |**SPEAKER-two-utt** |**78.521** |**61.956** |**64.694** |
+| **roberta.large** |**SPEAKER-two-utt** |**77.408** |**63.338** |**65.108** |
 | COSMIC | SOTA |   |   | 65.21 |
 ## IEMOCAP 
 The metric is f1_weighted (%)

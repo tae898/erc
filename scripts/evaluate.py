@@ -199,10 +199,11 @@ def leaderboard():
                      "(f1_micro) from others (f1_weighted). f1_micro is the "
                      "same as accuracy when every data point is assigned only "
                      "one class.\n\nThe reported performance of my models are "
-                     "the mean values of the 5 random seed trainings. I "
-                     "expect the other authors have done the same thing or "
-                     "something similar, since the numbers are stochastic in "
-                     "nature.\n\n")
+                     "the mean values of the 5 random seed runs. I expect the "
+                     "other authors have done the same thing or something "
+                     "similar, since the numbers are stochastic in nature."
+                     "\n\nThe rows are sorted by the validation performance, "
+                     "not test performance, because otherwise it's cheating.\n")
 
     for DATASET in DATASETS_SUPPORTED:
 
@@ -211,7 +212,9 @@ def leaderboard():
         else:
             metric = 'f1_weighted'
 
-        leaderboard[DATASET].sort(key=lambda x: x[-1])
+        # sort by the validation performance, not test performance.
+        # Otherwise you are cheating.
+        leaderboard[DATASET].sort(key=lambda x: x[-2])
         table = leaderboard[DATASET]
         table.insert(0, ["base model", "method", "train", "val", "test"])
 
