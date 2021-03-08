@@ -13,7 +13,10 @@ optimizer:
         lr:                     0.00001
 loss:
     name:                       FocalLoss
-    args:                       Null
+    args:                       
+        alpha:                  0.25
+        gamma:                  2
+        reduce:                 True
 metric:
     -   name:                   F1Weighted
         args:                   Null
