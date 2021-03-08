@@ -1,4 +1,4 @@
-id:                             audio_effnet_b0
+id:                             audio_effnet
 pretrained:                     Null
 model:
     name:                       BaseTimmModel
@@ -28,10 +28,10 @@ dataset:
         name:                   AudioDataset
         args:
             data_dir:           data/MELD/raw-audios-wav/train/        
-            csv_path:           data/MELD/raw-audios/train.csv
+            csv_path:           data/MELD/raw-audios-wav/train.csv
             format:             .wav
             sr:                 22050
-            duration:           8
+            duration:           6
             n_mels:             128
             is_train:           True  
         loader:
@@ -44,10 +44,10 @@ dataset:
         name:                   AudioDataset
         args:
             data_dir:           data/MELD/raw-audios-wav/val/        
-            csv_path:           data/MELD/raw-audios/val.csv
+            csv_path:           data/MELD/raw-audios-wav/val.csv
             format:             .wav
             sr:                 22050
-            duration:           8
+            duration:           6
             n_mels:             128
             is_train:           False
         loader:
@@ -55,6 +55,7 @@ dataset:
             args:
                 batch_size:     4
                 shuffle:        True
+                drop_last:      True
 
 trainer: 
     nepochs: 10
