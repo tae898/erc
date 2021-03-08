@@ -8,6 +8,8 @@ import numpy as np
 import cv2
 import os
 
+from transforms import *
+
 class AudioDataset(data.Dataset):
 	def __init__(self, csv_path, data_dir, format, is_train, sr, duration, n_mels):
 		self.csv = pd.read_csv(csv_path, dtype={'audio_id': 'string'})
@@ -19,6 +21,11 @@ class AudioDataset(data.Dataset):
 		self.n_mels = n_mels
 		self.duration = duration
 		self.audio_length = duration * sr
+  
+		# Audio augmentation
+		self.transform = Compose([OneOf([GaussianNoiseSNR(min_snr=10), PinkNoiseSNR(min_snr=10)]), 
+                            TimeShift(sr=self.sr), 
+                            VolumeControl(p=0.5)])
 
 	def get_audio(self, audio_path, dur):
 		offset = 0
@@ -69,6 +76,7 @@ class AudioDataset(data.Dataset):
 		audio_path_w_format = audio_path + self.format
   
 		y = self.get_audio(audio_path_w_format, dur)
+		y = self.transform(y)
 		melspec = self.audio2melspec(y)
 		image = self.melspec2img(melspec)
 		return image, label		

@@ -32,3 +32,5 @@ from albumentations import (
 )
 
 from albumentations.pytorch import ToTensorV2
+
+from .audio_transforms import *
