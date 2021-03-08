@@ -10,7 +10,7 @@ model:
 optimizer:
     name:                       Adam
     args:
-        lr:                     0.0001
+        lr:                     0.00001
 loss:
     name:                       FocalLoss
     args:                       Null
@@ -27,11 +27,11 @@ dataset:
     train:
         name:                   AudioDataset
         args:
-            data_dir:           data/MELD/raw-audios/train/        
+            data_dir:           data/MELD/raw-audios-wav/train/        
             csv_path:           data/MELD/raw-audios/train.csv
-            format:             .mp3
+            format:             .wav
             sr:                 22050
-            duration:           8
+            duration:           4
             n_mels:             128
             is_train:           True  
         loader:
@@ -43,11 +43,11 @@ dataset:
     val:
         name:                   AudioDataset
         args:
-            data_dir:           data/MELD/raw-audios/val/        
+            data_dir:           data/MELD/raw-audios-wav/val/        
             csv_path:           data/MELD/raw-audios/val.csv
-            format:             .mp3
+            format:             .wav
             sr:                 22050
-            duration:           8
+            duration:           4
             n_mels:             128
             is_train:           False
         loader:
