@@ -10,7 +10,7 @@ model:
 optimizer:
     name:                       Adam
     args:
-        lr:                     0.00001
+        lr:                     0.0001
 loss:
     name:                       FocalLoss
     args:                       

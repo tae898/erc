@@ -23,9 +23,16 @@ class AudioDataset(data.Dataset):
 		self.audio_length = duration * sr
   
 		# Audio augmentation
-		self.transform = Compose([OneOf([GaussianNoiseSNR(min_snr=10), PinkNoiseSNR(min_snr=10)]), 
+		self.audio_transform = Compose([OneOf([GaussianNoiseSNR(min_snr=10), PinkNoiseSNR(min_snr=10)]), 
                             TimeShift(sr=self.sr), 
                             VolumeControl(p=0.5)])
+  
+		# Image transformation
+		self.image_transform = tf.Compose(
+      		[
+            	tf.ToTensor(), 
+         		tf.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+           	])
 
 	def get_audio(self, audio_path, dur):
 		offset = 0
@@ -54,10 +61,8 @@ class AudioDataset(data.Dataset):
 		# Convert 1 channel to 3 channels
 		img = np.stack([melspec, melspec, melspec], axis=-1)
 
-		# Standardization
 		img = (img - img.mean()) / (img.std() + 1E-6)
 
-		# Normalization
 		min_val, max_val = img.min(), img.max()
 		if (max_val - min_val) > 1E-6:
 			img = np.clip(img, min_val, max_val)
@@ -66,8 +71,8 @@ class AudioDataset(data.Dataset):
 		else:
 			img = np.zeros_like(img, dtype=np.uint8)
 
-		img = img / 255.0
-		return np.moveaxis(img, 2, 0).astype(np.float32)
+		return img.astype(np.float32)
+		# return np.moveaxis(img, 2, 0).astype(np.float32)
 
 	def __getitem__(self, index):
 		df_row = self.csv.iloc[index]
@@ -77,9 +82,10 @@ class AudioDataset(data.Dataset):
   
 		y = self.get_audio(audio_path_w_format, dur)
 		if self.is_train:
-			y = self.transform(y)
+			y = self.audio_transform(y)
 		melspec = self.audio2melspec(y)
 		image = self.melspec2img(melspec)
+		image = self.image_transform(image)
 		return image, label		
 
 	def __len__(self):
