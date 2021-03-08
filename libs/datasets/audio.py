@@ -76,7 +76,8 @@ class AudioDataset(data.Dataset):
 		audio_path_w_format = audio_path + self.format
   
 		y = self.get_audio(audio_path_w_format, dur)
-		y = self.transform(y)
+		if self.is_train:
+			y = self.transform(y)
 		melspec = self.audio2melspec(y)
 		image = self.melspec2img(melspec)
 		return image, label		
