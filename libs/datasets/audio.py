@@ -23,15 +23,20 @@ class AudioDataset(data.Dataset):
 		self.audio_length = duration * sr
   
 		# Audio augmentation
-		self.audio_transform = Compose([OneOf([GaussianNoiseSNR(min_snr=10), PinkNoiseSNR(min_snr=10)]), 
+		self.audio_transform = AudioTfCompose([OneOf([GaussianNoiseSNR(min_snr=10), PinkNoiseSNR(min_snr=10)]), 
                             TimeShift(sr=self.sr), 
                             VolumeControl(p=0.5)])
   
 		# Image transformation
-		self.image_transform = tf.Compose(
+		self.image_transform = Compose(
       		[
-            	tf.ToTensor(), 
-         		tf.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+				Normalize(
+					mean=[0.485, 0.456, 0.406],
+					std=[0.229, 0.224, 0.225],
+					max_pixel_value=255.0,
+					p=1.0,
+				),
+				ToTensorV2(p=1.0),
            	])
 
 	def get_audio(self, audio_path, dur):
@@ -61,8 +66,8 @@ class AudioDataset(data.Dataset):
 		# Convert 1 channel to 3 channels
 		img = np.stack([melspec, melspec, melspec], axis=-1)
 
+		# Convert to pixel range [0..255]
 		img = (img - img.mean()) / (img.std() + 1E-6)
-
 		min_val, max_val = img.min(), img.max()
 		if (max_val - min_val) > 1E-6:
 			img = np.clip(img, min_val, max_val)
@@ -72,7 +77,6 @@ class AudioDataset(data.Dataset):
 			img = np.zeros_like(img, dtype=np.uint8)
 
 		return img.astype(np.float32)
-		# return np.moveaxis(img, 2, 0).astype(np.float32)
 
 	def __getitem__(self, index):
 		df_row = self.csv.iloc[index]
@@ -85,7 +89,7 @@ class AudioDataset(data.Dataset):
 			y = self.audio_transform(y)
 		melspec = self.audio2melspec(y)
 		image = self.melspec2img(melspec)
-		image = self.image_transform(image)
+		image = self.image_transform(image=image)['image']
 		return image, label		
 
 	def __len__(self):

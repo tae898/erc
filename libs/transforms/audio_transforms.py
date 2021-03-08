@@ -21,7 +21,7 @@ class AudioTransform:
         raise NotImplementedError
 
 
-class Compose:
+class AudioTfCompose:
     def __init__(self, transforms: list):
         self.transforms = transforms
 
