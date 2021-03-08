@@ -23,9 +23,16 @@ class AudioDataset(data.Dataset):
 		self.audio_length = duration * sr
   
 		# Audio augmentation
-		self.audio_transform = AudioTfCompose([OneOf([GaussianNoiseSNR(min_snr=10), PinkNoiseSNR(min_snr=10)]), 
-                            TimeShift(sr=self.sr), 
-                            VolumeControl(p=0.5)])
+		self.audio_transform = AudioTfCompose(
+      		[
+            	OneOf(
+                 	[
+                    	GaussianNoiseSNR(min_snr=10), 
+                     	PinkNoiseSNR(min_snr=10)
+                    ]), 
+                TimeShift(sr=self.sr), 
+                VolumeControl(p=0.5)
+            ])
   
 		# Image transformation
 		self.image_transform = Compose(
