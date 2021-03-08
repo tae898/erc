@@ -31,7 +31,7 @@ dataset:
             csv_path:           data/MELD/raw-audios/train.csv
             format:             .wav
             sr:                 22050
-            duration:           4
+            duration:           8
             n_mels:             128
             is_train:           True  
         loader:
@@ -47,7 +47,7 @@ dataset:
             csv_path:           data/MELD/raw-audios/val.csv
             format:             .wav
             sr:                 22050
-            duration:           4
+            duration:           8
             n_mels:             128
             is_train:           False
         loader:
