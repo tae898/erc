@@ -15,7 +15,7 @@ loss:
     name:                       FocalLoss
     args:                       Null
 metric:
-    -   name:                   Accuracy
+    -   name:                   F1Weighted
         args:                   Null
 scheduler:
     name:                       StepLR
