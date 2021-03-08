@@ -29,7 +29,7 @@ class AudioDataset(data.Dataset):
 
 	def get_audio(self, audio_path, dur):
 		offset = 0
-		if is_train and self.duration < dur + 1:
+		if self.is_train and self.duration < dur + 1:
 			offset = np.random.uniform(0, int(dur - self.duration))
 
 		# Assume the default sample rate = 22050
