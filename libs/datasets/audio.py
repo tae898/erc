@@ -22,6 +22,8 @@ class AudioDataset(data.Dataset):
 
 	def get_audio(self, audio_path):
 		offset = 0
+
+		# Assume the default sample rate = 22050
 		y, _ = lb.load(audio_path, sr=None, duration=self.duration, offset=offset)
 
 		# Resize the audio sequence to a fixed size audio_length
