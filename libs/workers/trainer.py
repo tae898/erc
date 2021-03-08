@@ -10,13 +10,14 @@ from torchnet import meter
 from tqdm import tqdm
 from utils.device import detach, move_to
 
+from torch.cuda.amp import GradScaler, autocast
+
 import warnings
 warnings.filterwarnings("ignore")
 
 class Trainer():
 	def __init__(self, device, config, model, criterion, optimizer, scheduler, metric):
 		super(Trainer, self).__init__()
-
 		self.config = config
 		self.device = device
 		self.model = model
@@ -24,6 +25,10 @@ class Trainer():
 		self.optimizer = optimizer
 		self.scheduler = scheduler
 		self.metric = metric
+  
+		# Optimization
+		self.scaler = GradScaler()
+		self.max_grad_norm = 1.0
 
 		# Train ID
 		self.train_id = self.config.get('id', 'None')
@@ -92,18 +97,22 @@ class Trainer():
 			# 2: Clear gradients from previous iteration
 			self.optimizer.zero_grad()
 
-			# 3: Get network outputs
-			outs = self.model(inp)
+			with autocast(enabled=True):
+				# 3: Get network outputs
+				outs = self.model(inp)
 
-			# 4: Calculate the loss
-			loss = self.criterion(outs, lbl)
+				# 4: Calculate the loss
+				loss = self.criterion(outs, lbl)
 
 			# 5: Calculate gradients
-			loss.backward()
-
+			self.scaler.scale(loss).backward()
+			self.scaler.unscale_(self.optimizer)
+			torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
+   
 			# 6: Performing backpropagation
-			self.optimizer.step()
-
+			self.scaler.step(self.optimizer)
+			self.scaler.update()
+   
 			with torch.no_grad():
 				# 7: Update loss
 				running_loss.add(loss.item())
