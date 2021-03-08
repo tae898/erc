@@ -20,8 +20,10 @@ class AudioDataset(data.Dataset):
 		self.duration = duration
 		self.audio_length = duration * sr
 
-	def get_audio(self, audio_path):
+	def get_audio(self, audio_path, dur):
 		offset = 0
+		if self.duration < dur + 1:
+			offset = np.random.uniform(0, int(dur - self.duration))
 
 		# Assume the default sample rate = 22050
 		y, _ = lb.load(audio_path, sr=None, duration=self.duration, offset=offset)
@@ -62,10 +64,11 @@ class AudioDataset(data.Dataset):
 
 	def __getitem__(self, index):
 		df_row = self.csv.iloc[index]
-		audio_id, label = df_row['audio_id'], df_row['label']
+		audio_id, label, dur = df_row['audio_id'], df_row['label'], df_row['duration']
 		audio_path = os.path.join(self.data_dir, audio_id)
 		audio_path_w_format = audio_path + self.format
-		y = self.get_audio(audio_path_w_format)
+  
+		y = self.get_audio(audio_path_w_format, dur)
 		melspec = self.audio2melspec(y)
 		image = self.melspec2img(melspec)
 		return image, label		
