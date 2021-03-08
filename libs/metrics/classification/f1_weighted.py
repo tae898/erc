@@ -24,7 +24,7 @@ class F1Weighted():
     def value(self):
         self.pred = np.reshape(self.pred, newshape=(-1,))
         self.true = np.reshape(self.true, newshape=(-1,))
-        return f1_score(self.pred, self.true, average='weighted')
+        return f1_score(self.true, self.pred, average='weighted')
 
     def summary(self):
         print(f'F1 weighted: {self.value()}')
