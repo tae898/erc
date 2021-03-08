@@ -149,7 +149,7 @@ for SEED in ${SEEDS//,/ }; do
 
     # evaluate with weighted f1 scores and accuracy
     python3 scripts/evaluate.py --DATASET $DATASET --model-path "${BASE_DIR}/${SEED}.pt" --num-utt $NUM_UTT --use-cuda
-    # rm "${BASE_DIR}/${SEED}.pt"
+    rm "${BASE_DIR}/${SEED}.pt"
 done
 
 python3 scripts/evaluate.py --DATASET $DATASET --model-path "${BASE_DIR}/${SEED}.pt" --evaluate-seeds

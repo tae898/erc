@@ -201,9 +201,10 @@ def leaderboard():
                      "one class.\n\nThe reported performance of my models are "
                      "the mean values of the 5 random seed runs. I expect the "
                      "other authors have done the same thing or something "
-                     "similar, since the numbers are stochastic in nature."
-                     "\n\nThe rows are sorted by the validation performance, "
-                     "not test performance, because otherwise it's cheating.\n")
+                     "similar, since the numbers are stochastic in nature.\n\n"
+                     "`CEL` stands for cross entropy loss. The models with CEL "
+                     "stopped training when their validation cross entropy "
+                     "loss hit the minimum.\n")
 
     for DATASET in DATASETS_SUPPORTED:
 
@@ -212,9 +213,7 @@ def leaderboard():
         else:
             metric = 'f1_weighted'
 
-        # sort by the validation performance, not test performance.
-        # Otherwise you are cheating.
-        leaderboard[DATASET].sort(key=lambda x: x[-2])
+        leaderboard[DATASET].sort(key=lambda x: x[-1])
         table = leaderboard[DATASET]
         table.insert(0, ["base model", "method", "train", "val", "test"])
 
