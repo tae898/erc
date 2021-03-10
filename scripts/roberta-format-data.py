@@ -43,7 +43,6 @@ def get_emotion2num(DATASET):
     emotion2num = {DATASET: {emotion: idx for idx, emotion in enumerate(
         emotions_)} for DATASET, emotions_ in emotions.items()}
 
-
     return emotion2num[DATASET]
 
 
@@ -123,6 +122,7 @@ def format_classification(DATASET, num_utt=1):
         for input_order in range(num_utt):
             write_input_label(DATASET, SPLIT, input_order, num_utt, labels,
                               utterance_ordered, emotion2num)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Format data for roberta')

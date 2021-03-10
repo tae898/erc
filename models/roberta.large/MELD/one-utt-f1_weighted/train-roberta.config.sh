@@ -15,7 +15,7 @@ else
     exit 1
 fi
 
-METRIC=f1_weighted                                     # should be one of f1_weighted, f1_micro, or f1_macro
+METRIC=f1_weighted                                     # should be one of cross_entropy_loss, f1_weighted, f1_micro, or f1_macro
 PRETRAIN_NSP=false                                     # pretrain next sentence prediction
 SEEDS=0,1,2,3,4                                        # random seeds
 NUM_UTT=1                                              # number of utterances in one sequence

@@ -4,8 +4,10 @@ This repo is is to reach the SOTA of multimodal ERC challenges. The authors aim 
 
 ## Prerequisites
 
-* An x86-64 Unix or Unix-like machines 
+* An x86-64 Unix or Unix-like machine
 * Python 3.6x, 3.7x, or 3.8x
+* [fairseq](https://github.com/pytorch/fairseq#requirements-and-installation)
+* [apex](https://github.com/pytorch/fairseq#requirements-and-installation)
 
 
 ## Datasets
@@ -15,10 +17,6 @@ There are multiple datasets that we experimented on. You check check them out in
 ## fairseq
 
 The fairseq is an amazing repo from Facebook.
-
-### Prerequisites
-
-You have to [install fairseq](https://github.com/pytorch/fairseq#requirements-and-installation).
 
 ### Training
 In this directory run training by

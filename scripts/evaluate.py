@@ -4,6 +4,7 @@ import os
 from glob import glob
 import argparse
 from fairseq.models.roberta import RobertaModel
+from fairseq.data.data_utils import collate_tokens
 import sys
 import pprint
 import json
@@ -66,77 +67,140 @@ def make_markdown_table(array):
     return markdown
 
 
-def evaluate_model(DATASET, model_path, num_utt, use_cuda):
+def evalute_SPLIT(roberta, DATASET, num_utt, batch_size, SPLIT):
+
+    def label_fn(label):
+        return roberta.task.label_dictionary.string(
+            [label + roberta.task.label_dictionary.nspecial])
+
+    y_true = []
+    y_pred = []
+
+    X = {}
+    for i in range(num_utt):
+        X[i] = os.path.join(DATASET_DIR, DATASET,
+                            'roberta', SPLIT + f'.input{i}')
+
+        with open(X[i], 'r') as stream:
+            X[i] = [line.strip() for line in stream.readlines()]
+
+    Y = os.path.join(DATASET_DIR, DATASET, 'roberta', SPLIT + '.label')
+    with open(Y, 'r') as stream:
+        Y = [line.strip() for line in stream.readlines()]
+
+    for i in range(num_utt):
+        assert len(X[i]) == len(Y)
+
+    original_length = len(Y)
+    num_batches = original_length // batch_size
+
+    for i in range(num_utt):
+        X[i] = [X[i][j*batch_size:(j+1)*batch_size] for j in range(num_batches)] + \
+            [[X[i][j]] for j in range(batch_size*num_batches, original_length)]
+
+    Y = [Y[j*batch_size:(j+1)*batch_size] for j in range(num_batches)] + \
+        [[Y[j]] for j in range(batch_size*num_batches, original_length)]
+
+    for i in range(num_utt):
+        assert len(X[i]) == len(Y)
+
+    for idx in tqdm(range(len(Y))):
+        batch = [X[i][idx] for i in range(num_utt)]
+        batch = list(map(list, zip(*batch)))
+
+        batch = collate_tokens(
+            [roberta.encode(*[sentence for sentence in sentences])
+             for sentences in batch], pad_idx=1
+        )
+
+        logprobs = roberta.predict(DATASET + '_head', batch)
+        pred = logprobs.argmax(dim=1)
+        label = Y[idx]
+
+        assert len(pred) == len(label)
+        for p, l in zip(pred, label):
+            y_true.append(l)
+            y_pred.append(label_fn(p))
+
+    assert original_length == len(y_true) == len(y_pred), \
+        f"{original_length}, {len(y_true)}, {len(y_pred)}"
+
+    scores_all = {}
+    scores_all['f1_weighted'] = f1_score(y_true, y_pred, average='weighted')
+    scores_all['f1_micro'] = f1_score(y_true, y_pred, average='micro')
+    scores_all['f1_macro'] = f1_score(y_true, y_pred, average='macro')
+
+    return scores_all
+
+
+def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric, num_utt,
+                   batch_size, use_cuda, **kwargs):
     if DATASET not in DATASETS_SUPPORTED:
         sys.exit(f"{DATASET} is not supported!")
 
-    roberta = RobertaModel.from_pretrained(
-        os.path.dirname(model_path),
-        checkpoint_file=os.path.basename(model_path),
-        data_name_or_path=os.path.join(DATASET_DIR, DATASET, 'roberta/bin')
-    )
+    stats = {}
+    for model_path in tqdm(glob(os.path.join(checkpoint_dir, '*.pt'))):
+        checkpoint_file = os.path.basename(model_path)
+        roberta = RobertaModel.from_pretrained(
+            checkpoint_dir,
+            checkpoint_file=checkpoint_file,
+            data_name_or_path=os.path.join(DATASET_DIR, DATASET, 'roberta/bin')
+        )
 
-    def label_fn(label): return roberta.task.label_dictionary.string(
-        [label + roberta.task.label_dictionary.nspecial]
+        roberta.eval()  # disable dropout
+        if use_cuda:
+            roberta.cuda()
+        SPLIT = 'val'
+        print(f"evaluating {DATASET}, {model_path}, {SPLIT} ...")
+        scores = evalute_SPLIT(roberta, DATASET, num_utt,
+                               batch_size, SPLIT=SPLIT)
+        print(model_path)
+        pprint.PrettyPrinter(indent=4).pprint(scores)
+        stats[model_path] = scores
+
+        del roberta
+
+    pprint.PrettyPrinter(indent=4).pprint(stats)
+    stats = {key: val[metric] for key, val in stats.items()}
+    best_model_path = max(stats, key=stats.get)
+
+    print(f"{best_model_path} has the best {metric} performance on val")
+
+    checkpoint_file = os.path.basename(best_model_path)
+    roberta = RobertaModel.from_pretrained(
+        checkpoint_dir,
+        checkpoint_file=checkpoint_file,
+        data_name_or_path=os.path.join(DATASET_DIR, DATASET, 'roberta/bin')
     )
 
     roberta.eval()  # disable dropout
     if use_cuda:
         roberta.cuda()
 
-    y_true = {}
-    y_pred = {}
-
+    stats = {}
     for SPLIT in tqdm(['train', 'val', 'test']):
+        print(f"evaluating {DATASET}, {best_model_path}, {SPLIT} ...")
+        scores = evalute_SPLIT(roberta, DATASET, num_utt,
+                               batch_size, SPLIT=SPLIT)
 
-        y_true[SPLIT] = []
-        y_pred[SPLIT] = []
+        stats[SPLIT] = scores
+    pprint.PrettyPrinter(indent=4).pprint(stats)
 
-        X = {}
-        for i in range(num_utt):
-            X[i] = os.path.join(DATASET_DIR, DATASET,
-                                'roberta', SPLIT + f'.input{i}')
+    del roberta
 
-            with open(X[i], 'r') as stream:
-                X[i] = [line.strip() for line in stream.readlines()]
+    with open(os.path.join(base_dir, f"{seed}.json"),  'w') as stream:
+        json.dump(stats, stream, indent=4, ensure_ascii=False)
 
-        Y = os.path.join(DATASET_DIR, DATASET, 'roberta', SPLIT + '.label')
-        with open(Y, 'r') as stream:
-            Y = [line.strip() for line in stream.readlines()]
-
-        for idx, label in enumerate(tqdm(Y)):
-            to_encode = [X[i][idx] for i in range(num_utt)]
-            # print(to_encode)
-            tokens = roberta.encode(*to_encode)
-            # print(tokens)
-            pred = label_fn(roberta.predict(
-                DATASET + '_head', tokens).argmax().item())
-
-            y_true[SPLIT].append(label)
-            y_pred[SPLIT].append(pred)
-
-    scores_all = {}
-    for SPLIT in ['train', 'val', 'test']:
-        scores_all[SPLIT] = {}
-        scores_all[SPLIT]['f1_weighted'] = f1_score(
-            y_true[SPLIT], y_pred[SPLIT], average='weighted')
-        scores_all[SPLIT]['f1_micro'] = f1_score(
-            y_true[SPLIT], y_pred[SPLIT], average='micro')
-        scores_all[SPLIT]['f1_macro'] = f1_score(
-            y_true[SPLIT], y_pred[SPLIT], average='macro')
-
-    pprint.PrettyPrinter(indent=4).pprint(scores_all)
-
-    with open(model_path.replace('.pt', '.json'), 'w') as stream:
-        json.dump(scores_all, stream, indent=4, ensure_ascii=False)
+    for model_path in glob(os.path.join(checkpoint_dir, '*.pt')):
+        os.remove(model_path)
 
 
 def hasNumbers(inputString):
     return any(char.isdigit() for char in inputString)
 
 
-def evaluate_all_seeds(model_path):
-    DIR_NAME = os.path.dirname(model_path)
+def evaluate_all_seeds(base_dir):
+    DIR_NAME = base_dir
     jsonpaths = [path for path in glob(os.path.join(DIR_NAME, '*.json'))
                  if hasNumbers(os.path.basename(path))]
 
@@ -202,9 +266,8 @@ def leaderboard():
                      "the mean values of the 5 random seed runs. I expect the "
                      "other authors have done the same thing or something "
                      "similar, since the numbers are stochastic in nature.\n\n"
-                     "`CEL` stands for cross entropy loss. The models with CEL "
-                     "stopped training when their validation cross entropy "
-                     "loss hit the minimum.\n")
+                     "The rows are ordred by the validation performance, not "
+                     "the test performance, because otherwise it's cheating.\n\n")
 
     for DATASET in DATASETS_SUPPORTED:
 
@@ -213,7 +276,7 @@ def leaderboard():
         else:
             metric = 'f1_weighted'
 
-        leaderboard[DATASET].sort(key=lambda x: x[-1])
+        leaderboard[DATASET].sort(key=lambda x: x[-2])
         table = leaderboard[DATASET]
         table.insert(0, ["base model", "method", "train", "val", "test"])
 
@@ -232,8 +295,14 @@ if __name__ == "__main__":
         description='evaluate the model on f1 and acc')
     parser.add_argument('--DATASET', default=None,
                         help='e.g. IEMOCAP, MELD, AFEW, CAER')
+    parser.add_argument('--seed', type=int, default=None, help='e.g. SEED num')
     parser.add_argument('--model-path', default=None, help='e.g. model path')
     parser.add_argument('--num-utt', default=0, type=int, help='e.g. 0, 1')
+    parser.add_argument('--batch-size', default=1,
+                        type=int, help='e.g. 1, 2, 4')
+    parser.add_argument('--checkpoint-dir', default=None)
+    parser.add_argument('--base-dir', default=None)
+    parser.add_argument('--metric', default='f1_weighted')
     parser.add_argument('--use-cuda', action='store_true')
     parser.add_argument('--evaluate-seeds', action='store_true')
     parser.add_argument('--leaderboard', action='store_true')
@@ -243,10 +312,8 @@ if __name__ == "__main__":
     print(f"arguments given to {__file__}: {args}")
 
     if args['evaluate_seeds']:
-        evaluate_all_seeds(args['model_path'])
+        evaluate_all_seeds(args['base_dir'])
     elif args['leaderboard']:
         leaderboard()
     else:
-        [args.pop(not_needed) for not_needed in
-         ['evaluate_seeds', 'leaderboard']]
         evaluate_model(**args)
