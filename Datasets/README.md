@@ -16,7 +16,7 @@ We only include the datasets where the speaker emotion is labeled. Our goal is t
 ## Easy Instructions
 
 **Just download the pre-computed files by**
-```console
+```bash
 bash scripts/download.sh MELD IEMOCAP EmoryNLP DailyDialog
 ```
 Once you've finished downloading the above four archives, then proceed to [After everything](#After-everything)
@@ -29,7 +29,7 @@ You probably don't want to do this but it might give you a feeling of fulfillmen
 
 You have to download the original datasets yourselves from the original authors. If you click on the links, the authors tell you how to download them. Some of them can be downloaded directly while some ask you to write them emails. Anyways, if you get them, they'll look like this:
 
-```console
+```bash
 ├── emotion-detection-emotion-detection-1.0.tar.gz
 ├── IEMOCAP_full_release.tar.gz
 ├── ijcnlp_dailydialog.zip
@@ -40,7 +40,7 @@ You have to download the original datasets yourselves from the original authors.
 
 Run the shell script by
 
-```console
+```bash
 bash scripts/clean.sh
 ```
 This might take a while ...
@@ -55,13 +55,13 @@ This might take a while ...
 You can either compute the features yourself or download them.
 
 - If you want to download the pre-computed features (recommended)
-    ```console
+    ```bash
     bash scripts/face.sh download
     ```
 
 
 - If you want to compute them in your machine (not recommended. might take some time), `face.sh` takes three positional arguments $1, $2, and $3. $1 should be either `download` or `compute`. $2 should be number of jobs (e.g. 4). $3 should be the gpu-id (-1 means CPU). For example, if you want to compute with 4 jobs and use the gpu-id of 0,
-    ```console
+    ```bash
     bash scripts/face.sh compute 4 0
     ```
     >`insightface` has to be installed before running this. See this repo:https://github.com/deepinsight/insightface. After cloning this repo, go to the `python-package` from the root repo directory and install it by `pip install -e .` Btw, this is the best human face repo I've seen so far. The only caveat is that the core deep learning framework used is neither pytorch nor tensorflow, but mxnet.
@@ -70,7 +70,7 @@ You can either compute the features yourself or download them.
 
 After you've either downloaded or computed, your current directory `Datasets` should look like this:
 
-```console
+```bash
 ├── DailyDialog
 │   ├── raw-texts
 │   │   ├── test [7740 entries exceeds filelimit, not opening dir]
