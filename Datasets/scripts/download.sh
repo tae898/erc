@@ -8,20 +8,20 @@ for arg in "$@"; do
     elif [ $arg = "MELD" ]; then
         LINK="https://surfdrive.surf.nl/files/index.php/s/nnjxH1oboRN3996/download"
         FILENAME="MELD.zip"
-    elif [ $arg = "AFEW" ]; then
-        LINK="https://surfdrive.surf.nl/files/index.php/s/Y90LClcdqqrRAhz/download"
-        FILENAME="AFEW.zip"
-    elif [ $arg = "CAER" ]; then
-        LINK="https://surfdrive.surf.nl/files/index.php/s/TrgLYrGFwmBawBi/download"
-        FILENAME="CAER.zip"
+    elif [ $arg = "EmoryNLP" ]; then
+        LINK="https://surfdrive.surf.nl/files/index.php/s/PqcSGwnWViOKv1o/download"
+        FILENAME="EmoryNLP.zip"
+    elif [ $arg = "DailyDialog" ]; then
+        LINK="https://surfdrive.surf.nl/files/index.php/s/xdv2Lmwo2H32rTN/download"
+        FILENAME="DailyDialog.zip"
     else
-        echo "Currently only IEMOCAP, MELD, AFEW, and CAER datasets are supported"
+        echo "Currently only IEMOCAP, MELD, EmoryNLP, and DailyDialog datasets are supported"
         continue
     fi
     wget -O $FILENAME $LINK
 done
 
-for FILE in "IEMOCAP.zip" "MELD.zip" "AFEW.zip" "CAER.zip"
+for FILE in "IEMOCAP.zip" "MELD.zip" "EmoryNLP.zip" "DailyDialog.zip"
 do
     if test -f "$FILE"; then
         echo $FILE exists
