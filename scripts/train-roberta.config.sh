@@ -4,8 +4,6 @@ if [ "${DATASET}" = MELD ]; then
     NUM_CLASSES=7
 elif [ "${DATASET}" = IEMOCAP ]; then
     NUM_CLASSES=7
-elif [ "${DATASET}" = CAER ]; then
-    NUM_CLASSES=7
 elif [ "${DATASET}" = EmoryNLP ]; then
     NUM_CLASSES=7
 elif [ "${DATASET}" = DailyDialog ]; then
@@ -16,6 +14,7 @@ else
 fi
 
 METRIC=f1_weighted                                     # should be one of f1_weighted, f1_micro, or f1_macro
+PRETRAIN_MLM=true                                      # pretrain masked language model with training data
 PRETRAIN_NSP=false                                     # pretrain next sentence prediction
 SEEDS=0,1,2,3,4                                        # random seeds
 NUM_UTT=1                                              # number of utterances in one sequence

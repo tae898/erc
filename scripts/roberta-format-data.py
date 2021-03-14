@@ -7,6 +7,7 @@ import os
 from glob import glob
 import sys
 DATASET_DIR = "Datasets/"
+DATASETS_SUPPORTED = ['MELD', 'IEMOCAP', 'EmoryNLP', 'DailyDialog']
 
 
 def get_emotion2num(DATASET):
@@ -32,18 +33,21 @@ def get_emotion2num(DATASET):
                            'surprise',
                            'undecided']
 
-    emotions['CAER'] = ['anger',
-                        'disgust',
-                        'fear',
-                        'happy',
-                        'neutral',
-                        'sad',
-                        'surprise']
-
     emotion2num = {DATASET: {emotion: idx for idx, emotion in enumerate(
         emotions_)} for DATASET, emotions_ in emotions.items()}
 
     return emotion2num[DATASET]
+
+
+def make_utterance(utterance, speaker, mode='title'):
+    if mode == 'title':
+        utterance = speaker.title() + ': ' + utterance
+    elif mode == 'upper':
+        utterance = speaker.upper() + ': ' + utterance
+    elif mode == 'lower':
+        utterance = speaker.lower() + ': ' + utterance
+
+    return utterance
 
 
 def load_labels_utt_ordered(DATASET):
@@ -65,7 +69,7 @@ def get_uttid_speaker_utterance_emotion(labels, SPLIT, json_path):
     emotion = labels[SPLIT][uttid]
 
     # very important here.
-    utterance = speaker.upper() + ': ' + utterance
+    utterance = make_utterance(utterance, speaker, 'title')
 
     return uttid, speaker, utterance, emotion
 
@@ -111,10 +115,40 @@ def write_input_label(DATASET, SPLIT, input_order, num_utt, labels,
     f2.close()
 
 
-def format_classification(DATASET, num_utt=1):
-    if DATASET not in ['MELD', 'IEMOCAP', 'AFEW', 'CAER']:
-        sys.exit(f"{DATASET} is not supported!")
+def format_mlm(DATASET):
+    print(f"formatting {DATASET} data for pretraining with mlm ...")
+    _, utterance_ordered = load_labels_utt_ordered(DATASET)
+    os.makedirs(os.path.join(DATASET_DIR, DATASET, 'roberta/mlm'), exist_ok=True)
+    for SPLIT in tqdm(['train', 'val', 'test']):
+        rawtext = []
+        for diaid, uttids in tqdm(utterance_ordered[SPLIT].items()):
+            diatext = []
+            for uttid in uttids:
+                with open(f"Datasets/{DATASET}/raw-texts/{SPLIT}/{uttid}.json") as stream:
+                    utt = json.load(stream)
+                utterance = utt['Utterance']
+                speaker = utt['Speaker']
 
+                utterance = make_utterance(utterance, speaker, 'title')
+
+                diatext.append(utterance)
+            rawtext.append(diatext)
+
+        f1 = open(os.path.join(DATASET_DIR, DATASET, 'roberta/mlm',
+                               f"{SPLIT}.raw"), 'w')
+
+        for diatext in rawtext:
+            for utterance in diatext:
+                f1.write(utterance + ' ')
+            f1.write('\n\n')
+        f1.close()
+
+
+def format_nsp(DATASETS, num_utt):
+    raise NotImplementedError
+
+
+def format_classification(DATASET, num_utt=1):
     emotion2num = get_emotion2num(DATASET)
     labels, utterance_ordered = load_labels_utt_ordered(DATASET)
 
@@ -126,9 +160,10 @@ def format_classification(DATASET, num_utt=1):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Format data for roberta')
-    parser.add_argument('--DATASET', help='e.g. IEMOCAP, MELD, AFEW, CAER')
+    parser.add_argument('--DATASET', help=f"e.g. {DATASETS_SUPPORTED}")
     parser.add_argument('--num-utt', default=1, type=int,
                         help='e.g. 1, 2, 3, etc.')
+    parser.add_argument('--pretrain-mlm', action='store_true')
     parser.add_argument('--pretrain-nsp', action='store_true')
 
     args = parser.parse_args()
@@ -136,9 +171,14 @@ if __name__ == "__main__":
 
     print(f"arguments given to {__file__}: {args}")
 
+    if args['DATASET'] not in DATASETS_SUPPORTED:
+        sys.exit(f"{args['DATASET']} is not supported!")
+
     if args['pretrain_nsp']:
         args.pop('pretrain_nsp')
         format_nsp(**args)
+    elif args['pretrain_mlm']:
+        format_mlm(args['DATASET'])
     else:
         args.pop('pretrain_nsp')
         format_classification(**args)

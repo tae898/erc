@@ -34,42 +34,68 @@ fi
 
 echo "Training will be done over the SEEDS ${SEEDS}"
 
-if [ "$PRETRAIN_NSP" = true ]; then
-    echo 'pretraining with nsp ...'
+if [ "$PRETRAIN_MLM" = true ]; then
+    echo 'pretraining with MLM ...'
 
     # format data for roberta
-    python3 scripts/roberta-format-data.py --DATASET $DATASET --num-utt $NUM_UTT --pretrain-nsp
+    # TODO
+    python3 scripts/roberta-format-data.py --DATASET $DATASET --pretrain-mlm
 
-    # BPE encode for roberta
-    for INPUT_ORDER in $(seq 0 $(expr $NUM_UTT - 1)); do
-        for SPLIT in train val test; do
-            python -m examples.roberta.multiprocessing_bpe_encoder \
-                --encoder-json models/gpt2-bpe/encoder.json \
-                --vocab-bpe models/gpt2-bpe/vocab.bpe \
-                --inputs "Datasets/${DATASET}/roberta/$SPLIT.input${INPUT_ORDER}" \
-                --outputs "Datasets/${DATASET}/roberta/$SPLIT.input${INPUT_ORDER}.bpe" \
-                --workers $WORKERS \
-                --keep-empty
-        done
-    done
-
-    # Preprocess data into binary format for roberta
-    for INPUT_ORDER in $(seq 0 $(expr $NUM_UTT - 1)); do
-        fairseq-preprocess \
-            --only-source \
-            --trainpref "Datasets/${DATASET}/roberta/train.input${INPUT_ORDER}.bpe" \
-            --validpref "Datasets/${DATASET}/roberta/val.input${INPUT_ORDER}.bpe" \
-            --destdir "Datasets/${DATASET}/roberta/bin/input${INPUT_ORDER}" \
-            --workers $WORKERS \
-            --srcdict models/gpt2-bpe/dict.txt
+    for SPLIT in train val test; do \
+        python -m examples.roberta.multiprocessing_bpe_encoder \
+            --encoder-json models/gpt2-bpe/encoder.json \
+            --vocab-bpe models/gpt2-bpe/vocab.bpe \
+            --inputs "Datasets/${DATASET}/roberta/mlm/${SPLIT}.raw" \
+            --outputs "Datasets/${DATASET}/roberta/mlm/${SPLIT}.bpe" \
+            --keep-empty \
+            --workers $WORKERS
     done
 
     fairseq-preprocess \
         --only-source \
-        --trainpref "Datasets/${DATASET}/roberta/train.label" \
-        --validpref "Datasets/${DATASET}/roberta/val.label" \
-        --destdir "Datasets/${DATASET}/roberta/bin/label" \
+        --srcdict models/gpt2-bpe/dict.txt
+        --trainpref "Datasets/${DATASET}/roberta/mlm/$train.bpe" \
+        --validpref "Datasets/${DATASET}/roberta/mlm/$val.bpe" \
+        --testpref "Datasets/${DATASET}/roberta/mlm/$test.bpe" \
+        --destdir "Datasets/${DATASET}/roberta/mlm/bin/text" \
         --workers $WORKERS
+
+    CUDA_VISIBLE_DEVICES=$GPU_IDS fairseq-train "Datasets/${DATASET}/roberta/mlm/bin/text" \
+        --restore-file $ROBERTA_PATH \
+        --save-dir $CHECKPOINT_DIR \
+        --fp16 --fp16-init-scale 4 --threshold-loss-scale 1 --fp16-scale-window 128 \
+        --task masked_lm \
+        --criterion masked_lm \
+        --arch "roberta_${ROBERTA_SIZE}" \
+        --reset-optimizer --reset-dataloader --reset-meters \
+        --required-batch-size-multiple 1 \
+        --init-token 0 --separator-token 2 \
+        --sample-break-mode complete \
+        --tokens-per-sample $MAX_POSITIONS \
+        --max-tokens $MAX_TOKENS \
+        --lr-scheduler polynomial_decay --lr $LR --total-num-update $TOTAL_NUM_UPDATES --warmup-updates $WARMUP_UPDATES \
+        --dropout $DROP_OUT --attention-dropout $ATTENTION_DROP_OUT \
+        --weight-decay $WEIGHT_DECAY \
+        --optimizer adam --adam-betas "(0.9, 0.98)" --adam-eps 1e-06 \
+        --clip-norm 0.0 \
+        --batch-size $MAX_SENTENCES \
+        --update-freq $UPDATE_FREQ \
+        --max-epoch $MAX_EPOCH \
+        --save-interval $SAVE_INTERVAL \
+        --shorten-method "truncate" \
+        --find-unused-parameters \
+        --log-format simple --log-interval 1 \
+        --patience $PATIENCE \
+        --seed $SEED
+fi
+
+if [ "$PRETRAIN_NSP" = true ]; then
+    echo 'pretraining with nsp ...'
+
+    # format data for roberta
+    # TODO
+    python3 scripts/roberta-format-data.py --DATASET $DATASET --num-utt $NUM_UTT --pretrain-nsp
+
 fi
 
 # format data for roberta
