@@ -33,11 +33,6 @@ The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | CESTa | SOTA |   |   | 67.1 |
-## CAER 
-The metric is f1_weighted (%)
-|  base model | method | train | val | test |
-|-------------- | -------------- | -------------- | -------------- | -------------- | 
-| CAER-Net | SOTA |   |   | 77.04 |
 ## EmoryNLP 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |

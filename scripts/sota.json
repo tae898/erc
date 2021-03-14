@@ -26,12 +26,5 @@
         "link": "https://paperswithcode.com/sota/emotion-recognition-in-conversation-on-3",
         "model": "CESTa",
         "metric": "f1_micro"
-    },
-    "CAER": {
-        "value": 77.04,
-        "paper": "Context-Aware Emotion Recognition Networks",
-        "link": "https://paperswithcode.com/paper/context-aware-emotion-recognition-networks",
-        "model": "CAER-Net",
-        "metric": "f1_micro"
     }
 }

@@ -46,22 +46,22 @@ labels = {lbl[0]: lbl[1] for lbl in labels}
 with open('IEMOCAP/utterance-ordered.json', 'r') as stream:
     utterance_ordered = json.load(stream)
 
-labels = {DATASET: {diaid: foo for diaid, foo in labels.items() if diaid in list(utterance_ordered[DATASET].keys())}
-          for DATASET in ['train', 'val', 'test']}
+labels = {SPLIT: {diaid: foo for diaid, foo in labels.items() if diaid in list(utterance_ordered[SPLIT].keys())}
+          for SPLIT in ['train', 'val', 'test']}
 
-for DATASET in ['train', 'val', 'test']:
-    num_utts = len([val_ for key, val in labels[DATASET].items()
+for SPLIT in ['train', 'val', 'test']:
+    num_utts = len([val_ for key, val in labels[SPLIT].items()
                     for val_ in val])
     assert num_utts == len(
-        [uttid for diaid, list_of_utts in utterance_ordered[DATASET].items() for uttid in list_of_utts])
+        [uttid for diaid, list_of_utts in utterance_ordered[SPLIT].items() for uttid in list_of_utts])
 
     print(
-        f"{DATASET} has {len(labels[DATASET])} dialogues and "
-        f"{len([val_ for key, val in labels[DATASET].items() for val_ in val] )} utterances")
+        f"{SPLIT} has {len(labels[SPLIT])} dialogues and "
+        f"{len([val_ for key, val in labels[SPLIT].items() for val_ in val] )} utterances")
 
 
-voted_labels = [bar['voted'] for DATASET in ['train', 'val', 'test']
-                for diaid, foo in labels[DATASET].items() for _, bar in foo.items()]
+voted_labels = [bar['voted'] for SPLIT in ['train', 'val', 'test']
+                for diaid, foo in labels[SPLIT].items() for _, bar in foo.items()]
 
 print(f"There are {len(set(voted_labels))} unique labels.")
 
@@ -88,33 +88,44 @@ assert set(list(label_map.keys())) == label_3
 assert set(list(label_map.values())) == label_fullname
 
 
-undecided = {DATASET: {diaid: {uttid: {baz: qux for baz, qux in bar.items() if baz != 'voted'}
-                               for uttid, bar in foo.items() if bar['voted'] == 'xxx'}
-                       for diaid, foo in labels[DATASET].items()}
-             for DATASET in ['train', 'val', 'test']}
+undecided = {SPLIT: {diaid: {uttid: {baz: qux for baz, qux in bar.items() if baz != 'voted'}
+                             for uttid, bar in foo.items() if bar['voted'] == 'xxx'}
+                     for diaid, foo in labels[SPLIT].items()}
+             for SPLIT in ['train', 'val', 'test']}
 
 
 # remove diaid.
-undecided = {DATASET: {uttid: bar for diaid, foo in undecided[DATASET].items()
-                       for uttid, bar in foo.items()}
-             for DATASET in ['train', 'val', 'test']}
+undecided = {SPLIT: {uttid: bar for diaid, foo in undecided[SPLIT].items()
+                     for uttid, bar in foo.items()}
+             for SPLIT in ['train', 'val', 'test']}
 
 with open('IEMOCAP/undecided.json', 'w') as stream:
     json.dump(undecided, stream, indent=4)
 
-labels = {DATASET: {diaid: {uttid: label_map[bar['voted']].lower()
-                            for uttid, bar in foo.items()}
-                    for diaid, foo in labels[DATASET].items()}
-          for DATASET in ['train', 'val', 'test']}
+labels = {SPLIT: {diaid: {uttid: label_map[bar['voted']].lower()
+                          for uttid, bar in foo.items()}
+                  for diaid, foo in labels[SPLIT].items()}
+          for SPLIT in ['train', 'val', 'test']}
 
 # remove diaid.
-labels = {DATASET: {uttid: bar for diaid, foo in labels[DATASET].items()
-                    for uttid, bar in foo.items()}
-          for DATASET in ['train', 'val', 'test']}
+labels = {SPLIT: {uttid: bar for diaid, foo in labels[SPLIT].items()
+                  for uttid, bar in foo.items()}
+          for SPLIT in ['train', 'val', 'test']}
 
 
 with open('IEMOCAP/labels.json', 'w') as stream:
     json.dump(labels, stream, indent=4)
+
+for jsonpath in glob(f"IEMOCAP/raw-texts/*/*.json"):
+    with open(jsonpath, 'r') as stream:
+        text = json.load(stream)
+    SPLIT = jsonpath.split('/')[2]
+    uttid = os.path.basename(jsonpath).split('.json')[0]
+    emotion = labels[SPLIT][uttid]
+    text['Emotion'] = emotion
+
+    with open(jsonpath, 'w') as stream:
+        json.dump(text, stream, indent=4, ensure_ascii=False)
 
 
 README = f"This dataset has all three modalities!\n"\
