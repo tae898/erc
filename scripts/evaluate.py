@@ -11,8 +11,7 @@ import json
 import numpy as np
 DATASET_DIR = "Datasets/"
 MODEL_DIR = 'models/'
-DATASETS_SUPPORTED = ['MELD', 'IEMOCAP',
-                      'CAER', 'EmoryNLP', 'DailyDialog']
+DATASETS_SUPPORTED = ['MELD', 'IEMOCAP', 'EmoryNLP', 'DailyDialog']
 
 
 def add_markdown_sota(sota_values):
@@ -294,7 +293,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='evaluate the model on f1 and acc')
     parser.add_argument('--DATASET', default=None,
-                        help='e.g. IEMOCAP, MELD, AFEW, CAER')
+                        help='e.g. IEMOCAP, MELD, EmoryNLP, DailyDialog')
     parser.add_argument('--seed', type=int, default=None, help='e.g. SEED num')
     parser.add_argument('--model-path', default=None, help='e.g. model path')
     parser.add_argument('--num-utt', default=0, type=int, help='e.g. 0, 1')

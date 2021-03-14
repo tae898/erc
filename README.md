@@ -6,23 +6,22 @@ This repo is is to reach the SOTA of multimodal ERC challenges. The authors aim 
 
 * An x86-64 Unix or Unix-like machine
 * Python 3.6x, 3.7x, or 3.8x
-* [fairseq](https://github.com/pytorch/fairseq#requirements-and-installation)
+* [fairseq](https://github.com/pytorch/fairseq#requirements-and-installation). 
+    * I hope that I can replace this soon.
 * [apex](https://github.com/pytorch/fairseq#requirements-and-installation)
-
+    * This can be "easily" replaced by the builtin functions and packages that the new pytorch versions can offer.
 
 ## Datasets
 
-There are multiple datasets that we experimented on. You check check them out in the `Datasets/` directory.
+There are multiple datasets that we experimented on. You check check them out in the `Datasets/` directory. We only include the datasets where the speaker emotion is labeled. Our goal is to recognize speaker emotion in conversation. **At the moment we find that only MELD, IEMOCAP, EmoryNLP, and DailyDialog are only relevant to us.** MELD and IEMOCAP have all of the three modalities (i.e. text, audio, and vision), whereas the other two datasets only have the text modality. It's surprisingly difficult to find quality datasets that have all of the three modalities. 
 
-## fairseq
 
-The fairseq is an amazing repo from Facebook.
-
-### Training
+## RoBERTa Training
 In this directory run training by
 ```
 bash scripts/train-roberta.sh <DATASET>
 ```
+This requires `fairseq` and `apex`. I hope I can replace them soon.
 
 ## Contributing
 
