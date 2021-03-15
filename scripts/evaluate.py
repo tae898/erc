@@ -66,7 +66,7 @@ def make_markdown_table(array):
     return markdown
 
 
-def evalute_SPLIT(roberta, DATASET, num_utt, batch_size, SPLIT):
+def evalute_SPLIT(roberta, DATASET, batch_size, SPLIT):
 
     def label_fn(label):
         return roberta.task.label_dictionary.string(
@@ -76,7 +76,9 @@ def evalute_SPLIT(roberta, DATASET, num_utt, batch_size, SPLIT):
     y_pred = []
 
     X = {}
-    for i in range(num_utt):
+    num_inputs = len(glob(os.path.join(DATASET_DIR, DATASET, 'roberta',
+                                       f"{SPLIT}.input*.bpe")))
+    for i in range(num_inputs):
         X[i] = os.path.join(DATASET_DIR, DATASET,
                             'roberta', SPLIT + f'.input{i}')
 
@@ -87,24 +89,24 @@ def evalute_SPLIT(roberta, DATASET, num_utt, batch_size, SPLIT):
     with open(Y, 'r') as stream:
         Y = [line.strip() for line in stream.readlines()]
 
-    for i in range(num_utt):
+    for i in range(num_inputs):
         assert len(X[i]) == len(Y)
 
     original_length = len(Y)
     num_batches = original_length // batch_size
 
-    for i in range(num_utt):
+    for i in range(num_inputs):
         X[i] = [X[i][j*batch_size:(j+1)*batch_size] for j in range(num_batches)] + \
             [[X[i][j]] for j in range(batch_size*num_batches, original_length)]
 
     Y = [Y[j*batch_size:(j+1)*batch_size] for j in range(num_batches)] + \
         [[Y[j]] for j in range(batch_size*num_batches, original_length)]
 
-    for i in range(num_utt):
+    for i in range(num_inputs):
         assert len(X[i]) == len(Y)
 
     for idx in tqdm(range(len(Y))):
-        batch = [X[i][idx] for i in range(num_utt)]
+        batch = [X[i][idx] for i in range(num_inputs)]
         batch = list(map(list, zip(*batch)))
 
         batch = collate_tokens(
@@ -132,7 +134,7 @@ def evalute_SPLIT(roberta, DATASET, num_utt, batch_size, SPLIT):
     return scores_all
 
 
-def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric, num_utt,
+def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
                    batch_size, use_cuda, **kwargs):
     if DATASET not in DATASETS_SUPPORTED:
         sys.exit(f"{DATASET} is not supported!")
@@ -151,7 +153,7 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric, num_utt,
             roberta.cuda()
         SPLIT = 'val'
         print(f"evaluating {DATASET}, {model_path}, {SPLIT} ...")
-        scores = evalute_SPLIT(roberta, DATASET, num_utt,
+        scores = evalute_SPLIT(roberta, DATASET,
                                batch_size, SPLIT=SPLIT)
         print(model_path)
         pprint.PrettyPrinter(indent=4).pprint(scores)
@@ -179,7 +181,7 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric, num_utt,
     stats = {}
     for SPLIT in tqdm(['train', 'val', 'test']):
         print(f"evaluating {DATASET}, {best_model_path}, {SPLIT} ...")
-        scores = evalute_SPLIT(roberta, DATASET, num_utt,
+        scores = evalute_SPLIT(roberta, DATASET,
                                batch_size, SPLIT=SPLIT)
 
         stats[SPLIT] = scores
@@ -296,7 +298,6 @@ if __name__ == "__main__":
                         help='e.g. IEMOCAP, MELD, EmoryNLP, DailyDialog')
     parser.add_argument('--seed', type=int, default=None, help='e.g. SEED num')
     parser.add_argument('--model-path', default=None, help='e.g. model path')
-    parser.add_argument('--num-utt', default=0, type=int, help='e.g. 0, 1')
     parser.add_argument('--batch-size', default=1,
                         type=int, help='e.g. 1, 2, 4')
     parser.add_argument('--checkpoint-dir', default=None)

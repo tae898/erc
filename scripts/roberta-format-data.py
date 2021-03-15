@@ -39,12 +39,12 @@ def get_emotion2num(DATASET):
     return emotion2num[DATASET]
 
 
-def make_utterance(utterance, speaker, mode='title'):
-    if mode == 'title':
+def make_utterance(utterance, speaker, speaker_mode='title'):
+    if speaker_mode == 'title':
         utterance = speaker.title() + ': ' + utterance
-    elif mode == 'upper':
+    elif speaker_mode == 'upper':
         utterance = speaker.upper() + ': ' + utterance
-    elif mode == 'lower':
+    elif speaker_mode == 'lower':
         utterance = speaker.lower() + ': ' + utterance
 
     return utterance
@@ -60,7 +60,8 @@ def load_labels_utt_ordered(DATASET):
     return labels, utterance_ordered
 
 
-def get_uttid_speaker_utterance_emotion(labels, SPLIT, json_path):
+def get_uttid_speaker_utterance_emotion(labels, SPLIT, json_path,
+                                        speaker_mode=None):
     with open(json_path, 'r') as stream:
         text = json.load(stream)
     uttid = os.path.basename(json_path).split('.json')[0]
@@ -69,14 +70,69 @@ def get_uttid_speaker_utterance_emotion(labels, SPLIT, json_path):
     emotion = labels[SPLIT][uttid]
 
     # very important here.
-    utterance = make_utterance(utterance, speaker, 'title')
+    utterance = make_utterance(utterance, speaker, speaker_mode)
 
     return uttid, speaker, utterance, emotion
 
 
-def write_input_label(DATASET, SPLIT, input_order, num_utt, labels,
-                      utterance_ordered, emotion2num):
-    history = num_utt - input_order - 1
+def write_input_label(DATASET, SPLIT, labels, num_utts,
+                      utterance_ordered, emotion2num, speaker_mode=None):
+    diaids = list(utterance_ordered[SPLIT].keys())
+    assert num_utts > 0
+
+    input1 = []
+    input0 = []
+    labelnums = []
+
+    for diaid in diaids:
+        uttids = utterance_ordered[SPLIT][diaid]
+        json_paths = [os.path.join(
+            DATASET_DIR, DATASET, 'raw-texts', SPLIT, uttid + '.json')
+            for uttid in uttids]
+        usue = [get_uttid_speaker_utterance_emotion(
+            labels, SPLIT, json_path, speaker_mode) for json_path in json_paths]
+
+        utterances = [usue_[2] for usue_ in usue]
+        emotions = [usue_[3] for usue_ in usue]
+
+        assert len(utterances) == len(emotions)
+
+        for idx, (utterance, emotion) in enumerate(zip(utterances, emotions)):
+            labelnums.append(emotion2num[emotion])
+            input1.append(utterance)
+
+            history = []
+            start = idx - num_utts + 1
+            end = idx
+            for i in range(start, end):
+                if i < 0:
+                    history.append(' ')
+                else:
+                    history.append(utterances[i])
+            history = ' '.join(history)
+            input0.append(history)
+
+    f_input0 = open(os.path.join(DATASET_DIR, DATASET,
+                                 'roberta', SPLIT + f'.input0'), 'w')
+
+    f_input1 = open(os.path.join(DATASET_DIR, DATASET,
+                                 'roberta', SPLIT + f'.input1'), 'w')
+
+    f_label = open(os.path.join(DATASET_DIR, DATASET,
+                                'roberta', SPLIT + '.label'), 'w')
+
+    for i0, i1, ln in zip(input0, input1, labelnums):
+        f_input0.write(i0 + '\n')
+        f_input1.write(i1 + '\n')
+        f_label.write(str(ln) + '\n')
+
+    f_input0.close()
+    f_input1.close()
+    f_label.close()
+
+
+def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
+                             emotion2num, speaker_mode=None):
     samples = []
     diaids = list(utterance_ordered[SPLIT].keys())
 
@@ -86,85 +142,53 @@ def write_input_label(DATASET, SPLIT, input_order, num_utt, labels,
             DATASET_DIR, DATASET, 'raw-texts', SPLIT, uttid + '.json')
             for uttid in uttids]
         usue = [get_uttid_speaker_utterance_emotion(
-            labels, SPLIT, json_path) for json_path in json_paths]
+            labels, SPLIT, json_path, speaker_mode) for json_path in json_paths]
 
         utterances = [usue_[2] for usue_ in usue]
         emotions = [usue_[3] for usue_ in usue]
-
-        for _ in range(history):
-            utterances.insert(0, '')
-
-        for _ in range(history):
-            utterances.pop()
 
         assert len(utterances) == len(emotions)
 
         for utterance, emotion in zip(utterances, emotions):
             samples.append((utterance, emotion2num[emotion]))
 
-    f1 = open(os.path.join(DATASET_DIR, DATASET,
-                           'roberta', SPLIT + f'.input{input_order}'), 'w')
+    f_input0 = open(os.path.join(DATASET_DIR, DATASET,
+                                 'roberta', SPLIT + f'.input0'), 'w')
 
-    f2 = open(os.path.join(DATASET_DIR, DATASET,
-                           'roberta', SPLIT + '.label'), 'w')
+    f_label = open(os.path.join(DATASET_DIR, DATASET,
+                                'roberta', SPLIT + '.label'), 'w')
 
     for sample in samples:
-        f1.write(sample[0] + '\n')
-        f2.write(str(sample[1]) + '\n')
-    f1.close()
-    f2.close()
+        f_input0.write(sample[0] + '\n')
+        f_label.write(str(sample[1]) + '\n')
+    f_input0.close()
+    f_label.close()
 
 
-def format_mlm(DATASET):
-    print(f"formatting {DATASET} data for pretraining with mlm ...")
-    _, utterance_ordered = load_labels_utt_ordered(DATASET)
-    os.makedirs(os.path.join(DATASET_DIR, DATASET, 'roberta/mlm'), exist_ok=True)
-    for SPLIT in tqdm(['train', 'val', 'test']):
-        rawtext = []
-        for diaid, uttids in tqdm(utterance_ordered[SPLIT].items()):
-            diatext = []
-            for uttid in uttids:
-                with open(f"Datasets/{DATASET}/raw-texts/{SPLIT}/{uttid}.json") as stream:
-                    utt = json.load(stream)
-                utterance = utt['Utterance']
-                speaker = utt['Speaker']
+def format_classification(DATASET, num_utts=1, speaker_mode=None):
+    assert num_utts > 0
 
-                utterance = make_utterance(utterance, speaker, 'title')
-
-                diatext.append(utterance)
-            rawtext.append(diatext)
-
-        f1 = open(os.path.join(DATASET_DIR, DATASET, 'roberta/mlm',
-                               f"{SPLIT}.raw"), 'w')
-
-        for diatext in rawtext:
-            for utterance in diatext:
-                f1.write(utterance + ' ')
-            f1.write('\n\n')
-        f1.close()
-
-
-def format_nsp(DATASETS, num_utt):
-    raise NotImplementedError
-
-
-def format_classification(DATASET, num_utt=1):
+    if speaker_mode == 'none':
+        speaker_mode = None
     emotion2num = get_emotion2num(DATASET)
     labels, utterance_ordered = load_labels_utt_ordered(DATASET)
 
     for SPLIT in tqdm(['train', 'val', 'test']):
-        for input_order in range(num_utt):
-            write_input_label(DATASET, SPLIT, input_order, num_utt, labels,
-                              utterance_ordered, emotion2num)
+        if num_utts == 1:
+            write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
+                                     emotion2num, speaker_mode)
+        else:
+            write_input_label(DATASET, SPLIT, labels, num_utts,
+                              utterance_ordered, emotion2num, speaker_mode)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Format data for roberta')
     parser.add_argument('--DATASET', help=f"e.g. {DATASETS_SUPPORTED}")
-    parser.add_argument('--num-utt', default=1, type=int,
+    parser.add_argument('--num-utts', default=1, type=int,
                         help='e.g. 1, 2, 3, etc.')
-    parser.add_argument('--pretrain-mlm', action='store_true')
-    parser.add_argument('--pretrain-nsp', action='store_true')
+    parser.add_argument('--speaker-mode', default=None,
+                        help='e.g. title, upper, lower, none')
 
     args = parser.parse_args()
     args = vars(args)
@@ -174,11 +198,4 @@ if __name__ == "__main__":
     if args['DATASET'] not in DATASETS_SUPPORTED:
         sys.exit(f"{args['DATASET']} is not supported!")
 
-    if args['pretrain_nsp']:
-        args.pop('pretrain_nsp')
-        format_nsp(**args)
-    elif args['pretrain_mlm']:
-        format_mlm(args['DATASET'])
-    else:
-        args.pop('pretrain_nsp')
-        format_classification(**args)
+    format_classification(**args)

@@ -4,8 +4,6 @@ if [ "${DATASET}" = MELD ]; then
     NUM_CLASSES=7
 elif [ "${DATASET}" = IEMOCAP ]; then
     NUM_CLASSES=7
-elif [ "${DATASET}" = CAER ]; then
-    NUM_CLASSES=7
 elif [ "${DATASET}" = EmoryNLP ]; then
     NUM_CLASSES=7
 elif [ "${DATASET}" = DailyDialog ]; then
@@ -15,9 +13,10 @@ else
     exit 1
 fi
 
-METRIC=f1_weighted
+METRIC=f1_weighted                                     # should be one of f1_weighted, f1_micro, or f1_macro
+PRETRAIN_MLM=false                                     # pretrain masked language model with training data
 PRETRAIN_NSP=false                                     # pretrain next sentence prediction
-SEEDS=0,1,2,3,4                                        # random seeds
+SEEDS=1,2,3,4                                        # random seeds
 NUM_UTTS=2                                              # number of utterances in one sequence
 WORKERS=60                                             # number of workers for preprocessing RoBERTa
 TOTAL_NUM_UPDATES=1600                                 # one epoch is around 160 updates for MELD, when BATCH_SIZE=8 and UPDATE_FREQ=4
@@ -26,13 +25,14 @@ LR=1e-05                                               # Peak LR for polynomial 
 BATCH_SIZE=8                                        # Batch size, per GPU
 MAX_TOKENS=4400                                        # maximum number of tokens in a batch, per GPU
 ROBERTA_SIZE=large                                     # either "base" or "large"
-ROBERTA_PATH="models/roberta.${ROBERTA_SIZE}/model.pt" # pre-trained
-PATIENCE=10                                            # early stopping in number of training epochs
-TOKENS_PER_SAMPLE=512                                      # I think this should be fixed to 512.
-UPDATE_FREQ=4                                          # update parameters every N_i batches, when in epoch i
-NUM_EPOCHS=10                                           # force stop training at specified epoch
-SAVE_INTERVAL=1                                        # save a checkpoint every N epochs
-GPU_IDS=0,1                                            # The GPU ids of your machine. use `nvidia-smi` to check them out.
-WEIGHT_DECAY=0.1                                       # I haven't tune this yet.
-DROP_OUT=0.1                                           # I haven't tune this yet.
-ATTENTION_DROP_OUT=0.1                                 # I haven't tune this yet.
+# ROBERTA_PATH="models/roberta.${ROBERTA_SIZE}/model.pt" # pre-trained
+ROBERTA_PATH=/home/tkm290/repos/erc/checkpoints_20210315_08201615796410/checkpoint_best.pt
+PATIENCE=10            # early stopping in number of training epochs
+TOKENS_PER_SAMPLE=512      # I think this should be fixed to 512.
+UPDATE_FREQ=4          # update parameters every N_i batches, when in epoch i
+NUM_EPOCHS=10           # force stop training at specified epoch
+SAVE_INTERVAL=1        # save a checkpoint every N epochs
+GPU_IDS=0,1            # The GPU ids of your machine. use `nvidia-smi` to check them out.
+WEIGHT_DECAY=0.1       # I haven't tune this yet.
+DROP_OUT=0.1           # I haven't tune this yet.
+ATTENTION_DROP_OUT=0.1 # I haven't tune this yet.

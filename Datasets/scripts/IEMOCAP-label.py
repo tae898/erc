@@ -52,6 +52,7 @@ labels = {SPLIT: {diaid: foo for diaid, foo in labels.items() if diaid in list(u
 for SPLIT in ['train', 'val', 'test']:
     num_utts = len([val_ for key, val in labels[SPLIT].items()
                     for val_ in val])
+                    
     assert num_utts == len(
         [uttid for diaid, list_of_utts in utterance_ordered[SPLIT].items() for uttid in list_of_utts])
 
@@ -116,6 +117,7 @@ labels = {SPLIT: {uttid: bar for diaid, foo in labels[SPLIT].items()
 with open('IEMOCAP/labels.json', 'w') as stream:
     json.dump(labels, stream, indent=4)
 
+foo = []
 for jsonpath in glob(f"IEMOCAP/raw-texts/*/*.json"):
     with open(jsonpath, 'r') as stream:
         text = json.load(stream)
@@ -123,9 +125,13 @@ for jsonpath in glob(f"IEMOCAP/raw-texts/*/*.json"):
     uttid = os.path.basename(jsonpath).split('.json')[0]
     emotion = labels[SPLIT][uttid]
     text['Emotion'] = emotion
+    foo.append(text)
 
     with open(jsonpath, 'w') as stream:
         json.dump(text, stream, indent=4, ensure_ascii=False)
+
+with open('foo.json', 'w') as stream:
+    json.dump(foo, stream, indent=4, ensure_ascii=False)
 
 
 README = f"This dataset has all three modalities!\n"\
