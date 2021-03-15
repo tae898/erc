@@ -125,6 +125,11 @@ for jsonpath in glob(f"IEMOCAP/raw-texts/*/*.json"):
     uttid = os.path.basename(jsonpath).split('.json')[0]
     emotion = labels[SPLIT][uttid]
     text['Emotion'] = emotion
+    text['Utterance'] = text['Utterance'].replace('.  ', '. ')
+    text['Utterance'] = text['Utterance'].replace('!  ', '! ')
+    text['Utterance'] = text['Utterance'].replace('?  ', '? ')
+    text['Utterance'] = text['Utterance'].replace(',  ', ', ')
+
     foo.append(text)
 
     with open(jsonpath, 'w') as stream:
