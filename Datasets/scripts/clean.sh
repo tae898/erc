@@ -122,7 +122,6 @@ if test -f "IEMOCAP_full_release.tar.gz"; then
     mv -f IEMOCAP/raw-texts/train/*/*.json IEMOCAP/raw-texts/train/
     mv -f IEMOCAP/raw-texts/val/*/*.json IEMOCAP/raw-texts/val/
     mv -f IEMOCAP/raw-texts/test/*/*.json IEMOCAP/raw-texts/test/
-
     find IEMOCAP/raw-texts/ -type d -empty -delete
     
     python3 scripts/IEMOCAP-label.py

@@ -21,11 +21,6 @@ for DATASET in ['train', 'val', 'test']:
         SrNo, Utterance, Speaker, Emotion, Sentiment, Dialogue_ID,\
             Utterance_ID, Season, Episode, StartTime, EndTime = row
 
-        Utterance = Utterance.replace('.  ', '. ')
-        Utterance = Utterance.replace('!  ', '! ')
-        Utterance = Utterance.replace('?  ', '? ')
-        Utterance = Utterance.replace(',  ', ', ')
-
         to_dump = {'SrNo': SrNo,
                    'Utterance': Utterance,
                    'Speaker': Speaker,
