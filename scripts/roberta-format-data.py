@@ -10,6 +10,31 @@ DATASET_DIR = "Datasets/"
 DATASETS_SUPPORTED = ['MELD', 'IEMOCAP', 'EmoryNLP', 'DailyDialog']
 
 
+def clean_utterance(utterance):
+    """Clean utterance.
+
+    I define a clean utterance as an utterane without more than one white space
+    between characters. Furthermore, every utterance should end with a proper
+    punctuation (e.g. '.'). If the given utterance does not end with a proper
+    puncutation, period (.) is appended at the end.
+
+    """
+    num_whitespaces = 10
+    last_punctuations = \
+        ['!', '"', '%', '&', "'", ')', '*', ',',
+            '-', '.', '/', ':', ';', '?', ']', '_',
+            '—', '’', '”', '…', '。']
+
+    assert isinstance(utterance, str)
+    utterance = utterance.strip()
+    for i in range(num_whitespaces, 1, -1):
+        utterance = utterance.replace(' '*i, ' ')
+    if utterance[-1] not in last_punctuations:
+        utterance += '.'
+
+    return utterance
+
+
 def get_emotion2num(DATASET):
 
     emotions = {}
@@ -98,6 +123,8 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
         assert len(utterances) == len(emotions)
 
         for idx, (utterance, emotion) in enumerate(zip(utterances, emotions)):
+
+            utterance = clean_utterance(utterance)
             labelnums.append(emotion2num[emotion])
             input1.append(utterance)
 
@@ -105,11 +132,10 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
             start = idx - num_utts + 1
             end = idx
             for i in range(start, end):
-                if i < 0:
-                    history.append(' ')
-                else:
-                    history.append(utterances[i])
+                if i >= 0:
+                    history.append(clean_utterance(utterances[i]))
             history = ' '.join(history)
+
             input0.append(history)
 
     f_input0 = open(os.path.join(DATASET_DIR, DATASET,
@@ -150,6 +176,7 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
         assert len(utterances) == len(emotions)
 
         for utterance, emotion in zip(utterances, emotions):
+            utterance = clean_utterance(utterance)
             samples.append((utterance, emotion2num[emotion]))
 
     f_input0 = open(os.path.join(DATASET_DIR, DATASET,

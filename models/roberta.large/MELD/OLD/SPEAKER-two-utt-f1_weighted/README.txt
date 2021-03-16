@@ -13,3 +13,25 @@ Notice that there are two separation tokens between the two utterances.
 Facebook (the original authors of RoBERTa) did this way so I do this way too.
 
 <s> is always prepended to the entire sequence. It works as a BOS and CLS.
+
+
+```python
+for _ in range(history):
+    utterances.insert(0, '')
+
+for _ in range(history):
+    utterances.pop()
+```
+
+If there is no past utterance available (i.e. the first utterance in a dialogue),
+the past utterance is just ''. It's nothing.
+
+```python
+tokens = roberta.encode(*['Rachel: Hi'])
+tokens.tolist()
+[0, 41415, 35, 12289, 2]
+
+tokens = roberta.encode(*['', 'Rachel: Hi'])
+tokens.tolist()
+[0, 2, 2, 41415, 35, 12289, 2]
+```

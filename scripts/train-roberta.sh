@@ -37,14 +37,16 @@ echo "Training will be done over the SEEDS ${SEEDS}"
 # format data for roberta
 python3 scripts/roberta-format-data.py --DATASET $DATASET --num-utts $NUM_UTTS --speaker-mode $SPEAKER_MODE
 
-if ((NUM_UTT > 1)); then
+if ((NUM_UTTS > 1)); then
     NUM_INPUTS=2
 else
     NUM_INPUTS=1
 fi
+echo "number of inputs: ${NUM_INPUTS}"
 
 # BPE encode for roberta
-for INPUT_ORDER in $(seq 0 $(expr $NUM_INPUTS)); do
+for INPUT_ORDER in $(seq 0 $(expr $NUM_INPUTS - 1)); do
+    echo "input order: ${INPUT_ORDER}"
     for SPLIT in train val test; do
         python -m examples.roberta.multiprocessing_bpe_encoder \
             --encoder-json models/gpt2-bpe/encoder.json \
@@ -57,7 +59,8 @@ for INPUT_ORDER in $(seq 0 $(expr $NUM_INPUTS)); do
 done
 
 # Preprocess data into binary format for roberta
-for INPUT_ORDER in $(seq 0 $(expr $NUM_INPUTS)); do
+for INPUT_ORDER in $(seq 0 $(expr $NUM_INPUTS - 1)); do
+    echo "input order: ${INPUT_ORDER}"
     fairseq-preprocess \
         --only-source \
         --trainpref "Datasets/${DATASET}/roberta/train.input${INPUT_ORDER}.bpe" \

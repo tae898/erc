@@ -110,8 +110,8 @@ def evalute_SPLIT(roberta, DATASET, batch_size, SPLIT):
         batch = list(map(list, zip(*batch)))
 
         batch = collate_tokens(
-            [roberta.encode(*[sentence for sentence in sentences])
-             for sentences in batch], pad_idx=1
+            [roberta.encode(*[sequence for sequence in sequences])
+             for sequences in batch], pad_idx=1
         )
 
         logprobs = roberta.predict(DATASET + '_head', batch)
@@ -139,9 +139,22 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
     if DATASET not in DATASETS_SUPPORTED:
         sys.exit(f"{DATASET} is not supported!")
 
+    if metric.lower() not in ['f1_weighted', 'f1_micro', 'f1_macro',
+                              'cross_entropy_loss']:
+        raise ValueError(f"{metric} not supported!!")
+
+    if metric.lower() == 'cross_entropy_loss':
+        model_paths = glob(os.path.join(checkpoint_dir, 'checkpoint_best.pt'))
+    else:
+        model_paths = glob(os.path.join(checkpoint_dir, '*.pt'))
+        model_paths = [path for path in model_paths if os.path.basename(
+            path) not in ['checkpoint_last.pt', 'checkpoint_best.pt']]
+
     stats = {}
-    for model_path in tqdm(glob(os.path.join(checkpoint_dir, '*.pt'))):
+    for model_path in tqdm(model_paths):
         checkpoint_file = os.path.basename(model_path)
+        print(checkpoint_file)
+
         roberta = RobertaModel.from_pretrained(
             checkpoint_dir,
             checkpoint_file=checkpoint_file,
@@ -162,8 +175,14 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
         del roberta
 
     pprint.PrettyPrinter(indent=4).pprint(stats)
-    stats = {key: val[metric] for key, val in stats.items()}
-    best_model_path = max(stats, key=stats.get)
+
+    if metric != 'cross_entropy_loss':
+        stats = {key: val[metric] for key, val in stats.items()}
+
+    if len(stats) > 1:
+        best_model_path = max(stats, key=stats.get)
+    else:
+        best_model_path = list(stats.keys())[0]
 
     print(f"{best_model_path} has the best {metric} performance on val")
 
@@ -267,8 +286,12 @@ def leaderboard():
                      "the mean values of the 5 random seed runs. I expect the "
                      "other authors have done the same thing or something "
                      "similar, since the numbers are stochastic in nature.\n\n"
-                     "The rows are ordred by the validation performance, not "
-                     "the test performance, because otherwise it's cheating.\n\n")
+                     "Since the distribution of classes is different for every "
+                     "dataset and train / val / tests splits, and also not all "
+                     "datasets have the same performance metric, the optimization "
+                     "is done to minimize the validation cross entropy loss, "
+                     "since its the most generic metric, "
+                     "with backpropagation on training data split.\n\n")
 
     for DATASET in DATASETS_SUPPORTED:
 
@@ -277,7 +300,7 @@ def leaderboard():
         else:
             metric = 'f1_weighted'
 
-        leaderboard[DATASET].sort(key=lambda x: x[-2])
+        leaderboard[DATASET].sort(key=lambda x: x[-1])
         table = leaderboard[DATASET]
         table.insert(0, ["base model", "method", "train", "val", "test"])
 
