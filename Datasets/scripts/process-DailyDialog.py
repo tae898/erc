@@ -4,7 +4,7 @@ import json
 import re
 
 specials_1 = ["!", "%",  ")", ",", ".", ":", ";", "?",
-              "’", "”", "′"]
+              "’", "”", "′", "。"]
 
 specials_2 = ["\"", "#", "(", "@",
               "°", "‘", "“", "′", "’"]
@@ -12,7 +12,6 @@ specials_2 = ["\"", "#", "(", "@",
 
 def clean_utt(utt):
     utt = utt.strip()
-    utt.replace('。', '.')
 
     for special in specials_1:
         utt = utt.replace(' ' + special, special)
