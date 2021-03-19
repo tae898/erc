@@ -14,7 +14,7 @@ else
 fi
 
 METRIC=cross_entropy_loss                              # should be one of f1_weighted, f1_micro, f1_macro, or cross_entropy_loss
-SPEAKER_MODE=title                                      # should be one of title, upper, lower, none
+SPEAKER_MODE=upper                                     # should be one of title, upper, lower, none
 SEEDS=0,1,2,3,4                                        # random seeds
 NUM_UTTS=5                                             # number of utterances in one sequence
 WORKERS=60                                             # number of workers for preprocessing RoBERTa

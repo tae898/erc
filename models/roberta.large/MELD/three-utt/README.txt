@@ -14,7 +14,7 @@ by the separation tokens. The goal is to predict the correct emotion of the seco
 segment, which is the current speaker utterance. If there are no past utterances
 available, then the first segment is just an empty segment.
 
-Speakers are prepended in title (e.g. Joey instead of JOEY). 
+Speakers are NOT prepended / appended 
 
 --------------------------------------------------------------------------------
 
@@ -22,15 +22,15 @@ Here are some examples:
 
 1. Past two utterances are available:
 
-<s>Joey: Hey Chandler, how are you? Chandler: I'm doing good!</s></s>Joey: That's nice to hear!</s>
+<s>Hey Chandler, how are you? I'm doing good!</s></s>That's nice to hear!</s>
 
 2. One past utterance is available:
 
-<s>Chandler: I'm doing good!</s></s>Joey: That's nice to hear!</s>
+<s>I'm doing good!</s></s>That's nice to hear!</s>
 
 3. No past utterances are available:
 
-<s></s></s>Joey: That's nice to hear!</s>
+<s></s></s>That's nice to hear!</s>
 
 --------------------------------------------------------------------------------
 

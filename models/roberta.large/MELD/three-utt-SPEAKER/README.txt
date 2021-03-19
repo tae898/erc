@@ -14,7 +14,16 @@ by the separation tokens. The goal is to predict the correct emotion of the seco
 segment, which is the current speaker utterance. If there are no past utterances
 available, then the first segment is just an empty segment.
 
-Speakers are prepended in title (e.g. Joey instead of JOEY). 
+Speakers are prepended all in caps (e.g. JOEY instead of Joey). There are several
+things to note about having the prepended speaker all in caps.
+
+1. If you see the actual movie scripts / subtitles, it seems that the general
+practice is to prepend an utterance with the speaker name all in caps. In the
+RoBERTa pretraining, if it has seen those data texts, this finetuning might
+take advantage of it.
+
+2. Common names such as Joey and Chandler are actually part of the original
+bpe `encoder.json`.
 
 --------------------------------------------------------------------------------
 
@@ -22,15 +31,15 @@ Here are some examples:
 
 1. Past two utterances are available:
 
-<s>Joey: Hey Chandler, how are you? Chandler: I'm doing good!</s></s>Joey: That's nice to hear!</s>
+<s>JOEY: Hey Chandler, how are you? CHANDLER: I'm doing good!</s></s>JOEY: That's nice to hear!</s>
 
 2. One past utterance is available:
 
-<s>Chandler: I'm doing good!</s></s>Joey: That's nice to hear!</s>
+<s>CHANDLER: I'm doing good!</s></s>JOEY: That's nice to hear!</s>
 
 3. No past utterances are available:
 
-<s></s></s>Joey: That's nice to hear!</s>
+<s></s></s>JOEY: That's nice to hear!</s>
 
 --------------------------------------------------------------------------------
 

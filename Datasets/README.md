@@ -56,7 +56,7 @@ You have to download the original datasets yourselves from the original authors.
 
 Run the shell script by
 
-```console
+```bash
 bash scripts/clean.sh
 ```
 This might take a while ...
