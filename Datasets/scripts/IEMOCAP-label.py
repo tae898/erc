@@ -125,6 +125,9 @@ for jsonpath in glob(f"IEMOCAP/raw-texts/*/*.json"):
     emotion = labels[SPLIT][uttid]
     text['Emotion'] = emotion
 
+    sessid = os.path.basename(jsonpath).split('_')[0].split('M')[0].split('F')[0]
+    text['SessionID'] = sessid
+
     with open(jsonpath, 'w') as stream:
         json.dump(text, stream, indent=4, ensure_ascii=False)
 

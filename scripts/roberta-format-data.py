@@ -38,25 +38,40 @@ def clean_utterance(utterance):
 def get_emotion2num(DATASET):
 
     emotions = {}
-    emotions['MELD'] = ['anger',
-                        'disgust',
-                        'fear',
+    # MELD has 7 classes
+    emotions['MELD'] = ['neutral',
                         'joy',
-                        'neutral',
+                        'surprise',
+                        'anger',
                         'sadness',
-                        'surprise']
+                        'disgust',
+                        'fear']
 
-    emotions['IEMOCAP'] = ['anger',
-                           'disgust',
-                           'excited',
-                           'fear',
+    # IEMOCAP originally has 11 classes but we'll only use 6 of them.
+    emotions['IEMOCAP'] = ['neutral',
                            'frustration',
-                           'happiness',
-                           'neutral',
-                           'other',
                            'sadness',
-                           'surprise',
-                           'undecided']
+                           'anger',
+                           'excited',
+                           'happiness']
+
+    # EmoryNLP has 7 classes
+    emotions['EmoryNLP'] = ['neutral',
+                            'joyful',
+                            'scared',
+                            'mad',
+                            'peaceful',
+                            'powerful',
+                            'sad']
+
+    # DailyDialog has 7 classes
+    emotions['DailyDialog'] = ['neutral',
+                               'happiness',
+                               'surprise',
+                               'sadness',
+                               'anger',
+                               'disgust',
+                               'fear']
 
     emotion2num = {DATASET: {emotion: idx for idx, emotion in enumerate(
         emotions_)} for DATASET, emotions_ in emotions.items()}
@@ -85,12 +100,30 @@ def load_labels_utt_ordered(DATASET):
     return labels, utterance_ordered
 
 
-def get_uttid_speaker_utterance_emotion(labels, SPLIT, json_path,
+def get_uttid_speaker_utterance_emotion(DATASET, labels, SPLIT, json_path,
                                         speaker_mode=None):
     with open(json_path, 'r') as stream:
         text = json.load(stream)
     uttid = os.path.basename(json_path).split('.json')[0]
-    speaker = text['Speaker']
+    if DATASET in ['MELD', 'EmoryNLP']:
+        speaker = text['Speaker']
+    elif DATASET == 'IEMOCAP':
+        sessid = text['SessionID']
+        speaker = text['Speaker']
+        # https: // www.ssa.gov/oact/babynames/decades/century.html
+        speaker = {'Ses01': {'Female': 'Mary', 'Male': 'James'},
+                   'Ses02': {'Female': 'Patricia', 'Male': 'John'},
+                   'Ses03': {'Female': 'Jennifer', 'Male': 'Robert'},
+                   'Ses04': {'Female': 'Linda', 'Male': 'Michael'},
+                   'Ses05': {'Female': 'Elizabeth', 'Male': 'William'}}[sessid][speaker]
+
+    elif DATASET == 'DailyDialog':
+        # random two gender neutral names
+        speaker = {'A': 'Alex',
+                   'B': 'Charlie'}[text['Speaker']]
+    else:
+        raise ValueError(f"{DATASET} not supported!!!!!!")
+
     utterance = text['Utterance']
     emotion = labels[SPLIT][uttid]
 
@@ -115,7 +148,8 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
             DATASET_DIR, DATASET, 'raw-texts', SPLIT, uttid + '.json')
             for uttid in uttids]
         usue = [get_uttid_speaker_utterance_emotion(
-            labels, SPLIT, json_path, speaker_mode) for json_path in json_paths]
+            DATASET, labels, SPLIT, json_path, speaker_mode)
+            for json_path in json_paths]
 
         utterances = [usue_[2] for usue_ in usue]
         emotions = [usue_[3] for usue_ in usue]
@@ -123,9 +157,14 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
         assert len(utterances) == len(emotions)
 
         for idx, (utterance, emotion) in enumerate(zip(utterances, emotions)):
+            try:
+                emotion_num = emotion2num[emotion]
+            except KeyError as e:
+                print(f"Such emotion doesn't exist. {e}")
+                continue
 
+            labelnums.append(emotion_num)
             utterance = clean_utterance(utterance)
-            labelnums.append(emotion2num[emotion])
             input1.append(utterance)
 
             history = []
@@ -146,6 +185,8 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
 
     f_label = open(os.path.join(DATASET_DIR, DATASET,
                                 'roberta', SPLIT + '.label'), 'w')
+
+    assert len(input0) == len(input1) == len(labelnums)
 
     for i0, i1, ln in zip(input0, input1, labelnums):
         f_input0.write(i0 + '\n')
