@@ -16,10 +16,10 @@ fi
 METRIC=cross_entropy_loss                              # should be one of f1_weighted, f1_micro, f1_macro, or cross_entropy_loss
 SPEAKER_MODE=none                                      # should be one of title, upper, lower, none
 SEEDS=0,1,2,3,4                                        # random seeds
-NUM_UTTS=6                                             # number of utterances in one sequence
+NUM_UTTS=4                                             # number of utterances in one sequence
 WORKERS=60                                             # number of workers for preprocessing RoBERTa
 LR=1e-05                                               # Peak LR for polynomial LR scheduler.
-BATCH_SIZE=2                                           # Batch size, per GPU
+BATCH_SIZE=4                                           # Batch size, per GPU
 ROBERTA_SIZE=large                                     # either "base" or "large"
 ROBERTA_PATH="models/roberta.${ROBERTA_SIZE}/model.pt" # pre-trained
 PATIENCE=10                                             # early stopping in number of training epochs

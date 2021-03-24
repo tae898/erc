@@ -29,6 +29,12 @@ The metric is f1_weighted (%)
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
+| roberta.large | one-utt | 72.317 | 54.899 | 54.002 | 
+| roberta.large | two-utt | 71.724 | 56.913 | 57.488 | 
+| roberta.large | four-utt | 72.844 | 59.195 | 61.468 | 
+| roberta.large | three-utt | 74.452 | 59.434 | 61.966 | 
+| roberta.large | five-utt | 73.535 | 60.196 | 62.972 | 
+| **roberta.large** |**six-utt** |**73.682** |**61.035** |**63.045** |
 | CESTa | SOTA |   |   | 67.1 |
 ## EmoryNLP 
 The metric is f1_weighted (%)

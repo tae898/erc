@@ -6,9 +6,11 @@ import json
 import os
 from glob import glob
 import sys
+import nltk
+import torch
+roberta = torch.hub.load('pytorch/fairseq', 'roberta.base')
 DATASET_DIR = "Datasets/"
 DATASETS_SUPPORTED = ['MELD', 'IEMOCAP', 'EmoryNLP', 'DailyDialog']
-
 
 def clean_utterance(utterance):
     """Clean utterance.
@@ -102,25 +104,29 @@ def load_labels_utt_ordered(DATASET):
 
 def get_uttid_speaker_utterance_emotion(DATASET, labels, SPLIT, json_path,
                                         speaker_mode=None):
+        
     with open(json_path, 'r') as stream:
         text = json.load(stream)
     uttid = os.path.basename(json_path).split('.json')[0]
     if DATASET in ['MELD', 'EmoryNLP']:
         speaker = text['Speaker']
     elif DATASET == 'IEMOCAP':
-        sessid = text['SessionID']
-        speaker = text['Speaker']
+        speaker = {'Female': 'Alice', 'Male': 'Bob'}[text['Speaker']]
+        # sessid = text['SessionID']
         # https: // www.ssa.gov/oact/babynames/decades/century.html
-        speaker = {'Ses01': {'Female': 'Mary', 'Male': 'James'},
-                   'Ses02': {'Female': 'Patricia', 'Male': 'John'},
-                   'Ses03': {'Female': 'Jennifer', 'Male': 'Robert'},
-                   'Ses04': {'Female': 'Linda', 'Male': 'Michael'},
-                   'Ses05': {'Female': 'Elizabeth', 'Male': 'William'}}[sessid][speaker]
+        # speaker = {'Ses01': {'Female': 'Mary', 'Male': 'James'},
+        #            'Ses02': {'Female': 'Patricia', 'Male': 'John'},
+        #            'Ses03': {'Female': 'Jennifer', 'Male': 'Robert'},
+        #            'Ses04': {'Female': 'Linda', 'Male': 'Michael'},
+        #            'Ses05': {'Female': 'Elizabeth', 'Male': 'William'}}[sessid][speaker]
 
     elif DATASET == 'DailyDialog':
+        speaker = {'A': 'Alice', 'B': 'Bob'}[text['Speaker']]
+        # assert text['Speaker'] in ['A', 'B']
+        # speaker = 'Person' + ' ' + text['Speaker']
         # random two gender neutral names
-        speaker = {'A': 'Alex',
-                   'B': 'Charlie'}[text['Speaker']]
+        # speaker = {'A': 'Alex',
+        #            'B': 'Charlie'}[text['Speaker']]
     else:
         raise ValueError(f"{DATASET} not supported!!!!!!")
 
@@ -134,7 +140,9 @@ def get_uttid_speaker_utterance_emotion(DATASET, labels, SPLIT, json_path,
 
 
 def write_input_label(DATASET, SPLIT, labels, num_utts,
-                      utterance_ordered, emotion2num, speaker_mode=None):
+                      utterance_ordered, emotion2num, speaker_mode=None,
+                      tokens_per_sample=512):
+    NUM_TOTAL_TRUNCATIONS = 0
     diaids = list(utterance_ordered[SPLIT].keys())
     assert num_utts > 0
 
@@ -160,12 +168,15 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
             try:
                 emotion_num = emotion2num[emotion]
             except KeyError as e:
-                print(f"Such emotion doesn't exist. {e}")
+                # print(f"Such emotion doesn't exist. {e}")
                 continue
 
-            labelnums.append(emotion_num)
             utterance = clean_utterance(utterance)
-            input1.append(utterance)
+            num_tokens1 = len(roberta.encode(utterance).tolist())
+
+            # -2 is for <CLS> and <SEP>
+            if num_tokens1 > tokens_per_sample - 2:
+                continue
 
             history = []
             start = idx - num_utts + 1
@@ -173,9 +184,29 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
             for i in range(start, end):
                 if i >= 0:
                     history.append(clean_utterance(utterances[i]))
+
+            is_truncated = 0
+            while True:
+                num_tokens0 = len(roberta.encode(' '.join(history)).tolist())
+                # -4 is for <CLS>, <SEP><SEP>, and <SEP>
+                if num_tokens0 + num_tokens1 <= tokens_per_sample - 4:
+                    break
+                else:
+                    # remove the oldest history utterance
+                    history.pop(0)
+                    is_truncated =1
+
+            NUM_TOTAL_TRUNCATIONS += is_truncated
+
             history = ' '.join(history)
 
             input0.append(history)
+            input1.append(utterance)
+            labelnums.append(emotion_num)
+
+
+
+    assert len(input0) == len(input1) == len(labelnums)
 
     f_input0 = open(os.path.join(DATASET_DIR, DATASET,
                                  'roberta', SPLIT + f'.input0'), 'w')
@@ -186,8 +217,6 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
     f_label = open(os.path.join(DATASET_DIR, DATASET,
                                 'roberta', SPLIT + '.label'), 'w')
 
-    assert len(input0) == len(input1) == len(labelnums)
-
     for i0, i1, ln in zip(input0, input1, labelnums):
         f_input0.write(i0 + '\n')
         f_input1.write(i1 + '\n')
@@ -197,6 +226,7 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
     f_input1.close()
     f_label.close()
 
+    print(f"{DATASET}, {SPLIT} has {NUM_TOTAL_TRUNCATIONS} truncations")
 
 def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
                              emotion2num, speaker_mode=None):
@@ -209,7 +239,8 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
             DATASET_DIR, DATASET, 'raw-texts', SPLIT, uttid + '.json')
             for uttid in uttids]
         usue = [get_uttid_speaker_utterance_emotion(
-            labels, SPLIT, json_path, speaker_mode) for json_path in json_paths]
+            DATASET, labels, SPLIT, json_path, speaker_mode) for json_path in json_paths]
+
 
         utterances = [usue_[2] for usue_ in usue]
         emotions = [usue_[3] for usue_ in usue]
@@ -218,6 +249,10 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
 
         for utterance, emotion in zip(utterances, emotions):
             utterance = clean_utterance(utterance)
+            try:
+                _ = emotion2num[emotion]
+            except KeyError:
+                continue
             samples.append((utterance, emotion2num[emotion]))
 
     f_input0 = open(os.path.join(DATASET_DIR, DATASET,
@@ -233,7 +268,8 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
     f_label.close()
 
 
-def format_classification(DATASET, num_utts=1, speaker_mode=None):
+def format_classification(DATASET, num_utts=1, speaker_mode=None,
+                          tokens_per_sample=512):
     assert num_utts > 0
 
     if speaker_mode == 'none':
@@ -247,7 +283,7 @@ def format_classification(DATASET, num_utts=1, speaker_mode=None):
                                      emotion2num, speaker_mode)
         else:
             write_input_label(DATASET, SPLIT, labels, num_utts,
-                              utterance_ordered, emotion2num, speaker_mode)
+                              utterance_ordered, emotion2num, speaker_mode, tokens_per_sample)
 
 
 if __name__ == "__main__":
@@ -257,6 +293,8 @@ if __name__ == "__main__":
                         help='e.g. 1, 2, 3, etc.')
     parser.add_argument('--speaker-mode', default=None,
                         help='e.g. title, upper, lower, none')
+    parser.add_argument('--tokens-per-sample', default=512, type=int,
+                        help='e.g. 512, 1024, etc.')
 
     args = parser.parse_args()
     args = vars(args)
