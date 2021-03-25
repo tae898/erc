@@ -12,6 +12,7 @@ roberta = torch.hub.load('pytorch/fairseq', 'roberta.base')
 DATASET_DIR = "Datasets/"
 DATASETS_SUPPORTED = ['MELD', 'IEMOCAP', 'EmoryNLP', 'DailyDialog']
 
+
 def clean_utterance(utterance):
     """Clean utterance.
 
@@ -104,7 +105,7 @@ def load_labels_utt_ordered(DATASET):
 
 def get_uttid_speaker_utterance_emotion(DATASET, labels, SPLIT, json_path,
                                         speaker_mode=None):
-        
+
     with open(json_path, 'r') as stream:
         text = json.load(stream)
     uttid = os.path.basename(json_path).split('.json')[0]
@@ -143,14 +144,17 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
                       utterance_ordered, emotion2num, speaker_mode=None,
                       tokens_per_sample=512):
     NUM_TOTAL_TRUNCATIONS = 0
+    max_tokens_input0 = 0
+    max_tokens_input1 = 0
+
     diaids = list(utterance_ordered[SPLIT].keys())
-    assert num_utts > 0
+    assert num_utts > 1
 
     input1 = []
     input0 = []
     labelnums = []
 
-    for diaid in diaids:
+    for diaid in tqdm(diaids):
         uttids = utterance_ordered[SPLIT][diaid]
         json_paths = [os.path.join(
             DATASET_DIR, DATASET, 'raw-texts', SPLIT, uttid + '.json')
@@ -165,18 +169,18 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
         assert len(utterances) == len(emotions)
 
         for idx, (utterance, emotion) in enumerate(zip(utterances, emotions)):
-            try:
-                emotion_num = emotion2num[emotion]
-            except KeyError as e:
-                # print(f"Such emotion doesn't exist. {e}")
+            if emotion not in list(emotion2num.keys()):
                 continue
 
             utterance = clean_utterance(utterance)
             num_tokens1 = len(roberta.encode(utterance).tolist())
 
             # -2 is for <CLS> and <SEP>
-            if num_tokens1 > tokens_per_sample - 2:
-                continue
+            JUST_IN_CASE = 2
+            if num_tokens1 > tokens_per_sample - 2 - JUST_IN_CASE:
+                raise ValueError(f"{utterance} is too long!!")
+
+            max_tokens_input1 = max(max_tokens_input1, num_tokens1)
 
             history = []
             start = idx - num_utts + 1
@@ -189,12 +193,14 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
             while True:
                 num_tokens0 = len(roberta.encode(' '.join(history)).tolist())
                 # -4 is for <CLS>, <SEP><SEP>, and <SEP>
-                if num_tokens0 + num_tokens1 <= tokens_per_sample - 4:
+                if num_tokens0 + num_tokens1 <= tokens_per_sample - 4 - JUST_IN_CASE:
                     break
                 else:
                     # remove the oldest history utterance
                     history.pop(0)
-                    is_truncated =1
+                    is_truncated = 1
+
+            max_tokens_input0 = max(max_tokens_input0, num_tokens0)
 
             NUM_TOTAL_TRUNCATIONS += is_truncated
 
@@ -202,9 +208,7 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
 
             input0.append(history)
             input1.append(utterance)
-            labelnums.append(emotion_num)
-
-
+            labelnums.append(emotion2num[emotion])
 
     assert len(input0) == len(input1) == len(labelnums)
 
@@ -228,12 +232,16 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
 
     print(f"{DATASET}, {SPLIT} has {NUM_TOTAL_TRUNCATIONS} truncations")
 
+    return max_tokens_input0, max_tokens_input1
+
+
 def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
                              emotion2num, speaker_mode=None):
+    max_tokens_input0 = 0
     samples = []
     diaids = list(utterance_ordered[SPLIT].keys())
 
-    for diaid in diaids:
+    for diaid in tqdm(diaids):
         uttids = utterance_ordered[SPLIT][diaid]
         json_paths = [os.path.join(
             DATASET_DIR, DATASET, 'raw-texts', SPLIT, uttid + '.json')
@@ -241,18 +249,19 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
         usue = [get_uttid_speaker_utterance_emotion(
             DATASET, labels, SPLIT, json_path, speaker_mode) for json_path in json_paths]
 
-
         utterances = [usue_[2] for usue_ in usue]
         emotions = [usue_[3] for usue_ in usue]
 
         assert len(utterances) == len(emotions)
 
         for utterance, emotion in zip(utterances, emotions):
-            utterance = clean_utterance(utterance)
-            try:
-                _ = emotion2num[emotion]
-            except KeyError:
+
+            if emotion not in list(emotion2num.keys()):
                 continue
+
+            utterance = clean_utterance(utterance)
+            num_tokens0 = len(roberta.encode(utterance).tolist())
+            max_tokens_input0 = max(max_tokens_input0, num_tokens0)
             samples.append((utterance, emotion2num[emotion]))
 
     f_input0 = open(os.path.join(DATASET_DIR, DATASET,
@@ -267,6 +276,8 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
     f_input0.close()
     f_label.close()
 
+    return max_tokens_input0
+
 
 def format_classification(DATASET, num_utts=1, speaker_mode=None,
                           tokens_per_sample=512):
@@ -279,11 +290,19 @@ def format_classification(DATASET, num_utts=1, speaker_mode=None,
 
     for SPLIT in tqdm(['train', 'val', 'test']):
         if num_utts == 1:
-            write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
-                                     emotion2num, speaker_mode)
+            max_tokens_input0 = write_input_label_simple(
+                DATASET, SPLIT, labels, utterance_ordered,
+                emotion2num, speaker_mode)
+            max_tokens_input1 = None
         else:
-            write_input_label(DATASET, SPLIT, labels, num_utts,
-                              utterance_ordered, emotion2num, speaker_mode, tokens_per_sample)
+            max_tokens_input0, max_tokens_input1 = write_input_label(
+                DATASET, SPLIT, labels, num_utts,
+                utterance_ordered, emotion2num, speaker_mode, tokens_per_sample)
+
+        print(f"{DATASET}, {SPLIT}, input0 has max tokens of {max_tokens_input0}")
+
+        if max_tokens_input1 is not None:
+            print(f"{DATASET}, {SPLIT}, input1 has max tokens of {max_tokens_input1}")
 
 
 if __name__ == "__main__":

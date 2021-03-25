@@ -33,8 +33,10 @@ The metric is f1_weighted (%)
 | roberta.large | two-utt | 71.724 | 56.913 | 57.488 | 
 | roberta.large | four-utt | 72.844 | 59.195 | 61.468 | 
 | roberta.large | three-utt | 74.452 | 59.434 | 61.966 | 
+| roberta.large | seven-utt | 73.767 | 61.824 | 62.578 | 
 | roberta.large | five-utt | 73.535 | 60.196 | 62.972 | 
-| **roberta.large** |**six-utt** |**73.682** |**61.035** |**63.045** |
+| roberta.large | six-utt | 73.682 | 61.035 | 63.045 | 
+| **roberta.large** |**eight-utt** |**76.076** |**61.909** |**64.342** |
 | CESTa | SOTA |   |   | 67.1 |
 ## EmoryNLP 
 The metric is f1_weighted (%)
