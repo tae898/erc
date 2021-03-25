@@ -11,17 +11,15 @@ The metric is f1_weighted (%)
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | roberta.large | one-utt | 76.691 | 62.604 | 63.978 | 
 | roberta.large | one-utt-SPEAKER | 74.727 | 62.168 | 64.546 | 
-| roberta.large | one-utt-Speaker | 75.723 | 62.306 | 64.636 | 
 | roberta.large | five-utt | 75.217 | 63.467 | 64.753 | 
+| roberta.large | eight-utt | 75.556 | 63.964 | 64.774 | 
 | roberta.large | three-utt | 78.206 | 63.613 | 64.844 | 
 | roberta.large | two-utt | 79.01 | 63.806 | 65.034 | 
-| roberta.large | two-utt-Speaker | 78.747 | 63.807 | 65.166 | 
 | roberta.large | four-utt | 79.499 | 63.847 | 65.242 | 
+| roberta.large | six-utt | 77.312 | 64.862 | 65.363 | 
+| roberta.large | seven-utt | 75.592 | 64.159 | 65.409 | 
 | roberta.large | five-utt-SPEAKER | 77.048 | 64.606 | 65.458 | 
 | roberta.large | two-utt-SPEAKER | 78.852 | 63.909 | 65.472 | 
-| roberta.large | five-utt-Speaker | 78.211 | 64.444 | 65.706 | 
-| roberta.large | four-utt-Speaker | 77.216 | 64.384 | 65.822 | 
-| roberta.large | three-utt-Speaker | 76.811 | 64.562 | 65.998 | 
 | roberta.large | four-utt-SPEAKER | 78.215 | 64.014 | 66.061 | 
 | **roberta.large** |**three-utt-SPEAKER** |**76.488** |**64.138** |**66.115** |
 | COSMIC | SOTA |   |   | 65.21 |
@@ -29,13 +27,17 @@ The metric is f1_weighted (%)
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
+| roberta.large | one-utt-SPEAKER | 72.516 | 54.961 | 53.412 | 
 | roberta.large | one-utt | 72.317 | 54.899 | 54.002 | 
+| roberta.large | two-utt-SPEAKER | 72.873 | 58.523 | 57.154 | 
 | roberta.large | two-utt | 71.724 | 56.913 | 57.488 | 
 | roberta.large | four-utt | 72.844 | 59.195 | 61.468 | 
 | roberta.large | three-utt | 74.452 | 59.434 | 61.966 | 
+| roberta.large | nine-utt | 74.224 | 62.085 | 62.311 | 
 | roberta.large | seven-utt | 73.767 | 61.824 | 62.578 | 
 | roberta.large | five-utt | 73.535 | 60.196 | 62.972 | 
 | roberta.large | six-utt | 73.682 | 61.035 | 63.045 | 
+| roberta.large | ten-utt | 75.523 | 61.903 | 63.178 | 
 | **roberta.large** |**eight-utt** |**76.076** |**61.909** |**64.342** |
 | CESTa | SOTA |   |   | 67.1 |
 ## EmoryNLP 
