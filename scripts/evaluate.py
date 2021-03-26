@@ -49,19 +49,19 @@ def make_markdown_table(array):
         markdown += "-------------- | "
     markdown += "\n"
 
-    for entry in array[1:-1]:
+    for entry in array[1:]:
         markdown += "| "
         for e in entry:
             to_add = str(e) + " | "
             markdown += to_add
         markdown += "\n"
 
-    if len(array) > 1:
-        markdown += "| "
-        for e in array[-1]:
-            to_add = "**" + str(e) + "**" + " |"
-            markdown += to_add
-        markdown += "\n"
+    # if len(array) > 1:
+    #     markdown += "| "
+    #     for e in array[-1]:
+    #         to_add = "**" + str(e) + "**" + " |"
+    #         markdown += to_add
+    #     markdown += "\n"
 
     return markdown
 
@@ -300,7 +300,7 @@ def leaderboard():
         else:
             metric = 'f1_weighted'
 
-        leaderboard[DATASET].sort(key=lambda x: x[-1])
+        leaderboard[DATASET].sort(key=lambda x: x[1])
         table = leaderboard[DATASET]
         table.insert(0, ["base model", "method", "train", "val", "test"])
 
