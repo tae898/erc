@@ -35,6 +35,19 @@ def clean_utterance(utterance):
     if utterance[-1] not in last_punctuations:
         utterance += '.'
 
+    specials_1 = ["!", "%",  ")", ",", ".", ":", ";", "?",
+                  "’", "”", "′", "。"]
+
+    specials_2 = ["#", "(", "@", "‘", "“"]
+
+    utterance = utterance.strip()
+
+    for special in specials_1:
+        utterance = utterance.replace(' ' + special, special)
+
+    for special in specials_2:
+        utterance = utterance.replace(special + ' ', special)
+
     return utterance
 
 
@@ -142,7 +155,7 @@ def get_uttid_speaker_utterance_emotion(DATASET, labels, SPLIT, json_path,
 
 def write_input_label(DATASET, SPLIT, labels, num_utts,
                       utterance_ordered, emotion2num, speaker_mode=None,
-                      tokens_per_sample=512):
+                      tokens_per_sample=512, clean_utterances=True):
     NUM_TOTAL_TRUNCATIONS = 0
     max_tokens_input0 = 0
     max_tokens_input1 = 0
@@ -172,7 +185,9 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
             if emotion not in list(emotion2num.keys()):
                 continue
 
-            utterance = clean_utterance(utterance)
+            if clean_utterances:
+                utterance = clean_utterance(utterance)
+
             num_tokens1 = len(roberta.encode(utterance).tolist())
 
             # -2 is for <CLS> and <SEP>
@@ -187,7 +202,10 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
             end = idx
             for i in range(start, end):
                 if i >= 0:
-                    history.append(clean_utterance(utterances[i]))
+                    if clean_utterances:
+                        history.append(clean_utterance(utterances[i]))
+                    else:
+                        history.append(utterances[i])
 
             is_truncated = 0
             while True:
@@ -236,7 +254,8 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
 
 
 def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
-                             emotion2num, speaker_mode=None):
+                             emotion2num, speaker_mode=None,
+                             clean_utterances=True):
     max_tokens_input0 = 0
     samples = []
     diaids = list(utterance_ordered[SPLIT].keys())
@@ -259,7 +278,9 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
             if emotion not in list(emotion2num.keys()):
                 continue
 
-            utterance = clean_utterance(utterance)
+            if clean_utterances:
+                utterance = clean_utterance(utterance)
+
             num_tokens0 = len(roberta.encode(utterance).tolist())
             max_tokens_input0 = max(max_tokens_input0, num_tokens0)
             samples.append((utterance, emotion2num[emotion]))
@@ -280,7 +301,7 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
 
 
 def format_classification(DATASET, num_utts=1, speaker_mode=None,
-                          tokens_per_sample=512):
+                          tokens_per_sample=512, clean_utterances=True):
     assert num_utts > 0
 
     if speaker_mode == 'none':
@@ -292,12 +313,13 @@ def format_classification(DATASET, num_utts=1, speaker_mode=None,
         if num_utts == 1:
             max_tokens_input0 = write_input_label_simple(
                 DATASET, SPLIT, labels, utterance_ordered,
-                emotion2num, speaker_mode)
+                emotion2num, speaker_mode, clean_utterances)
             max_tokens_input1 = None
         else:
             max_tokens_input0, max_tokens_input1 = write_input_label(
                 DATASET, SPLIT, labels, num_utts,
-                utterance_ordered, emotion2num, speaker_mode, tokens_per_sample)
+                utterance_ordered, emotion2num, speaker_mode, tokens_per_sample,
+                clean_utterances)
 
         print(f"{DATASET}, {SPLIT}, input0 has max tokens of {max_tokens_input0}")
 
@@ -314,9 +336,15 @@ if __name__ == "__main__":
                         help='e.g. title, upper, lower, none')
     parser.add_argument('--tokens-per-sample', default=512, type=int,
                         help='e.g. 512, 1024, etc.')
+    parser.add_argument('--clean-utterances', help="clean utterances or not.")
 
     args = parser.parse_args()
     args = vars(args)
+
+    if args['clean_utterances'] == 'true':
+        args['clean_utterances'] = True
+    else:
+        args['clean_utterances'] = False
 
     print(f"arguments given to {__file__}: {args}")
 

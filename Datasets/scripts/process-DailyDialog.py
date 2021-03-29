@@ -3,23 +3,23 @@ import os
 import json
 import re
 
-specials_1 = ["!", "%",  ")", ",", ".", ":", ";", "?",
-              "’", "”", "′", "。"]
+# specials_1 = ["!", "%",  ")", ",", ".", ":", ";", "?",
+#               "’", "”", "′", "。"]
 
-specials_2 = ["\"", "#", "(", "@",
-              "°", "‘", "“", "′", "’"]
+# specials_2 = ["\"", "#", "(", "@",
+#               "°", "‘", "“", "′", "’"]
 
 
-def clean_utt(utt):
-    utt = utt.strip()
+# def clean_utt(utt):
+#     utt = utt.strip()
 
-    for special in specials_1:
-        utt = utt.replace(' ' + special, special)
+#     for special in specials_1:
+#         utt = utt.replace(' ' + special, special)
 
-    for special in specials_2:
-        utt = utt.replace(special + ' ', special)
+#     for special in specials_2:
+#         utt = utt.replace(special + ' ', special)
 
-    return utt
+#     return utt
 
 
 def load_json(path):
@@ -101,7 +101,7 @@ for SPLIT in ['train', 'val', 'test']:
                 speaker = 'A'
             else:
                 speaker = 'B'
-            utt = clean_utt(utt)
+            # utt = clean_utt(utt)
             uttid = 'utt_' + str(uttcount).zfill(6)
             with open(f"DailyDialog/raw-texts/{SPLIT}/{uttid}.json", 'w') as stream:
                 json.dump({'Utterance': utt, 'Act': ac, 'Speaker': speaker,
@@ -124,8 +124,6 @@ README = \
     f"There are no speaker label. I assume that the two speakers are taking turns.\n"\
     f"That is, every utterance spoken by speaker A is followed by another utterance\n"\
     f"followed by speaker B.\n\n"\
-    f"This data has too many redundant white spaces before and after some special characters\n"\
-    f", such as {specials_1} and {specials_2}. Many of them were removed.\n"\
     f"This README is written by Taewoon Kim (https://tae898.github.io/)"
 
 with open(f"./DailyDialog/README.txt", 'w') as stream:
