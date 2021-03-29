@@ -80,9 +80,9 @@ def get_emotion2num(DATASET):
                             'powerful',
                             'sad']
 
-    # DailyDialog has 7 classes
-    emotions['DailyDialog'] = ['neutral',
-                               'happiness',
+    # DailyDialog originally has 7 classes, but we'll use 6 of them
+    # we remove neutral 
+    emotions['DailyDialog'] = ['happiness',
                                'surprise',
                                'sadness',
                                'anger',

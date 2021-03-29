@@ -7,7 +7,7 @@ elif [ "${DATASET}" = IEMOCAP ]; then
 elif [ "${DATASET}" = EmoryNLP ]; then
     NUM_CLASSES=7
 elif [ "${DATASET}" = DailyDialog ]; then
-    NUM_CLASSES=7
+    NUM_CLASSES=6
 else
     echo "${DATASET} is not supported"
     exit 1
@@ -23,7 +23,7 @@ LR=1e-05                                               # Peak LR for polynomial 
 BATCH_SIZE=8                                           # Batch size, per GPU
 ROBERTA_SIZE=large                                     # either "base" or "large"
 ROBERTA_PATH="models/roberta.${ROBERTA_SIZE}/model.pt" # pre-trained
-PATIENCE=5                                            # early stopping in number of training epochs
+PATIENCE=3                                            # early stopping in number of training epochs
 TOKENS_PER_SAMPLE=512                                  # I think this should be fixed to 512.
 UPDATE_FREQ=4                                          # update parameters every N_i batches, when in epoch i
 NUM_EPOCHS=30                                          # force stop training at specified epoch
