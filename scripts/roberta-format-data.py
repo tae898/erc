@@ -22,18 +22,7 @@ def clean_utterance(utterance):
     puncutation, period (.) is appended at the end.
 
     """
-    num_whitespaces = 10
-    last_punctuations = \
-        ['!', '"', '%', '&', "'", ')', '*', ',',
-            '-', '.', '/', ':', ';', '?', ']', '_',
-            '—', '’', '”', '…', '。']
-
     assert isinstance(utterance, str)
-    utterance = utterance.strip()
-    for i in range(num_whitespaces, 1, -1):
-        utterance = utterance.replace(' '*i, ' ')
-    if utterance[-1] not in last_punctuations:
-        utterance += '.'
 
     specials_1 = ["!", "%",  ")", ",", ".", ":", ";", "?",
                   "’", "”", "′", "。"]
@@ -48,6 +37,17 @@ def clean_utterance(utterance):
 
     for special in specials_2:
         utterance = utterance.replace(special + ' ', special)
+
+    num_whitespaces = 10
+    last_punctuations = \
+        ['!', '"', '%', '&', "'", ')', '*', ',',
+            '-', '.', '/', ':', ';', '?', ']', '_',
+            '—', '’', '”', '…', '。']
+    utterance = utterance.strip()
+    for i in range(num_whitespaces, 1, -1):
+        utterance = utterance.replace(' '*i, ' ')
+    if utterance[-1] not in last_punctuations:
+        utterance += '.'
 
     return utterance
 
