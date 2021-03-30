@@ -38,7 +38,8 @@ def clean_utterance(utterance):
     specials_1 = ["!", "%",  ")", ",", ".", ":", ";", "?",
                   "’", "”", "′", "。"]
 
-    specials_2 = ["#", "(", "@", "‘", "“"]
+    specials_2 = ["\"", "#", "(", "@",
+                  "°", "‘", "“", "′", "’"]
 
     utterance = utterance.strip()
 
@@ -81,7 +82,7 @@ def get_emotion2num(DATASET):
                             'sad']
 
     # DailyDialog originally has 7 classes, but we'll use 6 of them
-    # we remove neutral 
+    # we remove neutral
     emotions['DailyDialog'] = ['happiness',
                                'surprise',
                                'sadness',
