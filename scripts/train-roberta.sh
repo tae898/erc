@@ -38,7 +38,7 @@ echo "Training will be done over the SEEDS ${SEEDS}"
 
 # format data for roberta
 python3 scripts/roberta-format-data.py --DATASET $DATASET --num-utts $NUM_UTTS \
-    --speaker-mode $SPEAKER_MODE --tokens-per-sample $TOKENS_PER_SAMPLE --clean-utterances $CLEAN_UTTERANCES
+    --speaker-mode $SPEAKER_MODE --tokens-per-sample $TOKENS_PER_SAMPLE
 
 if ((NUM_UTTS == 1)); then
     NUM_INPUTS=1
