@@ -28,13 +28,13 @@ def add_markdown_sota(sota_values):
 
 def make_markdown_table(array):
     """ Input: Python list with rows of table as lists
-               First element as header. 
-        Output: String to put into a .md file 
+               First element as header.
+        Output: String to put into a .md file
 
-    Ex Input: 
+    Ex Input:
         [["Name", "Age", "Height"],
          ["Jake", 20, 5'10],
-         ["Mary", 21, 5'7]] 
+         ["Mary", 21, 5'7]]
     """
 
     markdown = "\n" + "| "
@@ -66,8 +66,78 @@ def make_markdown_table(array):
     return markdown
 
 
-def evalute_SPLIT(roberta, DATASET, batch_size, SPLIT):
+def list_duplicates_of(list_of_items):
+    groups = []
+    groups.append(0)
 
+    for idx, (prev, next) in enumerate(zip(list_of_items[:-1], list_of_items[1:])):
+        if prev != next:
+            groups.append(idx+1)
+    groups.append(len(list_of_items))
+    
+    groups = [[k for k in range(i, j)] for i, j in zip(groups[:-1], groups[1:])]
+
+
+    return groups
+
+def get_scores_all(X, Y, y_true, y_pred, cross_entropy_loss_all, probs_all,
+                   num_utts, score_pooling):
+
+    scores_all = {}
+
+    if num_utts == -1:
+        X_1_unrolled = [bar for foo in X[1] for bar in foo]
+        assert len(X_1_unrolled) == len(y_true) == len(probs_all)
+
+        groups = list_duplicates_of(X_1_unrolled)
+
+        y_true_pooled = []
+        y_pred_pooled = []
+        probs_all_pooled = []
+        cross_entropy_loss_all_pooled = []
+
+        for group in groups:
+            assert len(set([y_true[idx] for idx in group])) == 1
+            probs = [probs_all[idx] for idx in group]
+
+            if score_pooling == 'max':
+                idx = np.argmax(np.max(np.array(probs), axis=1))
+                idx = group[idx]
+                y_true_pooled.append(y_true[idx])
+                y_pred_pooled.append(y_pred[idx])
+                probs_all_pooled.append(probs_all[idx])
+                cross_entropy_loss_all_pooled.append(
+                    cross_entropy_loss_all[idx])
+            else:
+                prob = np.mean(np.array(probs), axis=0)
+                y_true_pooled.append(int(y_true[group[0]]))
+                y_pred_pooled.append(int(np.argmax(prob)))
+                probs_all_pooled.append(prob)
+                cross_entropy_loss_all_pooled.append(
+                    np.mean([cross_entropy_loss_all[idx] for idx in group]))
+
+        scores_all['f1_weighted'] = f1_score(
+            y_true_pooled, y_pred_pooled, average='weighted')
+        scores_all['f1_micro'] = f1_score(
+            y_true_pooled, y_pred_pooled, average='micro')
+        scores_all['f1_macro'] = f1_score(
+            y_true_pooled, y_pred_pooled, average='macro')
+        scores_all['cross_entropy_loss'] = np.mean(
+            cross_entropy_loss_all_pooled)
+
+    else:
+        scores_all['f1_weighted'] = f1_score(
+            y_true, y_pred, average='weighted')
+        scores_all['f1_micro'] = f1_score(y_true, y_pred, average='micro')
+        scores_all['f1_macro'] = f1_score(y_true, y_pred, average='macro')
+        scores_all['cross_entropy_loss'] = np.mean(cross_entropy_loss_all)
+
+    scores_all = {key: float(val) for key, val in scores_all.items()}
+
+    return scores_all
+
+
+def evalute_SPLIT(roberta, DATASET, batch_size, num_utts, score_pooling, SPLIT):
     def label_fn(label):
         return roberta.task.label_dictionary.string(
             [label + roberta.task.label_dictionary.nspecial])
@@ -105,6 +175,8 @@ def evalute_SPLIT(roberta, DATASET, batch_size, SPLIT):
     for i in range(num_inputs):
         assert len(X[i]) == len(Y)
 
+    cross_entropy_loss_all = []
+    probs_all = []
     for idx in tqdm(range(len(Y))):
         batch = [X[i][idx] for i in range(num_inputs)]
         batch = list(map(list, zip(*batch)))
@@ -115,27 +187,36 @@ def evalute_SPLIT(roberta, DATASET, batch_size, SPLIT):
         )
 
         logprobs = roberta.predict(DATASET + '_head', batch)
+        probs = np.exp(logprobs.detach().cpu().numpy())
         pred = logprobs.argmax(dim=1)
         label = Y[idx]
+
+        assert len(logprobs) == len(label) == len(probs)
+        for lp, l, p in zip(logprobs, label, probs):
+            cel = -lp[int(l)]
+            cross_entropy_loss_all.append(cel.detach().cpu().numpy())
+            probs_all.append(p)
 
         assert len(pred) == len(label)
         for p, l in zip(pred, label):
             y_true.append(l)
             y_pred.append(label_fn(p))
 
-    assert original_length == len(y_true) == len(y_pred), \
-        f"{original_length}, {len(y_true)}, {len(y_pred)}"
+    assert original_length == len(y_true) == len(y_pred) == \
+        len(cross_entropy_loss_all) == len(probs_all), \
+        f"{original_length}, {len(y_true)}, {len(y_pred)}, " \
+        f"{len(cross_entropy_loss_all)}, {len(probs_all)}"
 
-    scores_all = {}
-    scores_all['f1_weighted'] = f1_score(y_true, y_pred, average='weighted')
-    scores_all['f1_micro'] = f1_score(y_true, y_pred, average='micro')
-    scores_all['f1_macro'] = f1_score(y_true, y_pred, average='macro')
+    print(f"cross entropy loss mean: {np.mean(cross_entropy_loss_all)}")
+
+    scores_all = get_scores_all(X, Y, y_true, y_pred, cross_entropy_loss_all,
+                                probs_all, num_utts, score_pooling)
 
     return scores_all
 
 
 def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
-                   batch_size, use_cuda, **kwargs):
+                   batch_size, use_cuda, num_utts, score_pooling, **kwargs):
     if DATASET not in DATASETS_SUPPORTED:
         sys.exit(f"{DATASET} is not supported!")
 
@@ -143,7 +224,7 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
                               'cross_entropy_loss']:
         raise ValueError(f"{metric} not supported!!")
 
-    if metric.lower() == 'cross_entropy_loss':
+    if metric.lower() == 'cross_entropy_loss' and num_utts != -1:
         model_paths = glob(os.path.join(checkpoint_dir, 'checkpoint_best.pt'))
     else:
         model_paths = glob(os.path.join(checkpoint_dir, '*.pt'))
@@ -167,7 +248,7 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
         SPLIT = 'val'
         print(f"evaluating {DATASET}, {model_path}, {SPLIT} ...")
         scores = evalute_SPLIT(roberta, DATASET,
-                               batch_size, SPLIT=SPLIT)
+                               batch_size, num_utts, score_pooling, SPLIT=SPLIT)
         print(model_path)
         pprint.PrettyPrinter(indent=4).pprint(scores)
         stats[model_path] = scores
@@ -176,13 +257,20 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
 
     pprint.PrettyPrinter(indent=4).pprint(stats)
 
-    if metric != 'cross_entropy_loss':
-        stats = {key: val[metric] for key, val in stats.items()}
+    # if metric != 'cross_entropy_loss':
+    #     stats = {key: val[metric] for key, val in stats.items()}
 
-    if len(stats) > 1:
-        best_model_path = max(stats, key=stats.get)
+    stats = {key: val[metric] for key, val in stats.items()}
+
+    if metric.lower() == 'cross_entropy_loss':
+        best_model_path = min(stats, key=stats.get)
     else:
-        best_model_path = list(stats.keys())[0]
+        best_model_path = max(stats, key=stats.get)
+
+    # if len(stats) > 1:
+    #     best_model_path = max(stats, key=stats.get)
+    # else:
+    #     best_model_path = list(stats.keys())[0]
 
     print(f"{best_model_path} has the best {metric} performance on val")
 
@@ -201,7 +289,7 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
     for SPLIT in tqdm(['train', 'val', 'test']):
         print(f"evaluating {DATASET}, {best_model_path}, {SPLIT} ...")
         scores = evalute_SPLIT(roberta, DATASET,
-                               batch_size, SPLIT=SPLIT)
+                               batch_size, num_utts, score_pooling, SPLIT=SPLIT)
 
         stats[SPLIT] = scores
     pprint.PrettyPrinter(indent=4).pprint(stats)
@@ -211,8 +299,8 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
     with open(os.path.join(base_dir, f"{seed}.json"),  'w') as stream:
         json.dump(stats, stream, indent=4, ensure_ascii=False)
 
-    for model_path in glob(os.path.join(checkpoint_dir, '*.pt')):
-        os.remove(model_path)
+    # for model_path in glob(os.path.join(checkpoint_dir, '*.pt')):
+    #     os.remove(model_path)
 
 
 def hasNumbers(inputString):
@@ -329,6 +417,8 @@ if __name__ == "__main__":
     parser.add_argument('--use-cuda', action='store_true')
     parser.add_argument('--evaluate-seeds', action='store_true')
     parser.add_argument('--leaderboard', action='store_true')
+    parser.add_argument('--num-utts', type=int, help='e.g. 1, 2, 4')
+    parser.add_argument('--score-pooling', help='mean or max')
 
     args = parser.parse_args()
     args = vars(args)

@@ -20,12 +20,17 @@ The metric is f1_weighted (%)
 | roberta.large | 05-utt | 75.217 | 63.467 | 64.753 | 
 | roberta.large | 05-utt-SPEAKER | 77.048 | 64.606 | 65.458 | 
 | roberta.large | 06-utt | 77.312 | 64.862 | 65.363 | 
+| roberta.large | 06-utt-SPEAKER | 77.261 | 64.078 | 65.598 | 
 | roberta.large | 07-utt | 75.592 | 64.159 | 65.409 | 
 | roberta.large | 07-utt-SPEAKER | 78.052 | 64.721 | 65.78 | 
 | roberta.large | 08-utt | 75.556 | 63.964 | 64.774 | 
 | roberta.large | 08-utt-SPEAKER | 78.114 | 64.485 | 65.912 | 
 | roberta.large | 09-utt | 75.646 | 63.892 | 65.219 | 
+| roberta.large | 09-utt-SPEAKER | 77.086 | 65.068 | 65.398 | 
 | roberta.large | 10-utt | 81.141 | 64.486 | 65.031 | 
+| roberta.large | 10-utt-SPEAKER | 77.552 | 64.326 | 64.98 | 
+| roberta.large | all-utt | 82.618 | 63.565 | 64.204 | 
+| roberta.large | all-utt-SPEAKER | 79.89 | 62.857 | 65.014 | 
 | COSMIC | SOTA |   |   | 65.21 |
 ## IEMOCAP 
 The metric is f1_weighted (%)
@@ -36,18 +41,45 @@ The metric is f1_weighted (%)
 | roberta.large | 02-utt | 71.724 | 56.913 | 57.488 | 
 | roberta.large | 02-utt-SPEAKER | 72.873 | 58.523 | 57.154 | 
 | roberta.large | 03-utt | 74.452 | 59.434 | 61.966 | 
+| roberta.large | 03-utt-SPEAKER | 76.49 | 61.363 | 61.932 | 
 | roberta.large | 04-utt | 72.844 | 59.195 | 61.468 | 
+| roberta.large | 04-utt-SPEAKER | 81.734 | 63.315 | 64.543 | 
 | roberta.large | 05-utt | 73.535 | 60.196 | 62.972 | 
+| roberta.large | 05-utt-SPEAKER | 75.027 | 60.374 | 64.181 | 
 | roberta.large | 06-utt | 73.682 | 61.035 | 63.045 | 
+| roberta.large | 06-utt-SPEAKER | 78.209 | 62.602 | 64.803 | 
 | roberta.large | 07-utt | 73.767 | 61.824 | 62.578 | 
+| roberta.large | 07-utt-SPEAKER | 83.187 | 65.375 | 65.594 | 
 | roberta.large | 08-utt | 76.076 | 61.909 | 64.342 | 
+| roberta.large | 08-utt-SPEAKER | 82.548 | 64.626 | 65.722 | 
 | roberta.large | 09-utt | 74.224 | 62.085 | 62.311 | 
+| roberta.large | 09-utt-SPEAKER | 77.454 | 62.898 | 66.073 | 
 | roberta.large | 10-utt | 75.523 | 61.903 | 63.178 | 
+| roberta.large | 10-utt-SPEAKER | 75.871 | 63.369 | 65.564 | 
+| roberta.large | 11-utt | 68.497 | 60.844 | 62.733 | 
+| roberta.large | 11-utt-SPEAKER | 77.85 | 64.148 | 64.84 | 
+| roberta.large | 12-utt | 67.705 | 59.859 | 61.833 | 
+| roberta.large | 12-utt-SPEAKER | 78.399 | 63.655 | 66.396 | 
+| roberta.large | 13-utt | 70.184 | 59.181 | 63.344 | 
+| roberta.large | 13-utt-SPEAKER | 76.937 | 64.32 | 66.865 | 
+| roberta.large | 14-utt | 76.032 | 61.894 | 63.448 | 
+| roberta.large | 14-utt-SPEAKER | 79.036 | 64.357 | 66.927 | 
+| roberta.large | 15-utt | 73.801 | 60.999 | 63.19 | 
+| roberta.large | 15-utt-SPEAKER | 76.906 | 65.249 | 66.946 | 
+| roberta.large | 16-utt | 75.222 | 61.697 | 63.639 | 
+| roberta.large | 16-utt-SPEAKER | 80.687 | 64.307 | 67.422 | 
+| roberta.large | 17-utt-SPEAKER | 79.467 | 65.29 | 67.518 | 
+| roberta.large | 20210330_04021617076951 | 78.834 | 63.724 | 65.483 | 
+| roberta.large | all-utt | 76.718 | 60.17 | 63.898 | 
+| roberta.large | all-utt-SPEAKER | 81.804 | 64.98 | 67.763 | 
 | CESTa | SOTA |   |   | 67.1 |
 ## EmoryNLP 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
+| roberta.large | 01-utt | 48.941 | 38.139 | 35.518 | 
+| roberta.large | all-utt | 47.401 | 36.838 | 34.192 | 
+| roberta.large | all-utt-SPEAKER | 45.824 | 36.324 | 33.817 | 
 | COSMIC | SOTA |   |   | 38.11 |
 ## DailyDialog 
 The metric is f1_micro (%)
