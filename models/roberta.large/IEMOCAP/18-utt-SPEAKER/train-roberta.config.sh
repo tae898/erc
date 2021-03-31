@@ -7,7 +7,11 @@ elif [ "${DATASET}" = IEMOCAP ]; then
 elif [ "${DATASET}" = EmoryNLP ]; then
     NUM_CLASSES=7
 elif [ "${DATASET}" = DailyDialog ]; then
+<<<<<<< HEAD
     NUM_CLASSES=7
+=======
+    NUM_CLASSES=6
+>>>>>>> WTF
 else
     echo "${DATASET} is not supported"
     exit 1
