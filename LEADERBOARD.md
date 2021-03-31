@@ -9,6 +9,7 @@ Since the distribution of classes is different for every dataset and train / val
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
+| roberta.base | 01-utt | 68.081 | 58.539 | 62.638 | 
 | roberta.base | 01-utt-SPEAKER | 68.811 | 58.708 | 63.089 | 
 | COSMIC | SOTA |   |   | 65.21 |
 ## IEMOCAP 
