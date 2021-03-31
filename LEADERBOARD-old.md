@@ -70,23 +70,17 @@ The metric is f1_weighted (%)
 | roberta.large | 16-utt-SPEAKER | 80.687 | 64.307 | 67.422 | 
 | roberta.large | 17-utt | 76.789 | 62.168 | 64.315 | 
 | roberta.large | 17-utt-SPEAKER | 79.467 | 65.29 | 67.518 | 
-<<<<<<< HEAD:LEADERBOARD-old.md
 | roberta.large | 18-utt | 77.293 | 62.676 | 64.036 | 
-=======
->>>>>>> WTF:LEADERBOARD.md
 | roberta.large | 18-utt-SPEAKER | 77.54 | 62.912 | 65.715 | 
 | roberta.large | 19-utt-SPEAKER | 74.662 | 62.546 | 65.684 | 
 | roberta.large | 20-utt-SPEAKER | 77.392 | 63.376 | 66.846 | 
 | roberta.large | 21-utt-SPEAKER | 78.315 | 64.098 | 67.498 | 
 | roberta.large | 22-utt-SPEAKER | 78.834 | 63.724 | 65.483 | 
-<<<<<<< HEAD:LEADERBOARD-old.md
-=======
 | roberta.large | 23-utt-SPEAKER | 81.636 | 64.044 | 67.84 | 
 | roberta.large | 24-utt-SPEAKER | 79.419 | 64.132 | 66.684 | 
 | roberta.large | 25-utt-SPEAKER | 80.068 | 64.985 | 66.384 | 
 | roberta.large | 26-utt-SPEAKER | 78.272 | 62.664 | 65.72 | 
 | roberta.large | 27-utt-SPEAKER | 81.699 | 63.923 | 66.568 | 
->>>>>>> WTF:LEADERBOARD.md
 | roberta.large | all-utt | 76.718 | 60.17 | 63.898 | 
 | roberta.large | all-utt-SPEAKER | 81.804 | 64.98 | 67.763 | 
 | roberta.large | all-utt-SPEAKER? | 79.985 | 63.525 | 66.276 | 

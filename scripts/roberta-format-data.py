@@ -137,11 +137,6 @@ def get_uttid_speaker_utterance_emotion(DATASET, labels, SPLIT, json_path,
 
     elif DATASET == 'DailyDialog':
         speaker = {'A': 'Alice', 'B': 'Bob'}[text['Speaker']]
-        # assert text['Speaker'] in ['A', 'B']
-        # speaker = 'Person' + ' ' + text['Speaker']
-        # random two gender neutral names
-        # speaker = {'A': 'Alex',
-        #            'B': 'Charlie'}[text['Speaker']]
     else:
         raise ValueError(f"{DATASET} not supported!!!!!!")
 
@@ -156,7 +151,7 @@ def get_uttid_speaker_utterance_emotion(DATASET, labels, SPLIT, json_path,
 
 def write_input_label(DATASET, SPLIT, labels, num_utts,
                       utterance_ordered, emotion2num, speaker_mode=None,
-                      tokens_per_sample=512, clean_utterances=True):
+                      tokens_per_sample=512):
     NUM_TOTAL_TRUNCATIONS = 0
     max_tokens_input0 = 0
     max_tokens_input1 = 0
@@ -189,8 +184,8 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
 
             num_tokens1 = len(roberta.encode(utterance).tolist())
 
-            # -2 is for <CLS> and <SEP>
             JUST_IN_CASE = 2
+            # -2 is for <CLS> and <SEP>
             if num_tokens1 > tokens_per_sample - 2 - JUST_IN_CASE:
                 raise ValueError(f"{utterance} is too long!!")
 

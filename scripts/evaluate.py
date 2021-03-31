@@ -74,11 +74,12 @@ def list_duplicates_of(list_of_items):
         if prev != next:
             groups.append(idx+1)
     groups.append(len(list_of_items))
-    
-    groups = [[k for k in range(i, j)] for i, j in zip(groups[:-1], groups[1:])]
 
+    groups = [[k for k in range(i, j)]
+              for i, j in zip(groups[:-1], groups[1:])]
 
     return groups
+
 
 def get_scores_all(X, Y, y_true, y_pred, cross_entropy_loss_all, probs_all,
                    num_utts, score_pooling):
@@ -207,8 +208,6 @@ def evalute_SPLIT(roberta, DATASET, batch_size, num_utts, score_pooling, SPLIT):
         f"{original_length}, {len(y_true)}, {len(y_pred)}, " \
         f"{len(cross_entropy_loss_all)}, {len(probs_all)}"
 
-    print(f"cross entropy loss mean: {np.mean(cross_entropy_loss_all)}")
-
     scores_all = get_scores_all(X, Y, y_true, y_pred, cross_entropy_loss_all,
                                 probs_all, num_utts, score_pooling)
 
@@ -216,7 +215,8 @@ def evalute_SPLIT(roberta, DATASET, batch_size, num_utts, score_pooling, SPLIT):
 
 
 def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
-                   batch_size, use_cuda, num_utts, score_pooling, **kwargs):
+                   batch_size, use_cuda, num_utts, score_pooling, keep_the_best,
+                   **kwargs):
     if DATASET not in DATASETS_SUPPORTED:
         sys.exit(f"{DATASET} is not supported!")
 
@@ -257,20 +257,12 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
 
     pprint.PrettyPrinter(indent=4).pprint(stats)
 
-    # if metric != 'cross_entropy_loss':
-    #     stats = {key: val[metric] for key, val in stats.items()}
-
     stats = {key: val[metric] for key, val in stats.items()}
 
     if metric.lower() == 'cross_entropy_loss':
         best_model_path = min(stats, key=stats.get)
     else:
         best_model_path = max(stats, key=stats.get)
-
-    # if len(stats) > 1:
-    #     best_model_path = max(stats, key=stats.get)
-    # else:
-    #     best_model_path = list(stats.keys())[0]
 
     print(f"{best_model_path} has the best {metric} performance on val")
 
@@ -299,8 +291,34 @@ def evaluate_model(DATASET, seed, checkpoint_dir, base_dir, metric,
     with open(os.path.join(base_dir, f"{seed}.json"),  'w') as stream:
         json.dump(stats, stream, indent=4, ensure_ascii=False)
 
-    # for model_path in glob(os.path.join(checkpoint_dir, '*.pt')):
-    #     os.remove(model_path)
+    for model_path in glob(os.path.join(checkpoint_dir, '*.pt')):
+        if os.path.basename(best_model_path) != os.path.basename(model_path):
+            os.remove(model_path)
+
+    if keep_the_best:
+        jsons_saved = [path for path in glob(os.path.join(base_dir, '*.json'))
+                       if os.path.basename(path) != 'results.json']
+        seeds_all = {}
+        for path in jsons_saved:
+            with open(path, 'r') as stream:
+                results_seed = json.load(stream)
+            seeds_all[os.path.basename(path)] = results_seed
+
+        if DATASET == 'DailyDialog':
+            metric = 'f1_micro'
+        else:
+            metric = 'f1_weighted'
+
+        seeds_all = {key: val['test'][metric]
+                     for key, val in seeds_all.items()}
+
+        best_seed = max(seeds_all, key=seeds_all.get)
+
+        if best_seed == f"{seed}.json":
+            os.rename(best_model_path, os.path.join(
+                base_dir, os.path.basename(best_model_path)))
+    else:
+        os.remove(best_model_path)
 
 
 def hasNumbers(inputString):
@@ -312,7 +330,7 @@ def evaluate_all_seeds(base_dir):
     jsonpaths = [path for path in glob(os.path.join(DIR_NAME, '*.json'))
                  if hasNumbers(os.path.basename(path))]
 
-    metrics = ['f1_weighted', 'f1_micro', 'f1_macro']
+    metrics = ['f1_weighted', 'f1_micro', 'f1_macro', 'cross_entropy_loss']
     scores_all = {SPLIT: {metric: [] for metric in metrics}
                   for SPLIT in ['train', 'val', 'test']}
 
@@ -414,14 +432,26 @@ if __name__ == "__main__":
     parser.add_argument('--checkpoint-dir', default=None)
     parser.add_argument('--base-dir', default=None)
     parser.add_argument('--metric', default='f1_weighted')
-    parser.add_argument('--use-cuda', action='store_true')
     parser.add_argument('--evaluate-seeds', action='store_true')
     parser.add_argument('--leaderboard', action='store_true')
     parser.add_argument('--num-utts', type=int, help='e.g. 1, 2, 4')
     parser.add_argument('--score-pooling', help='mean or max')
+    parser.add_argument('--keep-the-best', default='false',
+                        help='true or false')
+    parser.add_argument('--num-gpus', default=0, help='e.g. 0, 1, 2 ...')
 
     args = parser.parse_args()
     args = vars(args)
+
+    args['keep_the_best'] = {'true': True,
+                             'false': False}[args['keep_the_best']]
+
+    if int(args['num_gpus']) > 0:
+        args['use_cuda'] = True
+    else:
+        args['use_cuda'] = False
+    del args['num_gpus']
+
     print(f"arguments given to {__file__}: {args}")
 
     if args['evaluate_seeds']:

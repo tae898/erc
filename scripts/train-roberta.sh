@@ -131,14 +131,16 @@ for SEED in ${SEEDS//,/ }; do
         --batch-size $BATCH_SIZE \
         --num-utts $NUM_UTTS \
         --score-pooling $SCORE_POOLING \
-        --metric $METRIC --use-cuda
+        --keep-the-best $KEEP_THE_BEST \
+        --metric $METRIC \
+        --num-gpus $NUM_GPUS
 
 done
 
 python3 scripts/evaluate.py --DATASET $DATASET --base-dir $BASE_DIR \
     --evaluate-seeds
 
-# rm -rf $CHECKPOINT_DIR
+rm -rf $CHECKPOINT_DIR
 
 python3 scripts/evaluate.py --leaderboard
 
