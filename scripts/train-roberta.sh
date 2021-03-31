@@ -40,10 +40,10 @@ echo "Training will be done over the SEEDS ${SEEDS}"
 python3 scripts/roberta-format-data.py --DATASET $DATASET --num-utts $NUM_UTTS \
     --speaker-mode $SPEAKER_MODE --tokens-per-sample $TOKENS_PER_SAMPLE --clean-utterances $CLEAN_UTTERANCES
 
-if ((NUM_UTTS > 1)); then
-    NUM_INPUTS=2
-else
+if ((NUM_UTTS == 1)); then
     NUM_INPUTS=1
+else
+    NUM_INPUTS=2
 fi
 echo "number of inputs: ${NUM_INPUTS}"
 
@@ -129,6 +129,8 @@ for SEED in ${SEEDS//,/ }; do
     python3 scripts/evaluate.py --DATASET $DATASET --seed $SEED \
         --checkpoint-dir $CHECKPOINT_DIR --base-dir $BASE_DIR \
         --batch-size $BATCH_SIZE \
+        --num-utts $NUM_UTTS \
+        --score-pooling $SCORE_POOLING \
         --metric $METRIC --use-cuda
 
 done
@@ -136,7 +138,7 @@ done
 python3 scripts/evaluate.py --DATASET $DATASET --base-dir $BASE_DIR \
     --evaluate-seeds
 
-rm -rf $CHECKPOINT_DIR
+# rm -rf $CHECKPOINT_DIR
 
 python3 scripts/evaluate.py --leaderboard
 

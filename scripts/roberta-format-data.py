@@ -6,50 +6,11 @@ import json
 import os
 from glob import glob
 import sys
-import nltk
 import torch
+
 roberta = torch.hub.load('pytorch/fairseq', 'roberta.base')
 DATASET_DIR = "Datasets/"
 DATASETS_SUPPORTED = ['MELD', 'IEMOCAP', 'EmoryNLP', 'DailyDialog']
-
-
-def clean_utterance(utterance):
-    """Clean utterance.
-
-    I define a clean utterance as an utterane without more than one white space
-    between characters. Furthermore, every utterance should end with a proper
-    punctuation (e.g. '.'). If the given utterance does not end with a proper
-    puncutation, period (.) is appended at the end.
-
-    """
-    num_whitespaces = 10
-    last_punctuations = \
-        ['!', '"', '%', '&', "'", ')', '*', ',',
-            '-', '.', '/', ':', ';', '?', ']', '_',
-            '—', '’', '”', '…', '。']
-
-    assert isinstance(utterance, str)
-    utterance = utterance.strip()
-    for i in range(num_whitespaces, 1, -1):
-        utterance = utterance.replace(' '*i, ' ')
-    if utterance[-1] not in last_punctuations:
-        utterance += '.'
-
-    specials_1 = ["!", "%",  ")", ",", ".", ":", ";", "?",
-                  "’", "”", "′", "。"]
-
-    specials_2 = ["\"", "#", "(", "@",
-                  "°", "‘", "“", "′", "’"]
-
-    utterance = utterance.strip()
-
-    for special in specials_1:
-        utterance = utterance.replace(' ' + special, special)
-
-    for special in specials_2:
-        utterance = utterance.replace(special + ' ', special)
-
-    return utterance
 
 
 def get_emotion2num(DATASET):
@@ -94,6 +55,45 @@ def get_emotion2num(DATASET):
         emotions_)} for DATASET, emotions_ in emotions.items()}
 
     return emotion2num[DATASET]
+
+
+def clean_utterance(utterance):
+    """Clean utterance.
+
+    I define a clean utterance as an utterane without more than one white space
+    between characters. Furthermore, every utterance should end with a proper
+    punctuation (e.g. '.'). If the given utterance does not end with a proper
+    puncutation, period (.) is appended at the end.
+
+    """
+    num_whitespaces = 10
+    last_punctuations = \
+        ['!', '"', '%', '&', "'", ')', '*', ',',
+            '-', '.', '/', ':', ';', '?', ']', '_',
+            '—', '’', '”', '…', '。']
+
+    assert isinstance(utterance, str)
+    utterance = utterance.strip()
+    for i in range(num_whitespaces, 1, -1):
+        utterance = utterance.replace(' '*i, ' ')
+    if utterance[-1] not in last_punctuations:
+        utterance += '.'
+
+    specials_1 = ["!", "%",  ")", ",", ".", ":", ";", "?",
+                  "’", "”", "′", "。"]
+
+    specials_2 = ["\"", "#", "(", "@",
+                  "°", "‘", "“", "′", "’"]
+
+    utterance = utterance.strip()
+
+    for special in specials_1:
+        utterance = utterance.replace(' ' + special, special)
+
+    for special in specials_2:
+        utterance = utterance.replace(special + ' ', special)
+
+    return utterance
 
 
 def make_utterance(utterance, speaker, speaker_mode='title'):
@@ -162,7 +162,6 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
     max_tokens_input1 = 0
 
     diaids = list(utterance_ordered[SPLIT].keys())
-    assert num_utts > 1
 
     input1 = []
     input0 = []
@@ -188,6 +187,8 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
 
             if clean_utterances:
                 utterance = clean_utterance(utterance)
+            else:
+                utterance = utterance.strip()
 
             num_tokens1 = len(roberta.encode(utterance).tolist())
 
@@ -199,14 +200,17 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
             max_tokens_input1 = max(max_tokens_input1, num_tokens1)
 
             history = []
-            start = idx - num_utts + 1
+            if num_utts == -1:
+                start = -1000
+            else:
+                start = idx - num_utts + 1
             end = idx
             for i in range(start, end):
                 if i >= 0:
                     if clean_utterances:
                         history.append(clean_utterance(utterances[i]))
                     else:
-                        history.append(utterances[i])
+                        history.append(utterances[i].strip())
 
             is_truncated = 0
             while True:
@@ -223,11 +227,18 @@ def write_input_label(DATASET, SPLIT, labels, num_utts,
 
             NUM_TOTAL_TRUNCATIONS += is_truncated
 
-            history = ' '.join(history)
-
-            input0.append(history)
-            input1.append(utterance)
-            labelnums.append(emotion2num[emotion])
+            if num_utts == -1:
+                histories = [history[i:] for i in range(len(history)+1)]
+                for history in histories:
+                    history = ' '.join(history)
+                    input0.append(history)
+                    input1.append(utterance)
+                    labelnums.append(emotion2num[emotion])
+            else:
+                history = ' '.join(history)
+                input0.append(history)
+                input1.append(utterance)
+                labelnums.append(emotion2num[emotion])
 
     assert len(input0) == len(input1) == len(labelnums)
 
@@ -281,6 +292,8 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
 
             if clean_utterances:
                 utterance = clean_utterance(utterance)
+            else:
+                utterance = utterance.strip()
 
             num_tokens0 = len(roberta.encode(utterance).tolist())
             max_tokens_input0 = max(max_tokens_input0, num_tokens0)
@@ -303,7 +316,7 @@ def write_input_label_simple(DATASET, SPLIT, labels, utterance_ordered,
 
 def format_classification(DATASET, num_utts=1, speaker_mode=None,
                           tokens_per_sample=512, clean_utterances=True):
-    assert num_utts > 0
+    assert num_utts >= -1
 
     if speaker_mode == 'none':
         speaker_mode = None

@@ -69,6 +69,7 @@ The metric is f1_weighted (%)
 | roberta.large | 16-utt | 75.222 | 61.697 | 63.639 | 
 | roberta.large | 16-utt-SPEAKER | 80.687 | 64.307 | 67.422 | 
 | roberta.large | 17-utt-SPEAKER | 79.467 | 65.29 | 67.518 | 
+| roberta.large | 20210330_04021617076951 | 78.834 | 63.724 | 65.483 | 
 | roberta.large | all-utt | 76.718 | 60.17 | 63.898 | 
 | roberta.large | all-utt-SPEAKER | 81.804 | 64.98 | 67.763 | 
 | CESTa | SOTA |   |   | 67.1 |
