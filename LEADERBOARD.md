@@ -16,6 +16,7 @@ The metric is f1_weighted (%)
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
+| roberta.base | 01-utt-SPEAKER-10-names | 74.114 | 54.301 | 51.643 | 
 | CESTa | SOTA |   |   | 67.1 |
 ## EmoryNLP 
 The metric is f1_weighted (%)

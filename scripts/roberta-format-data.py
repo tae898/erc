@@ -128,15 +128,15 @@ def get_uttid_speaker_utterance_emotion(DATASET, labels, SPLIT, json_path,
     elif DATASET == 'IEMOCAP':
         speaker = {'Female': 'Alice', 'Male': 'Bob'}[text['Speaker']]
         # sessid = text['SessionID']
-        # https: // www.ssa.gov/oact/babynames/decades/century.html
+        # # https: // www.ssa.gov/oact/babynames/decades/century.html
         # speaker = {'Ses01': {'Female': 'Mary', 'Male': 'James'},
         #            'Ses02': {'Female': 'Patricia', 'Male': 'John'},
         #            'Ses03': {'Female': 'Jennifer', 'Male': 'Robert'},
         #            'Ses04': {'Female': 'Linda', 'Male': 'Michael'},
-        #            'Ses05': {'Female': 'Elizabeth', 'Male': 'William'}}[sessid][speaker]
+        #            'Ses05': {'Female': 'Elizabeth', 'Male': 'William'}}[sessid][text['Speaker']]
 
     elif DATASET == 'DailyDialog':
-        speaker = {'A': 'Alice', 'B': 'Bob'}[text['Speaker']]
+        speaker = {'A': 'Alex', 'B': 'Blake'}[text['Speaker']]
     else:
         raise ValueError(f"{DATASET} not supported!!!!!!")
 
