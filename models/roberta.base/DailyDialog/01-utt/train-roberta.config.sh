@@ -1,4 +1,4 @@
-DATASET="IEMOCAP"
+DATASET="DailyDialog"
 
 if [ "${DATASET}" = MELD ]; then
     NUM_CLASSES=7
@@ -14,14 +14,14 @@ else
 fi
 
 METRIC=cross_entropy_loss                              # should be one of f1_weighted, f1_micro, f1_macro, or cross_entropy_loss
-SPEAKER_MODE=none                                     # should be one of title, upper, lower, none
-SEEDS=0,1,2,3,4                                                # random seeds
-NUM_UTTS=1000                                          # number of utterances in one sequence
+SPEAKER_MODE=none                                      # should be one of title, upper, lower, none
+SEEDS=0,1,2,3,4                                        # random seeds
+NUM_UTTS=1                                          # number of utterances in one sequence
 SCORE_POOLING=max                                      # this is only used when NUM_UTTS is -1 (should be max or mean)
 KEEP_THE_BEST=false                                    # keep the best model instead of deleting. (true or false)
 WORKERS=60                                             # number of workers for preprocessing RoBERTa
 LR=1e-05                                               # Peak LR for polynomial LR scheduler.
-BATCH_SIZE=8                                           # Batch size, per GPU
+BATCH_SIZE=32                                           # Batch size, per GPU
 ROBERTA_SIZE=base                                      # either "base" or "large"
 ROBERTA_PATH="models/roberta.${ROBERTA_SIZE}/model.pt" # pre-trained
 PATIENCE=5                                             # early stopping in number of training epochs
