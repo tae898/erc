@@ -21,7 +21,8 @@ The metric is f1_weighted (%)
 | roberta.base | 01-utt | 72.38 | 54.621 | 52.716 | 
 | roberta.base | 01-utt-SPEAKER-02-names | 72.495 | 54.211 | 51.987 | 
 | roberta.base | 01-utt-SPEAKER-10-names | 74.114 | 54.301 | 51.643 | 
-| roberta.base | 20210401_15321617291160 | 75.114 | 61.039 | 62.785 | 
+| roberta.base | all-utt | 75.114 | 61.039 | 62.785 | 
+| roberta.base | all-utt-SPEAKER-02-names | 69.636 | 60.741 | 61.362 | 
 | CESTa | SOTA |   |   | 67.1 |
 ## EmoryNLP 
 The metric is f1_weighted (%)
