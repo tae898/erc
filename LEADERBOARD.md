@@ -11,6 +11,7 @@ The metric is f1_weighted (%)
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | roberta.base | 01-utt | 68.081 | 58.539 | 62.638 | 
 | roberta.base | 01-utt-SPEAKER | 68.811 | 58.708 | 63.089 | 
+| roberta.base | 02-utt | 70.685 | 60.114 | 63.288 | 
 | roberta.base | all-utt | 75.709 | 60.905 | 63.506 | 
 | roberta.base | all-utt-SPEAKER | 73.063 | 61.471 | 63.535 | 
 | COSMIC | SOTA |   |   | 65.21 |
@@ -31,6 +32,7 @@ The metric is f1_weighted (%)
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | roberta.base | 01-utt | 43.255 | 37.534 | 34.414 | 
 | roberta.base | 01-utt-SPEAKER | 44.276 | 37.093 | 34.318 | 
+| roberta.base | all-utt | 45.351 | 37.175 | 33.945 | 
 | roberta.base | all-utt-SPEAKER | 48.431 | 37.935 | 34.148 | 
 | COSMIC | SOTA |   |   | 38.11 |
 ## DailyDialog 
