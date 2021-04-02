@@ -1,4 +1,4 @@
-DATASET="EmoryNLP"
+DATASET="IEMOCAP"
 
 if [ "${DATASET}" = MELD ]; then
     NUM_CLASSES=7

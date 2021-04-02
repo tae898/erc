@@ -23,6 +23,7 @@ The metric is f1_weighted (%)
 | roberta.base | 01-utt-SPEAKER-10-names | 74.114 | 54.301 | 51.643 | 
 | roberta.base | all-utt | 75.114 | 61.039 | 62.785 | 
 | roberta.base | all-utt-SPEAKER-02-names | 69.636 | 60.741 | 61.362 | 
+| roberta.base | all-utt-SPEAKER-10-names | 70.966 | 62.245 | 61.894 | 
 | CESTa | SOTA |   |   | 67.1 |
 ## EmoryNLP 
 The metric is f1_weighted (%)
@@ -30,6 +31,7 @@ The metric is f1_weighted (%)
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | roberta.base | 01-utt | 43.255 | 37.534 | 34.414 | 
 | roberta.base | 01-utt-SPEAKER | 44.276 | 37.093 | 34.318 | 
+| roberta.base | all-utt-SPEAKER | 48.431 | 37.935 | 34.148 | 
 | COSMIC | SOTA |   |   | 38.11 |
 ## DailyDialog 
 The metric is f1_micro (%)
