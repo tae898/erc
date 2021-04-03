@@ -12,6 +12,7 @@ The metric is f1_weighted (%)
 | roberta.base | 01-utt | 68.081 | 58.539 | 62.638 | 
 | roberta.base | 01-utt-SPEAKER | 68.811 | 58.708 | 63.089 | 
 | roberta.base | 02-utt | 70.685 | 60.114 | 63.288 | 
+| roberta.base | 02-utt-SPEAKER | 71.501 | 60.119 | 63.563 | 
 | roberta.base | all-utt | 75.709 | 60.905 | 63.506 | 
 | roberta.base | all-utt-SPEAKER | 73.063 | 61.471 | 63.535 | 
 | COSMIC | SOTA |   |   | 65.21 |
@@ -22,6 +23,9 @@ The metric is f1_weighted (%)
 | roberta.base | 01-utt | 72.38 | 54.621 | 52.716 | 
 | roberta.base | 01-utt-SPEAKER-02-names | 72.495 | 54.211 | 51.987 | 
 | roberta.base | 01-utt-SPEAKER-10-names | 74.114 | 54.301 | 51.643 | 
+| roberta.base | 02-utt | 70.612 | 56.113 | 55.088 | 
+| roberta.base | 02-utt-SPEAKER-02-names | 71.4 | 56.94 | 54.731 | 
+| roberta.base | 02-utt-SPEAKER-10-names | 74.658 | 58.572 | 55.504 | 
 | roberta.base | all-utt | 75.114 | 61.039 | 62.785 | 
 | roberta.base | all-utt-SPEAKER-02-names | 69.636 | 60.741 | 61.362 | 
 | roberta.base | all-utt-SPEAKER-10-names | 70.966 | 62.245 | 61.894 | 
@@ -32,6 +36,8 @@ The metric is f1_weighted (%)
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | roberta.base | 01-utt | 43.255 | 37.534 | 34.414 | 
 | roberta.base | 01-utt-SPEAKER | 44.276 | 37.093 | 34.318 | 
+| roberta.base | 02-utt | 44.09 | 37.44 | 34.398 | 
+| roberta.base | 02-utt-SPEAKER | 45.283 | 37.661 | 35.275 | 
 | roberta.base | all-utt | 45.351 | 37.175 | 33.945 | 
 | roberta.base | all-utt-SPEAKER | 48.431 | 37.935 | 34.148 | 
 | COSMIC | SOTA |   |   | 38.11 |

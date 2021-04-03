@@ -14,7 +14,7 @@ else
 fi
 
 METRIC=cross_entropy_loss                              # should be one of f1_weighted, f1_micro, f1_macro, or cross_entropy_loss
-SPEAKER_MODE=none                                     # should be one of title, upper, lower, none
+SPEAKER_MODE=upper                                     # should be one of title, upper, lower, none
 SEEDS=0,1,2,3,4                                        # random seeds
 NUM_UTTS=2                                             # number of utterances in one sequence
 SCORE_POOLING=max                                      # this is only used when NUM_UTTS is -1 (should be max or mean)
