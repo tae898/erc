@@ -3,38 +3,37 @@ pretrained:                     Null
 model:
     name:                       BaseTimmModel
     args:
-        name:                   tf_efficientnet_b0_ns
+        name:                   tf_efficientnet_b1_ap
         num_classes:            7
         freeze_backbone:        False
-        from_pretrained:        True 
+        from_pretrained:        True
 optimizer:
     name:                       Adam
     args:
-        lr:                     0.0001
+        lr:                     0.0003
 loss:
     name:                       FocalLoss
     args:                       
-        alpha:                  0.25
-        gamma:                  2
+        alpha:                  0.75
+        gamma:                  4
         reduce:                 True
 metric:
     -   name:                   F1Weighted
         args:                   Null
 scheduler:
-    name:                       StepLR
+    name:                       ReduceLROnPlateau
     args:
-        step_size:              3
-        gamma:                  0.2
-        last_epoch:             -1  
+        factor:                 0.5
+        patience:               2
 dataset:            
     train:
         name:                   AudioDataset
         args:
-            data_dir:           data/MELD/raw-audios-wav/train/        
-            csv_path:           data/MELD/raw-audios-wav/train.csv
+            data_dir:           data/raw-audios-wav/train/        
+            csv_path:           data/raw-audios-wav/train.csv
             format:             .wav
             sr:                 22050
-            duration:           4
+            duration:           8
             n_mels:             128
             is_train:           True  
         loader:
@@ -46,11 +45,11 @@ dataset:
     val:
         name:                   AudioDataset
         args:
-            data_dir:           data/MELD/raw-audios-wav/val/        
-            csv_path:           data/MELD/raw-audios-wav/val.csv
+            data_dir:           data/raw-audios-wav/val/        
+            csv_path:           data/raw-audios-wav/val.csv
             format:             .wav
             sr:                 22050
-            duration:           4
+            duration:           8
             n_mels:             128
             is_train:           False
         loader:
@@ -59,8 +58,8 @@ dataset:
                 batch_size:     4
                 shuffle:        True
                 drop_last:      True
-
+ 
 trainer: 
-    nepochs: 10
+    nepochs: 20
     val_step: 1
     log_step: 1
