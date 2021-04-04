@@ -1,4 +1,4 @@
-DATASET="MELD"
+DATASET="DailyDialog"
 
 if [ "${DATASET}" = MELD ]; then
     NUM_CLASSES=7
@@ -16,9 +16,9 @@ fi
 METRIC=cross_entropy_loss                              # should be one of f1_weighted, f1_micro, f1_macro, or cross_entropy_loss
 SPEAKER_MODE=upper                                     # should be one of title, upper, lower, none
 SEEDS=0,1,2,3,4                                        # random seeds
-NUM_UTTS=3                                             # number of utterances in one sequence
+NUM_UTTS=2                                             # number of utterances in one sequence
 SCORE_POOLING=max                                      # this is only used when NUM_UTTS is -1 (should be max or mean)
-KEEP_THE_BEST=true                                    # keep the best model instead of deleting. (true or false)
+KEEP_THE_BEST=false                                    # keep the best model instead of deleting. (true or false)
 WORKERS=60                                             # number of workers for preprocessing RoBERTa
 LR=1e-05                                               # Peak LR for polynomial LR scheduler.
 BATCH_SIZE=32                                          # Batch size, per GPU

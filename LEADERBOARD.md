@@ -10,6 +10,7 @@ The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | roberta.base | 01-utt | 68.081 | 58.539 | 62.638 | 
+| roberta.large | 01-utt-SPEAKER | 75.828 | 62.51 | 65.292 | 
 | roberta.base | 01-utt-SPEAKER | 68.811 | 58.708 | 63.089 | 
 | roberta.base | 02-utt | 70.685 | 60.114 | 63.288 | 
 | roberta.base | 02-utt-SPEAKER | 71.501 | 60.119 | 63.563 | 
@@ -22,6 +23,7 @@ The metric is f1_weighted (%)
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | roberta.base | 01-utt | 72.38 | 54.621 | 52.716 | 
 | roberta.base | 01-utt-SPEAKER-02-names | 72.495 | 54.211 | 51.987 | 
+| roberta.large | 01-utt-SPEAKER-10-names | 73.992 | 55.639 | 53.051 | 
 | roberta.base | 01-utt-SPEAKER-10-names | 74.114 | 54.301 | 51.643 | 
 | roberta.base | 02-utt | 70.612 | 56.113 | 55.088 | 
 | roberta.base | 02-utt-SPEAKER-02-names | 71.4 | 56.94 | 54.731 | 
@@ -47,6 +49,8 @@ The metric is f1_micro (%)
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | roberta.base | 01-utt | 93.679 | 90.219 | 87.005 | 
 | roberta.base | 01-utt-SPEAKER | 92.492 | 90.239 | 86.371 | 
+| roberta.base | 02-utt | 92.853 | 90.552 | 87.216 | 
+| roberta.base | 02-utt-SPEAKER | 93.051 | 90.427 | 86.878 | 
 | roberta.base | all-utt | 94.965 | 91.176 | 89.147 | 
 | roberta.base | all-utt-SPEAKER | 94.808 | 91.093 | 88.696 | 
 | CESTa | SOTA |   |   | 63.12 |
