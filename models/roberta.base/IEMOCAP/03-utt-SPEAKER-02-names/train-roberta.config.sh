@@ -1,4 +1,4 @@
-DATASET="DailyDialog"
+DATASET="IEMOCAP"
 
 if [ "${DATASET}" = MELD ]; then
     NUM_CLASSES=7
@@ -7,7 +7,7 @@ elif [ "${DATASET}" = IEMOCAP ]; then
 elif [ "${DATASET}" = EmoryNLP ]; then
     NUM_CLASSES=7
 elif [ "${DATASET}" = DailyDialog ]; then
-    NUM_CLASSES=7
+    NUM_CLASSES=6
 else
     echo "${DATASET} is not supported"
     exit 1
@@ -16,13 +16,13 @@ fi
 METRIC=cross_entropy_loss                              # should be one of f1_weighted, f1_micro, f1_macro, or cross_entropy_loss
 SPEAKER_MODE=upper                                     # should be one of title, upper, lower, none
 SEEDS=0,1,2,3,4                                        # random seeds
-NUM_UTTS=1000                                             # number of utterances in one sequence
+NUM_UTTS=3                                             # number of utterances in one sequence
 SCORE_POOLING=max                                      # this is only used when NUM_UTTS is -1 (should be max or mean)
-KEEP_THE_BEST=true                                    # keep the best model instead of deleting. (true or false)
+KEEP_THE_BEST=false                                    # keep the best model instead of deleting. (true or false)
 WORKERS=60                                             # number of workers for preprocessing RoBERTa
 LR=1e-05                                               # Peak LR for polynomial LR scheduler.
-BATCH_SIZE=4                                          # Batch size, per GPU
-ROBERTA_SIZE=large                                      # either "base" or "large"
+BATCH_SIZE=32                                          # Batch size, per GPU
+ROBERTA_SIZE=base                                      # either "base" or "large"
 ROBERTA_PATH="models/roberta.${ROBERTA_SIZE}/model.pt" # pre-trained
 PATIENCE=5                                             # early stopping in number of training epochs
 TOKENS_PER_SAMPLE=512                                  # I think this should be fixed to 512.

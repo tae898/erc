@@ -9,6 +9,7 @@ import sys
 import pprint
 import json
 import numpy as np
+import random
 DATASET_DIR = "Datasets/"
 MODEL_DIR = 'models/'
 DATASETS_SUPPORTED = ['MELD', 'IEMOCAP', 'EmoryNLP', 'DailyDialog']
@@ -81,8 +82,13 @@ def list_duplicates_of(list_of_items):
     return groups
 
 
-def get_scores_all(X, Y, y_true, y_pred, cross_entropy_loss_all, probs_all,
-                   num_utts, score_pooling):
+def get_scores_all(DATASET, X, Y, y_true, y_pred, cross_entropy_loss_all,
+                   probs_all, num_utts, score_pooling):
+
+    if DATASET == 'DailyDialog':
+        LABELS_FOR_EVAL = ['1', '2', '3', '4', '5', '6']
+    else:
+        LABELS_FOR_EVAL = None
 
     scores_all = {}
 
@@ -118,19 +124,24 @@ def get_scores_all(X, Y, y_true, y_pred, cross_entropy_loss_all, probs_all,
                     np.mean([cross_entropy_loss_all[idx] for idx in group]))
 
         scores_all['f1_weighted'] = f1_score(
-            y_true_pooled, y_pred_pooled, average='weighted')
+            y_true_pooled, y_pred_pooled, labels=LABELS_FOR_EVAL,
+            average='weighted')
         scores_all['f1_micro'] = f1_score(
-            y_true_pooled, y_pred_pooled, average='micro')
+            y_true_pooled, y_pred_pooled, labels=LABELS_FOR_EVAL,
+            average='micro')
         scores_all['f1_macro'] = f1_score(
-            y_true_pooled, y_pred_pooled, average='macro')
+            y_true_pooled, y_pred_pooled, labels=LABELS_FOR_EVAL,
+            average='macro')
         scores_all['cross_entropy_loss'] = np.mean(
             cross_entropy_loss_all_pooled)
 
     else:
         scores_all['f1_weighted'] = f1_score(
-            y_true, y_pred, average='weighted')
-        scores_all['f1_micro'] = f1_score(y_true, y_pred, average='micro')
-        scores_all['f1_macro'] = f1_score(y_true, y_pred, average='macro')
+            y_true, y_pred, labels=LABELS_FOR_EVAL, average='weighted')
+        scores_all['f1_micro'] = f1_score(
+            y_true, y_pred, labels=LABELS_FOR_EVAL, average='micro')
+        scores_all['f1_macro'] = f1_score(
+            y_true, y_pred, labels=LABELS_FOR_EVAL, average='macro')
         scores_all['cross_entropy_loss'] = np.mean(cross_entropy_loss_all)
 
     scores_all = {key: float(val) for key, val in scores_all.items()}
@@ -159,6 +170,21 @@ def evalute_SPLIT(roberta, DATASET, batch_size, num_utts, score_pooling, SPLIT):
     Y = os.path.join(DATASET_DIR, DATASET, 'roberta', SPLIT + '.label')
     with open(Y, 'r') as stream:
         Y = [line.strip() for line in stream.readlines()]
+
+    # to avoid OOM
+    if num_inputs == 1:
+        XY = list(zip(X[0], Y))
+        random.shuffle(XY)
+
+        X[0], Y = zip(*XY)
+
+    elif num_inputs == 2:
+        XY = list(zip(X[0], X[1], Y))
+        random.shuffle(XY)
+
+        X[0], X[1], Y = zip(*XY)
+    else:
+        raise ValueError("something is wrong")
 
     for i in range(num_inputs):
         assert len(X[i]) == len(Y)
@@ -208,7 +234,7 @@ def evalute_SPLIT(roberta, DATASET, batch_size, num_utts, score_pooling, SPLIT):
         f"{original_length}, {len(y_true)}, {len(y_pred)}, " \
         f"{len(cross_entropy_loss_all)}, {len(probs_all)}"
 
-    scores_all = get_scores_all(X, Y, y_true, y_pred, cross_entropy_loss_all,
+    scores_all = get_scores_all(DATASET, X, Y, y_true, y_pred, cross_entropy_loss_all,
                                 probs_all, num_utts, score_pooling)
 
     return scores_all
@@ -398,6 +424,10 @@ def leaderboard():
                      "is done to minimize the validation cross entropy loss, "
                      "since its the most generic metric, "
                      "with backpropagation on training data split.\n\n")
+
+        stream.write("As for DailyDialog, the neutral class, which accounts "
+                     "for 80% of the data, is not included in the f1_score "
+                     "calcuation. Note that they are still used in training.\n\n")
 
     for DATASET in DATASETS_SUPPORTED:
 

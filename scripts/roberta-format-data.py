@@ -42,9 +42,11 @@ def get_emotion2num(DATASET):
                             'powerful',
                             'sad']
 
-    # DailyDialog originally has 7 classes, but we'll use 6 of them
-    # we remove neutral
-    emotions['DailyDialog'] = ['happiness',
+    # DailyDialog originally has 7 classes, but be sure not to include the 
+    # neutral class, which accounts for 80% of the data, in calculating 
+    # the micro f1_score.
+    emotions['DailyDialog'] = ['neutral',
+                               'happiness',
                                'surprise',
                                'sadness',
                                'anger',
@@ -126,14 +128,14 @@ def get_uttid_speaker_utterance_emotion(DATASET, labels, SPLIT, json_path,
     if DATASET in ['MELD', 'EmoryNLP']:
         speaker = text['Speaker']
     elif DATASET == 'IEMOCAP':
-        # speaker = {'Female': 'Alice', 'Male': 'Bob'}[text['Speaker']]
-        sessid = text['SessionID']
-        # https: // www.ssa.gov/oact/babynames/decades/century.html
-        speaker = {'Ses01': {'Female': 'Mary', 'Male': 'James'},
-                   'Ses02': {'Female': 'Patricia', 'Male': 'John'},
-                   'Ses03': {'Female': 'Jennifer', 'Male': 'Robert'},
-                   'Ses04': {'Female': 'Linda', 'Male': 'Michael'},
-                   'Ses05': {'Female': 'Elizabeth', 'Male': 'William'}}[sessid][text['Speaker']]
+        speaker = {'Female': 'Alice', 'Male': 'Bob'}[text['Speaker']]
+        # sessid = text['SessionID']
+        # # https: // www.ssa.gov/oact/babynames/decades/century.html
+        # speaker = {'Ses01': {'Female': 'Mary', 'Male': 'James'},
+        #            'Ses02': {'Female': 'Patricia', 'Male': 'John'},
+        #            'Ses03': {'Female': 'Jennifer', 'Male': 'Robert'},
+        #            'Ses04': {'Female': 'Linda', 'Male': 'Michael'},
+        #            'Ses05': {'Female': 'Elizabeth', 'Male': 'William'}}[sessid][text['Speaker']]
 
     elif DATASET == 'DailyDialog':
         speaker = {'A': 'Alex', 'B': 'Blake'}[text['Speaker']]

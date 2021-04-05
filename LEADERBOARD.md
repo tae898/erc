@@ -5,6 +5,8 @@ The reported performance of my models are the mean values of the 5 random seed r
 
 Since the distribution of classes is different for every dataset and train / val / tests splits, and also not all datasets have the same performance metric, the optimization is done to minimize the validation cross entropy loss, since its the most generic metric, with backpropagation on training data split.
 
+As for DailyDialog, the neutral class, which accounts for 80% of the data, is not included in the f1_score calcuation. Note that they are still used in training.
+
 ## MELD 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
@@ -14,6 +16,8 @@ The metric is f1_weighted (%)
 | roberta.base | 01-utt-SPEAKER | 68.811 | 58.708 | 63.089 | 
 | roberta.base | 02-utt | 70.685 | 60.114 | 63.288 | 
 | roberta.base | 02-utt-SPEAKER | 71.501 | 60.119 | 63.563 | 
+| roberta.base | 03-utt | 70.183 | 60.369 | 63.957 | 
+| roberta.base | 03-utt-SPEAKER | 71.218 | 60.24 | 64.02 | 
 | roberta.base | all-utt | 75.709 | 60.905 | 63.506 | 
 | roberta.base | all-utt-SPEAKER | 73.063 | 61.471 | 63.535 | 
 | COSMIC | SOTA |   |   | 65.21 |
@@ -28,6 +32,9 @@ The metric is f1_weighted (%)
 | roberta.base | 02-utt | 70.612 | 56.113 | 55.088 | 
 | roberta.base | 02-utt-SPEAKER-02-names | 71.4 | 56.94 | 54.731 | 
 | roberta.base | 02-utt-SPEAKER-10-names | 74.658 | 58.572 | 55.504 | 
+| roberta.base | 03-utt | 71.118 | 57.543 | 58.645 | 
+| roberta.base | 03-utt-SPEAKER-02-names | 66.71 | 58.423 | 56.688 | 
+| roberta.base | 03-utt-SPEAKER-10-names | 74.296 | 59.521 | 58.048 | 
 | roberta.base | all-utt | 75.114 | 61.039 | 62.785 | 
 | roberta.base | all-utt-SPEAKER-02-names | 69.636 | 60.741 | 61.362 | 
 | roberta.base | all-utt-SPEAKER-10-names | 70.966 | 62.245 | 61.894 | 
@@ -40,6 +47,8 @@ The metric is f1_weighted (%)
 | roberta.base | 01-utt-SPEAKER | 44.276 | 37.093 | 34.318 | 
 | roberta.base | 02-utt | 44.09 | 37.44 | 34.398 | 
 | roberta.base | 02-utt-SPEAKER | 45.283 | 37.661 | 35.275 | 
+| roberta.base | 03-utt | 44.754 | 37.701 | 34.589 | 
+| roberta.base | 03-utt-SPEAKER | 44.104 | 37.509 | 34.732 | 
 | roberta.base | all-utt | 45.351 | 37.175 | 33.945 | 
 | roberta.base | all-utt-SPEAKER | 48.431 | 37.935 | 34.148 | 
 | COSMIC | SOTA |   |   | 38.11 |
@@ -47,10 +56,4 @@ The metric is f1_weighted (%)
 The metric is f1_micro (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.base | 01-utt | 93.679 | 90.219 | 87.005 | 
-| roberta.base | 01-utt-SPEAKER | 92.492 | 90.239 | 86.371 | 
-| roberta.base | 02-utt | 92.853 | 90.552 | 87.216 | 
-| roberta.base | 02-utt-SPEAKER | 93.051 | 90.427 | 86.878 | 
-| roberta.base | all-utt | 94.965 | 91.176 | 89.147 | 
-| roberta.base | all-utt-SPEAKER | 94.808 | 91.093 | 88.696 | 
 | CESTa | SOTA |   |   | 63.12 |
