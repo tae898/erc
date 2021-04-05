@@ -1,0 +1,12 @@
+0 1167
+1 1143
+2 739
+3 710
+4 620
+5 392
+madeupword0000 0
+madeupword0001 0
+madeupword0002 0
+madeupword0003 0
+madeupword0004 0
+madeupword0005 0
