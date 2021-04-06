@@ -18,6 +18,10 @@ The metric is f1_weighted (%)
 | roberta.base | 02-utt-SPEAKER | 71.501 | 60.119 | 63.563 | 
 | roberta.base | 03-utt | 70.183 | 60.369 | 63.957 | 
 | roberta.base | 03-utt-SPEAKER | 71.218 | 60.24 | 64.02 | 
+| roberta.base | 04-utt | 73.168 | 61.085 | 64.302 | 
+| roberta.base | 04-utt-SPEAKER | 73.056 | 61.222 | 64.211 | 
+| roberta.base | 05-utt | 72.049 | 61.105 | 64.078 | 
+| roberta.base | 05-utt-SPEAKER | 71.921 | 60.972 | 64.297 | 
 | roberta.base | all-utt | 75.709 | 60.905 | 63.506 | 
 | roberta.base | all-utt-SPEAKER | 73.063 | 61.471 | 63.535 | 
 | COSMIC | SOTA |   |   | 65.21 |
