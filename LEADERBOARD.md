@@ -56,4 +56,5 @@ The metric is f1_weighted (%)
 The metric is f1_micro (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
+| roberta.large | all-utt-SPEAKER | 69.538 | 58.016 | 55.522 | 
 | CESTa | SOTA |   |   | 63.12 |
