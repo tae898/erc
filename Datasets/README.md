@@ -157,11 +157,11 @@ After you've either downloaded or computed, your current directory `Datasets` sh
 
 ## How to use the datasets
 
-Check out `scripts/datasets-demo.ipynb`
+Check out `scripts/notebooks/datasets-demo.ipynb`
 
 ## Dataset stats
 
-The below stats were made by `scripts/get-stats.ipynb`
+The below stats were made by `scripts/notebooks/get-stats.ipynb`
 
 ### MELD
 
@@ -408,3 +408,8 @@ The below stats were made by `scripts/get-stats.ipynb`
 ![IEMOCAP-fps](scripts/images/IEMOCAP-fps.png)
 ![IEMOCAP-num-frames](scripts/images/IEMOCAP-num-frames.png)
 ![IEMOCAP-num-tokens](scripts/images/IEMOCAP-num-tokens.png)
+
+
+## Text features
+
+RoBERTa-large text features were extracted for the datasets [MELD](https://surfdrive.surf.nl/files/index.php/s/TqCNPJmlMPBYYtb/download) and [IEMOCAP](https://surfdrive.surf.nl/files/index.php/s/q7w3Dqaudgal0Rp/download).
