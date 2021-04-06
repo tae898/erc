@@ -23,6 +23,7 @@ The metric is f1_weighted (%)
 | roberta.base | 05-utt-BS32 | 72.049 | 61.105 | 64.078 | 
 | roberta.base | 05-utt-SPEAKER-BS32 | 71.921 | 60.972 | 64.297 | 
 | roberta.base | all-utt-BS8 | 75.709 | 60.905 | 63.506 | 
+| roberta.large | all-utt-SPEAKER-BS4 | 80.067 | 64.755 | 64.731 | 
 | roberta.base | all-utt-SPEAKER-BS8 | 73.063 | 61.471 | 63.535 | 
 | COSMIC | SOTA |   |   | 65.21 |
 ## IEMOCAP 
@@ -39,6 +40,7 @@ The metric is f1_weighted (%)
 | roberta.base | 03-utt-BS32 | 71.118 | 57.543 | 58.645 | 
 | roberta.base | 03-utt-SPEAKER-02-names-BS32 | 66.71 | 58.423 | 56.688 | 
 | roberta.base | 03-utt-SPEAKER-10-names-BS32 | 74.296 | 59.521 | 58.048 | 
+| roberta.base | 20210406_19311617737515 | 71.205 | 57.249 | 58.784 | 
 | roberta.base | all-utt-BS8 | 75.114 | 61.039 | 62.785 | 
 | roberta.base | all-utt-SPEAKER-02-names-BS8 | 69.636 | 60.741 | 61.362 | 
 | roberta.base | all-utt-SPEAKER-10-names-BS8 | 70.966 | 62.245 | 61.894 | 
