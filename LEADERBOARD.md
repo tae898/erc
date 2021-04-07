@@ -12,21 +12,21 @@ The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
 | roberta.large | 01-utt-SPEAKER-BS32 | 75.828 | 62.51 | 65.292 | 
+| roberta.large | all-utt-SPEAKER-BS1 | 77.66 | 63.005 | 64.865 | 
 | roberta.large | all-utt-SPEAKER-BS4 | 80.067 | 64.755 | 64.731 | 
-| roberta.large | all-utt-SPEAKERS-BS1 | 77.66 | 63.005 | 64.865 | 
 | COSMIC | SOTA |   |   | 65.21 |
 ## IEMOCAP 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.large | 01-utt-SPEAKER-10-names-BS16 | 73.992 | 55.639 | 53.051 | 
-| roberta.large | all-utt-SPEAKER-10-names-BS1 | 81.225 | 65.412 | 67.421 | 
+| roberta.large | 01-utt-SPEAKER-BS16 | 73.992 | 55.639 | 53.051 | 
+| roberta.large | all-utt-SPEAKER-BS1 | 81.225 | 65.412 | 67.421 | 
 | CESTa | SOTA |   |   | 67.1 |
 ## EmoryNLP 
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.large | all-utt-SPEAKERS-BS1 | 51.055 | 38.016 | 35.008 | 
+| roberta.large | all-utt-SPEAKER-BS1 | 51.055 | 38.016 | 35.008 | 
 | COSMIC | SOTA |   |   | 38.11 |
 ## DailyDialog 
 The metric is f1_micro (%)
