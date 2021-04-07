@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-assert timm.__version__ == "0.3.2"
 from utils import getter
 from .extractors import EfficientNetExtractor
 
@@ -33,10 +32,14 @@ class BaseTimmModel(nn.Module):
     def __init__(self, num_classes, name, freeze_backbone=False, from_pretrained=True):
         super().__init__()
         self.model = timm.create_model(name, pretrained=from_pretrained)
+
         try:
             self.model.head = nn.Linear(self.model.head.in_features, num_classes)
         except:
-            self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
+            try:
+                self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
+            except:
+                self.model.classifier = nn.Linear(self.model.classifier.in_features, num_classes)
 
     def forward(self, x):
         x = self.model(x)

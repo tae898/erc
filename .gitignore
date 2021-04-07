@@ -26,6 +26,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+apex/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -132,10 +133,7 @@ dmypy.json
 .vscode
 
 # Dataset
-meld/
-data/dev/
-data/train/
-data/test/
+data/
 
 # Checkpoints
 runs/

@@ -1,0 +1,65 @@
+id:                             audio_effnet
+pretrained:                     Null
+model:
+    name:                       BaseTimmModel
+    args:
+        name:                   tf_efficientnet_b1_ap
+        num_classes:            7
+        freeze_backbone:        False
+        from_pretrained:        True
+optimizer:
+    name:                       Adam
+    args:
+        lr:                     0.0003
+loss:
+    name:                       FocalLoss
+    args:                       
+        alpha:                  0.75
+        gamma:                  4
+        reduce:                 True
+metric:
+    -   name:                   F1Weighted
+        args:                   Null
+scheduler:
+    name:                       ReduceLROnPlateau
+    args:
+        factor:                 0.5
+        patience:               2
+dataset:            
+    train:
+        name:                   AudioDataset
+        args:
+            data_dir:           data/raw-audios-wav/train/        
+            csv_path:           data/raw-audios-wav/train.csv
+            format:             .wav
+            sr:                 22050
+            duration:           8
+            n_mels:             128
+            is_train:           True  
+        loader:
+            name: DataLoader
+            args:
+                batch_size:     4
+                shuffle:        True
+                drop_last:      True
+    val:
+        name:                   AudioDataset
+        args:
+            data_dir:           data/raw-audios-wav/val/        
+            csv_path:           data/raw-audios-wav/val.csv
+            format:             .wav
+            sr:                 22050
+            duration:           8
+            n_mels:             128
+            is_train:           False
+        loader:
+            name: DataLoader
+            args:
+                batch_size:     4
+                shuffle:        True
+                drop_last:      True
+ 
+trainer: 
+    nepochs: 20
+    val_step: 1
+    log_step: 1
