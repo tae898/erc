@@ -407,7 +407,13 @@ def leaderboard():
                                            [metric]['mean']*100, 3),
                                      round(results['val'][metric]
                                            ['mean']*100, 3),
-                                     round(results['test'][metric]['mean']*100, 3)])
+                                     round(results['test']
+                                           [metric]['mean']*100, 3),
+                                     round(
+                                         results['train']['cross_entropy_loss']['mean'], 5),
+                                     round(
+                                         results['val']['cross_entropy_loss']['mean'], 5),
+                                     round(results['test']['cross_entropy_loss']['mean'], 5)])
 
     with open('LEADERBOARD.md', 'w') as stream:
         stream.write('# Leaderboard\n')
@@ -440,13 +446,15 @@ def leaderboard():
         leaderboard[DATASET].sort(key=lambda x: x[0])
 
         table = leaderboard[DATASET]
-        table.insert(0, ["base model", "method", "train", "val", "test"])
+        table.insert(0, ["base model", "method",
+                         f"train ({metric})", f"val ({metric})", f"test ({metric})", 
+                         f"train (cse)", f"val (cse)", f"test (cse)"])
 
         with open('LEADERBOARD.md', 'a') as stream:
             table = make_markdown_table(table)
 
             stream.write(f"## {DATASET} \n")
-            stream.write(f"The metric is {metric} (%)")
+            # stream.write(f"The metric is {metric} (%)")
             stream.write(table)
             table = add_markdown_sota(sota[DATASET])
             stream.write(table)
