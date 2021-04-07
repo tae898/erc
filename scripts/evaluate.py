@@ -437,6 +437,8 @@ def leaderboard():
             metric = 'f1_weighted'
 
         leaderboard[DATASET].sort(key=lambda x: x[1])
+        leaderboard[DATASET].sort(key=lambda x: x[0])
+
         table = leaderboard[DATASET]
         table.insert(0, ["base model", "method", "train", "val", "test"])
 
