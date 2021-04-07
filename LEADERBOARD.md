@@ -11,19 +11,6 @@ As for DailyDialog, the neutral class, which accounts for 80% of the data, is no
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.base | 01-utt-BS64 | 68.081 | 58.539 | 62.638 | 
-| roberta.base | 01-utt-SPEAKER-BS64 | 68.811 | 58.708 | 63.089 | 
-| roberta.base | 02-utt-BS32 | 70.685 | 60.114 | 63.288 | 
-| roberta.base | 02-utt-SPEAKER-BS32 | 71.501 | 60.119 | 63.563 | 
-| roberta.base | 03-utt-BS32 | 70.183 | 60.369 | 63.957 | 
-| roberta.base | 03-utt-SPEAKER-BS32 | 71.218 | 60.24 | 64.02 | 
-| roberta.base | 04-utt-BS32 | 73.168 | 61.085 | 64.302 | 
-| roberta.base | 04-utt-SPEAKER-BS32 | 73.056 | 61.222 | 64.211 | 
-| roberta.base | 05-utt-BS32 | 72.049 | 61.105 | 64.078 | 
-| roberta.base | 05-utt-SPEAKER-BS32 | 71.921 | 60.972 | 64.297 | 
-| roberta.base | all-utt-BS8 | 75.709 | 60.905 | 63.506 | 
-| roberta.base | all-utt-SPEAKER-BS1 | 80.209 | 60.666 | 62.805 | 
-| roberta.base | all-utt-SPEAKER-BS8 | 73.063 | 61.471 | 63.535 | 
 | roberta.large | 01-utt-SPEAKER-BS32 | 75.828 | 62.51 | 65.292 | 
 | roberta.large | all-utt-SPEAKER-BS4 | 80.067 | 64.755 | 64.731 | 
 | roberta.large | all-utt-SPEAKERS-BS1 | 77.66 | 63.005 | 64.865 | 
@@ -32,22 +19,6 @@ The metric is f1_weighted (%)
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.base | 01-utt-BS64 | 72.38 | 54.621 | 52.716 | 
-| roberta.base | 01-utt-SPEAKER-02-names-BS64 | 72.495 | 54.211 | 51.987 | 
-| roberta.base | 01-utt-SPEAKER-10-names-BS64 | 74.114 | 54.301 | 51.643 | 
-| roberta.base | 02-utt-BS32 | 70.612 | 56.113 | 55.088 | 
-| roberta.base | 02-utt-SPEAKER-02-names-BS32 | 71.4 | 56.94 | 54.731 | 
-| roberta.base | 02-utt-SPEAKER-10-names-BS32 | 74.658 | 58.572 | 55.504 | 
-| roberta.base | 03-utt-BS32 | 71.118 | 57.543 | 58.645 | 
-| roberta.base | 03-utt-SPEAKER-02-names-BS32 | 66.71 | 58.423 | 56.688 | 
-| roberta.base | 03-utt-SPEAKER-10-names-BS32 | 74.296 | 59.521 | 58.048 | 
-| roberta.base | 04-utt-BS16 | 70.915 | 58.655 | 59.725 | 
-| roberta.base | 04-utt-SPEAKER-02-names-BS16 | 69.031 | 58.358 | 58.327 | 
-| roberta.base | 04-utt-SPEAKER-10-names-BS16 | 69.103 | 59.138 | 58.333 | 
-| roberta.base | 05-utt | 67.264 | 59.353 | 58.404 | 
-| roberta.base | all-utt-BS8 | 75.114 | 61.039 | 62.785 | 
-| roberta.base | all-utt-SPEAKER-02-names-BS8 | 69.636 | 60.741 | 61.362 | 
-| roberta.base | all-utt-SPEAKER-10-names-BS8 | 70.966 | 62.245 | 61.894 | 
 | roberta.large | 01-utt-SPEAKER-10-names-BS16 | 73.992 | 55.639 | 53.051 | 
 | roberta.large | all-utt-SPEAKER-10-names-BS1 | 81.225 | 65.412 | 67.421 | 
 | CESTa | SOTA |   |   | 67.1 |
@@ -55,14 +26,6 @@ The metric is f1_weighted (%)
 The metric is f1_weighted (%)
 |  base model | method | train | val | test |
 |-------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.base | 01-utt-BS32 | 43.255 | 37.534 | 34.414 | 
-| roberta.base | 01-utt-SPEAKER-BS32 | 44.276 | 37.093 | 34.318 | 
-| roberta.base | 02-utt-BS32 | 44.09 | 37.44 | 34.398 | 
-| roberta.base | 02-utt-SPEAKER-BS32 | 45.283 | 37.661 | 35.275 | 
-| roberta.base | 03-utt-BS32 | 44.754 | 37.701 | 34.589 | 
-| roberta.base | 03-utt-SPEAKER-BS32 | 44.104 | 37.509 | 34.732 | 
-| roberta.base | all-utt-BS8 | 45.351 | 37.175 | 33.945 | 
-| roberta.base | all-utt-SPEAKER-BS8 | 48.431 | 37.935 | 34.148 | 
 | roberta.large | all-utt-SPEAKERS-BS1 | 51.055 | 38.016 | 35.008 | 
 | COSMIC | SOTA |   |   | 38.11 |
 ## DailyDialog 
