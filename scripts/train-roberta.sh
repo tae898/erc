@@ -6,7 +6,7 @@ pip install scikit-learn requests nltk importlib_metadata
 . scripts/train-roberta.config.sh
 
 CURRENT_TIME=$(date +%Y%m%d_%H%M%s)
-CHECKPOINT_DIR="checkpoints_${CURRENT_TIME}"
+CHECKPOINT_DIR="checkpoints-${CURRENT_TIME}-${NUM_UTTS}-${BATCH_SIZE}-${SPEAKER_MODE}"
 
 rm -rf Datasets/$DATASET/roberta/
 mkdir -p Datasets/$DATASET/roberta/
@@ -19,7 +19,7 @@ wget -N 'https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/vocab.bpe' -P 'models/g
 # Download fairseq dictionary.
 wget -N 'https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/dict.txt' -P 'models/gpt2-bpe'
 
-BASE_DIR="models/roberta.${ROBERTA_SIZE}/${DATASET}/${CURRENT_TIME}"
+BASE_DIR="models/roberta.${ROBERTA_SIZE}/${DATASET}/${CURRENT_TIME}-${NUM_UTTS}-${BATCH_SIZE}-${SPEAKER_MODE}"
 rm -rf $BASE_DIR
 mkdir -p $BASE_DIR
 cp scripts/train-roberta.config.sh $BASE_DIR
