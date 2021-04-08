@@ -27,7 +27,7 @@ ROBERTA_PATH="models/roberta.${ROBERTA_SIZE}/model.pt" # pre-trained
 PATIENCE=5                                             # early stopping in number of training epochs
 TOKENS_PER_SAMPLE=512                                  # I think this should be fixed to 512.
 UPDATE_FREQ=4                                          # update parameters every N_i batches, when in epoch i
-NUM_EPOCHS=2                                           # force stop training at specified epoch
+NUM_EPOCHS=100                                           # force stop training at specified epoch
 NUM_WARMUP_EPOCHS=2                                    # number of warmup epochs
 SAVE_INTERVAL=1                                        # save a checkpoint every N epochs
 GPU_IDS=0                                              # The GPU ids of your machine. use `nvidia-smi` to check them out.
@@ -76,7 +76,7 @@ for NUM_UTTS in 1 2 4 8 16 32 1000; do
         elif ((NUM_UTTS > 1 && NUM_UTTS <= 2)); then
             BATCH_SIZE=4
         elif ((NUM_UTTS > 2 && NUM_UTTS <= 4)); then
-            BATCH_SIZE=2
+            BATCH_SIZE=4
         elif ((NUM_UTTS > 4 && NUM_UTTS <= 8)); then
             BATCH_SIZE=2
         elif ((NUM_UTTS > 8 && NUM_UTTS <= 16)); then
@@ -105,7 +105,7 @@ for NUM_UTTS in 1 2 4 8 16 32 1000; do
     fi
     echo $DATASET $NUM_UTTS $BATCH_SIZE
     CURRENT_TIME=$(date +%Y%m%d_%H%M%s)
-    CHECKPOINT_DIR="checkpoints-${CURRENT_TIME}-${NUM_UTTS}-${BATCH_SIZE}"
+    CHECKPOINT_DIR="checkpoints-${CURRENT_TIME}-${NUM_UTTS}-${BATCH_SIZE}-${SPEAKER_MODE}"
     echo $CHECKPOINT_DIR
 
     rm -rf Datasets/$DATASET/roberta/
@@ -119,7 +119,7 @@ for NUM_UTTS in 1 2 4 8 16 32 1000; do
     # Download fairseq dictionary.
     wget -N 'https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/dict.txt' -P 'models/gpt2-bpe'
 
-    BASE_DIR="models/roberta.${ROBERTA_SIZE}/${DATASET}/${CURRENT_TIME}-${NUM_UTTS}-${BATCH_SIZE}"
+    BASE_DIR="models/roberta.${ROBERTA_SIZE}/${DATASET}/${CURRENT_TIME}-${NUM_UTTS}-${BATCH_SIZE}-${SPEAKER_MODE}"
     rm -rf $BASE_DIR
     mkdir -p $BASE_DIR
 
