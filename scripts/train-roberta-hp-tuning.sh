@@ -40,15 +40,15 @@ SEEDS=0 # random seeds
 for NUM_UTTS in 1 2 4 8 16 32 1000; do
     if [ "${DATASET}" = MELD ]; then
         if ((NUM_UTTS == 1)); then
-            BATCH_SIZE=16
+            BATCH_SIZE=8
         elif ((NUM_UTTS > 1 && NUM_UTTS <= 2)); then
-            BATCH_SIZE=8
-        elif ((NUM_UTTS > 2 && NUM_UTTS <= 4)); then
-            BATCH_SIZE=8
-        elif ((NUM_UTTS > 4 && NUM_UTTS <= 8)); then
             BATCH_SIZE=4
-        elif ((NUM_UTTS > 8 && NUM_UTTS <= 16)); then
+        elif ((NUM_UTTS > 2 && NUM_UTTS <= 4)); then
+            BATCH_SIZE=4
+        elif ((NUM_UTTS > 4 && NUM_UTTS <= 8)); then
             BATCH_SIZE=2
+        elif ((NUM_UTTS > 8 && NUM_UTTS <= 16)); then
+            BATCH_SIZE=1
         elif ((NUM_UTTS > 16 && NUM_UTTS <= 32)); then
             BATCH_SIZE=1
         else
@@ -56,13 +56,13 @@ for NUM_UTTS in 1 2 4 8 16 32 1000; do
         fi
     elif [ "${DATASET}" = IEMOCAP ]; then
         if ((NUM_UTTS == 1)); then
-            BATCH_SIZE=8
-        elif ((NUM_UTTS > 1 && NUM_UTTS <= 2)); then
             BATCH_SIZE=4
+        elif ((NUM_UTTS > 1 && NUM_UTTS <= 2)); then
+            BATCH_SIZE=2
         elif ((NUM_UTTS > 2 && NUM_UTTS <= 4)); then
-            BATCH_SIZE=2
+            BATCH_SIZE=1
         elif ((NUM_UTTS > 4 && NUM_UTTS <= 8)); then
-            BATCH_SIZE=2
+            BATCH_SIZE=1
         elif ((NUM_UTTS > 8 && NUM_UTTS <= 16)); then
             BATCH_SIZE=1
         elif ((NUM_UTTS > 16 && NUM_UTTS <= 32)); then
@@ -72,13 +72,13 @@ for NUM_UTTS in 1 2 4 8 16 32 1000; do
         fi
     elif [ "${DATASET}" = EmoryNLP ]; then
         if ((NUM_UTTS == 1)); then
-            BATCH_SIZE=4
-        elif ((NUM_UTTS > 1 && NUM_UTTS <= 2)); then
-            BATCH_SIZE=4
-        elif ((NUM_UTTS > 2 && NUM_UTTS <= 4)); then
-            BATCH_SIZE=4
-        elif ((NUM_UTTS > 4 && NUM_UTTS <= 8)); then
             BATCH_SIZE=2
+        elif ((NUM_UTTS > 1 && NUM_UTTS <= 2)); then
+            BATCH_SIZE=2
+        elif ((NUM_UTTS > 2 && NUM_UTTS <= 4)); then
+            BATCH_SIZE=2
+        elif ((NUM_UTTS > 4 && NUM_UTTS <= 8)); then
+            BATCH_SIZE=1
         elif ((NUM_UTTS > 8 && NUM_UTTS <= 16)); then
             BATCH_SIZE=1
         elif ((NUM_UTTS > 16 && NUM_UTTS <= 32)); then
@@ -88,13 +88,13 @@ for NUM_UTTS in 1 2 4 8 16 32 1000; do
         fi
     elif [ "${DATASET}" = DailyDialog ]; then
         if ((NUM_UTTS == 1)); then
-            BATCH_SIZE=8
+            BATCH_SIZE=4
         elif ((NUM_UTTS > 1 && NUM_UTTS <= 2)); then
-            BATCH_SIZE=8
+            BATCH_SIZE=4
         elif ((NUM_UTTS > 2 && NUM_UTTS <= 4)); then
-            BATCH_SIZE=8
+            BATCH_SIZE=4
         elif ((NUM_UTTS > 4 && NUM_UTTS <= 8)); then
-            BATCH_SIZE=8
+            BATCH_SIZE=4
         elif ((NUM_UTTS > 8 && NUM_UTTS <= 16)); then
             BATCH_SIZE=4
         elif ((NUM_UTTS > 16 && NUM_UTTS <= 32)); then
