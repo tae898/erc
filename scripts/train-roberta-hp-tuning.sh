@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # pip install scikit-learn requests nltk importlib_metadata
 
-DATASET="DailyDialog"
+DATASET="MELD"
 
 if [ "${DATASET}" = MELD ]; then
     NUM_CLASSES=7
@@ -30,14 +30,14 @@ UPDATE_FREQ=4                                          # update parameters every
 NUM_EPOCHS=100                                           # force stop training at specified epoch
 NUM_WARMUP_EPOCHS=2                                    # number of warmup epochs
 SAVE_INTERVAL=1                                        # save a checkpoint every N epochs
-GPU_IDS=0                                              # The GPU ids of your machine. use `nvidia-smi` to check them out.
+GPU_IDS=0,1                                              # The GPU ids of your machine. use `nvidia-smi` to check them out.
 WEIGHT_DECAY=0.1                                       # I haven't tune this yet.
 DROP_OUT=0.1                                           # I haven't tune this yet.
 ATTENTION_DROP_OUT=0.1                                 # I haven't tune this yet.
 
 SEEDS=0 # random seeds
 # for NUM_UTTS in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 1000; do
-for NUM_UTTS in 1 2 4 8 16 32 1000; do
+for NUM_UTTS in 16 32; do
     if [ "${DATASET}" = MELD ]; then
         if ((NUM_UTTS == 1)); then
             BATCH_SIZE=8
