@@ -7,12 +7,12 @@ model:
 optimizer:
     name:                       Adam
     args:
-        lr:                     0.00001
+        lr:                     0.00003
 loss:
     name:                       FocalLoss
     args:                       
         alpha:                  0.75
-        gamma:                  3
+        gamma:                  2
         reduce:                 True
 metric:
     -   name:                   F1Weighted
@@ -20,8 +20,8 @@ metric:
 scheduler:
     name:                       ReduceLROnPlateau
     args:
-        factor:                 0.1
-        patience:               5
+        factor:                 0.8
+        patience:               2
 dataset:            
     train:
         name:                   AudioTextFeatureVectorDataset
@@ -49,6 +49,6 @@ dataset:
                 drop_last:      True
  
 trainer: 
-    nepochs: 20
+    nepochs: 3
     val_step: 1
     log_step: 1
