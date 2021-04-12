@@ -21,7 +21,7 @@ class AudioTextFeatureVectorDataset(data.Dataset):
 		audio_id, label, dur = df_row['audio_id'], df_row['label'], df_row['duration']
 		audio_feat = np.load(os.path.join(self.audio_feat_dir, audio_id + '.npy'), allow_pickle=True)
 		text_feat = np.load(os.path.join(self.text_feat_dir, audio_id + '.npy'), allow_pickle=True).item()['features']
-		return audio_feat, text_feat, label
+		return (audio_feat, text_feat), label
 
 	def __len__(self):
 		return len(self.csv)

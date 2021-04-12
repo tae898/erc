@@ -1,21 +1,18 @@
-id:                             audio_effnet
+id:                             single_utterance_multimodal_fusion
 pretrained:                     Null
 model:
-    name:                       BaseTimmModel
+    name:                       FusionModel
     args:
-        name:                   tf_efficientnet_b1_ap
         num_classes:            7
-        freeze_backbone:        False
-        from_pretrained:        True
 optimizer:
     name:                       Adam
     args:
-        lr:                     0.0003
+        lr:                     0.00001
 loss:
     name:                       FocalLoss
     args:                       
         alpha:                  0.75
-        gamma:                  4
+        gamma:                  3
         reduce:                 True
 metric:
     -   name:                   F1Weighted
@@ -23,39 +20,31 @@ metric:
 scheduler:
     name:                       ReduceLROnPlateau
     args:
-        factor:                 0.5
-        patience:               2
+        factor:                 0.1
+        patience:               5
 dataset:            
     train:
-        name:                   AudioDataset
-        args:
-            data_dir:           data/raw-audios-wav/train/        
+        name:                   AudioTextFeatureVectorDataset
+        args:    
             csv_path:           data/raw-audios-wav/train.csv
-            format:             .wav
-            sr:                 22050
-            duration:           8
-            n_mels:             128
-            is_train:           True  
+            audio_feat_dir:     Datasets/MELD/audio-features/train/
+            text_feat_dir:      Datasets/MELD/text-features/train/
         loader:
             name: DataLoader
             args:
-                batch_size:     4
+                batch_size:     8
                 shuffle:        True
                 drop_last:      True
     val:
-        name:                   AudioDataset
+        name:                   AudioTextFeatureVectorDataset
         args:
-            data_dir:           data/raw-audios-wav/val/        
             csv_path:           data/raw-audios-wav/val.csv
-            format:             .wav
-            sr:                 22050
-            duration:           8
-            n_mels:             128
-            is_train:           False
+            audio_feat_dir:     Datasets/MELD/audio-features/val/
+            text_feat_dir:      Datasets/MELD/text-features/val/
         loader:
             name: DataLoader
             args:
-                batch_size:     4
+                batch_size:     8
                 shuffle:        True
                 drop_last:      True
  
