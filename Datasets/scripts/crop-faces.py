@@ -14,7 +14,7 @@ CURRENT_DIR = './'
 DET_THRESHOLD = 0.90
 COS_THRESHOLD = 0.80
 IMAGE_SIZE = 224
-DATABASES = ['MELD', 'IEMOCAP', 'CAER', 'AFEW']
+DATASETS = ['MELD', 'IEMOCAP']
 
 
 def video2numpy(path):
@@ -181,10 +181,10 @@ n_jobs = int(args.num_jobs)
 print(f"n_jobs: {n_jobs}")
 
 
-for DATABASE in tqdm(DATABASES):
-    for DATASET in tqdm(['train', 'val', 'test']):
+for DATASET in tqdm(DATASETS):
+    for SPLIT in tqdm(['train', 'val', 'test']):
         videopaths = glob(os.path.join(
-            CURRENT_DIR, DATABASE, 'raw-videos', DATASET, '*'))
+            CURRENT_DIR, DATASET, 'raw-videos', SPLIT, '*'))
 
         random.shuffle(videopaths)
 

@@ -5,36 +5,21 @@
 
 if [ $1 = "download" ]; then
     echo downloading ...
-    python3 -m pip install gdown
 
     rm -f MELD-faces.zip
     rm -f IEMOCAP-faces.zip
-    rm -f AFEW-faces.zip
-    rm -f CAER-faces.zip
 
-    # MELD
-    gdown --id 1xJ65HyNHmo-HUxRNIRLYzN0KL0RmOLsP
-    # IEMOCAP
-    gdown --id 1ov83wtza25M2h3QFuRXpswCzYivswktL
-    # AFEW
-    gdown --id 1e2INqhdSXyG0fBEKj5yjr0Jwy4p-cgi5
-    # CAER
-    gdown --id 1GMmMdrIMqacrUY5HC9DS3Na8HLoy9OD0
+    wget -O MELD-faces.zip https://surfdrive.surf.nl/files/index.php/s/1CsIG1PM76uIbfh/download
+    wget -O IEMOCAP-faces.zip https://surfdrive.surf.nl/files/index.php/s/pGMV6yrZLQS66yu/download
 
-    mkdir -p MELD
+    mkdir -p MELD 
     mkdir -p IEMOCAP
-    mkdir -p AFEW
-    mkdir -p CAER
 
     unzip -o MELD-faces.zip -d MELD/
     unzip -o IEMOCAP-faces.zip -d IEMOCAP/
-    unzip -o AFEW-faces.zip -d AFEW/
-    unzip -o CAER-faces.zip -d CAER/
 
     rm -f MELD-faces.zip
     rm -f IEMOCAP-faces.zip
-    rm -f AFEW-faces.zip
-    rm -f CAER-faces.zip
 
 fi
 

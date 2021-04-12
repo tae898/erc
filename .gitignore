@@ -139,3 +139,7 @@ Datasets/MELD/
 # Checkpoints
 runs/
 best_weights/
+checkpoints*
+
+# Pytorch models
+*.pt

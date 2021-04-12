@@ -22,6 +22,8 @@ for foo in glob('*/*.txt'):
             utterance_id = tokens[0]
             assert '_' in utterance_id
             assert 'XX' not in utterance_id
+            speaker = utterance_id.split('_')[-1]
+            speaker = ''.join([i for i in speaker if not i.isdigit()])
             dur = tokens[1]
             dur = dur.split(':')[0]
             dur = dur.split('-')
@@ -34,7 +36,9 @@ for foo in glob('*/*.txt'):
             diautt_ordered[DATASET][dia].append(utterance_id)
 
             to_dump = {'Utterance': utterance,
-                       'StartTime': start, 'EndTime': end}
+                       'StartTime': start, 
+                       'EndTime': end,
+                       'Speaker': {'M': 'Male', 'F':'Female'}[speaker]}
             with open(os.path.join(DATASET, dia, utterance_id + '.json'), 'w') as stream:
                 json.dump(to_dump, stream, indent=4)
 

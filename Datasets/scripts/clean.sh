@@ -4,76 +4,46 @@
 pip install av librosa
 mkdir -p DEBUG
 
-FILE=MELD.Raw.tar.gz
-if test -f "$FILE"; then
+if test -f "MELD.Raw.tar.gz"; then
     rm -rf MELD
-    echo "$FILE exists."
-    tar -zxvf $FILE
+    echo "Processing the MELD dataset ..."
+    tar -zxvf MELD.Raw.tar.gz
 
     cd MELD.Raw
-    FILE_=train.tar.gz
-    tar -zxvf $FILE_
-    rm $FILE_
-
-    FILE_=dev.tar.gz
-    tar -zxvf $FILE_
-    rm $FILE_
-
-    FILE_=test.tar.gz
-    tar -zxvf $FILE_
-    rm $FILE_
-
+    for FILE in "train.tar.gz" "dev.tar.gz" "test.tar.gz"; do
+        tar -xzvf $FILE
+        rm $FILE
+    done
     cd ..
 
     rm -rf DEBUG/MELD.Raw
     mv -f MELD.Raw DEBUG/
 
-    mkdir -p MELD/raw-videos/train
-    for filename in DEBUG/MELD.Raw/train_splits/*.mp4; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- $filename)"
-        ln -sf $filename MELD/raw-videos/train/$f
+    mv DEBUG/MELD.Raw/train_splits DEBUG/MELD.Raw/train
+    mv DEBUG/MELD.Raw/dev_splits_complete DEBUG/MELD.Raw/val
+    mv DEBUG/MELD.Raw/output_repeated_splits_test DEBUG/MELD.Raw/test
+
+    for SPLIT in "train" "val" "test"; do
+        mkdir -p "MELD/raw-videos/${SPLIT}"
+        for filename in DEBUG/MELD.Raw/$SPLIT/*.mp4; do
+            filename=$(readlink -f $filename)
+            echo "Processing ${filename} ..."
+            f="$(basename -- $filename)"
+            echo $f
+            ln -sf "${filename}" "MELD/raw-videos/${SPLIT}/${f}"
+        done
     done
 
-    mkdir -p MELD/raw-videos/val
-    for filename in DEBUG/MELD.Raw/dev_splits_complete/*.mp4; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- $filename)"
-        ln -sf $filename MELD/raw-videos/val/$f
-    done
-
-    mkdir -p MELD/raw-videos/test
-    for filename in DEBUG/MELD.Raw/output_repeated_splits_test/*.mp4; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- $filename)"
-        ln -sf $filename MELD/raw-videos/test/$f
-    done
-
-    mkdir -p MELD/raw-audios/train
-    for filename in DEBUG/MELD.Raw/train_splits/*.mp4; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- "$filename" .mp4).mp3"
-        ffmpeg -y -i $filename -q:a 0 -map a MELD/raw-audios/train/$f
-    done
-
-    mkdir -p MELD/raw-audios/val
-    for filename in DEBUG/MELD.Raw/dev_splits_complete/*.mp4; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- "$filename" .mp4).mp3"
-        ffmpeg -y -i $filename -q:a 0 -map a MELD/raw-audios/val/$f
-    done
-
-    mkdir -p MELD/raw-audios/test
-    for filename in DEBUG/MELD.Raw/output_repeated_splits_test/*.mp4; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- "$filename" .mp4).mp3"
-        ffmpeg -y -i $filename -q:a 0 -map a MELD/raw-audios/test/$f
+    for SPLIT in "train" "val" "test"; do
+        mkdir -p "MELD/raw-audios/${SPLIT}"
+        for filename in DEBUG/MELD.Raw/$SPLIT/*.mp4; do
+            filename=$(readlink -f $filename)
+            echo "Processing ${filename} ..."
+            f="$(basename -- $filename .mp4).wav"
+            echo $f
+            # ffmpeg -y -i $filename -q:a 0 -map a MELD/raw-audios/$SPLIT/$f
+            ffmpeg -i $filename -acodec pcm_s16le -ac 1 -ar 22050 MELD/raw-audios/$SPLIT/$f
+        done
     done
 
     python3 scripts/convert-cp1252-to-utf8.py
@@ -83,15 +53,13 @@ if test -f "$FILE"; then
 
     python3 scripts/MELD-utterance.py
 
-    rm $FILE
-
+    rm "MELD.Raw.tar.gz"
 fi
 
-FILE=IEMOCAP_full_release.tar.gz
-if test -f "$FILE"; then
+if test -f "IEMOCAP_full_release.tar.gz"; then
     rm -rf IEMOCAP
-    echo "$FILE exists."
-    tar -zxvf $FILE
+    echo "Processing the IEMOCAP dataset ..."
+    tar -zxvf IEMOCAP_full_release.tar.gz
 
     rm -rf DEBUG/IEMOCAP_full_release
     mv -f IEMOCAP_full_release DEBUG/
@@ -139,7 +107,6 @@ if test -f "$FILE"; then
         ffmpeg -y -i $videopath -i $audiopath -c:v copy -c:a aac $videopath.mp4
         rm $videopath
         mv $videopath.mp4 $videopath
-
     done
 
     mv -f IEMOCAP/raw-audios/train/*/*.wav IEMOCAP/raw-audios/train/
@@ -155,218 +122,257 @@ if test -f "$FILE"; then
     mv -f IEMOCAP/raw-texts/train/*/*.json IEMOCAP/raw-texts/train/
     mv -f IEMOCAP/raw-texts/val/*/*.json IEMOCAP/raw-texts/val/
     mv -f IEMOCAP/raw-texts/test/*/*.json IEMOCAP/raw-texts/test/
-
     find IEMOCAP/raw-texts/ -type d -empty -delete
+    
+    python3 scripts/IEMOCAP-label.py
 
-    rm $FILE
+    rm "IEMOCAP_full_release.tar.gz"
 fi
 
-FILE=EmotiW_2018.zip
-if test -f "$FILE"; then
-    rm -rf AFEW
-    echo "$FILE exists."
-    mkdir -p AFEW
-    unzip -o $FILE -d AFEW
 
-    cd AFEW
-    mkdir -p Train
-    FILE_=Train_AFEW.zip
-    unzip -o $FILE_ -d Train
-    rm $FILE_
+if test -f "emotion-detection-emotion-detection-1.0.tar.gz"; then
+    rm -rf EmoryNLP
+    echo "Processing the EmoryNLP dataset ..."
+    tar -zxvf emotion-detection-emotion-detection-1.0.tar.gz
 
-    mkdir -p Val
-    FILE_=Val_AFEW.zip
-    unzip -o $FILE_ -d Val
-    rm $FILE_
+    rm -rf DEBUG/emotion-detection-emotion-detection-1.0
+    mv -f emotion-detection-emotion-detection-1.0 DEBUG/
+    mkdir -p EmoryNLP/raw-texts
 
-    cd Test
-    FILE_=OneDrive-2018-06-22.zip
-    unzip -o $FILE_
-    rm $FILE_
+    python3 scripts/process-EmoryNLP.py
 
-    FILE_=LBPTOP.zip
-    unzip -o $FILE_
-    rm $FILE_
-
-    FILE_=Test_2017_Faces_Distribute.zip
-    unzip -o $FILE_
-    rm $FILE_
-
-    FILE_=Test_2017_points_distribute.zip
-    unzip -o $FILE_
-    rm $FILE_
-
-    FILE_=Test_vid_Distribute.rar
-    unrar x -o+ $FILE_
-    rm $FILE_
-
-    cd ../..
-
-    rm -rf DEBUG/AFEW
-    mv -f AFEW DEBUG/
-
-    mkdir -p AFEW/raw-videos/train
-    for filename in DEBUG/AFEW/Train/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- $filename)"
-        ln -sf $filename AFEW/raw-videos/train/$f
-    done
-
-    mkdir -p AFEW/raw-videos/val
-    for filename in DEBUG/AFEW/Val/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- $filename)"
-        ln -sf $filename AFEW/raw-videos/val/$f
-    done
-
-    mkdir -p AFEW/raw-videos/test
-    for filename in DEBUG/AFEW/Test/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- $filename)"
-        ln -sf $filename AFEW/raw-videos/test/$f
-    done
-
-    mkdir -p AFEW/raw-audios/train
-    for filename in DEBUG/AFEW/Train/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- "$filename" .avi).mp3"
-        ffmpeg -y -i $filename -q:a 0 -map a AFEW/raw-audios/train/$f
-    done
-
-    mkdir -p AFEW/raw-audios/val
-    for filename in DEBUG/AFEW/Val/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- "$filename" .avi).mp3"
-        ffmpeg -y -i $filename -q:a 0 -map a AFEW/raw-audios/val/$f
-    done
-
-    mkdir -p AFEW/raw-audios/test
-    for filename in DEBUG/AFEW/Test/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        f="$(basename -- "$filename" .avi).mp3"
-        ffmpeg -y -i $filename -q:a 0 -map a AFEW/raw-audios/test/$f
-    done
-
-    python3 scripts/AFEW-label.py
-
-    rm $FILE
-
+    rm "emotion-detection-emotion-detection-1.0.tar.gz"
 fi
 
-FILE=CAER.zip
-if test -f "$FILE"; then
-    rm -rf CAER
-    echo "$FILE exists."
-    unzip $FILE
+if test -f "ijcnlp_dailydialog.zip"; then
+    rm -rf DailyDialog
+    echo "Processing the DailyDialog dataset ..."
+    unzip ijcnlp_dailydialog.zip
 
-    rm -rf DEBUG/CAER
-    mv -f CAER DEBUG/
+    cd ijcnlp_dailydialog
+    unzip train.zip
+    unzip validation.zip
+    unzip test.zip
+    rm train.zip
+    rm validation.zip
+    rm test.zip
+    cd ..
 
-    mkdir -p CAER/raw-videos/train
-    for filename in DEBUG/CAER/train/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
+    rm -rf DEBUG/ijcnlp_dailydialog
+    mv -f ijcnlp_dailydialog DEBUG/ijcnlp_dailydialog
 
-        emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
-        emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
-        echo $emotion
-        f="$(basename -- $filename)"
-        f="${emotion}-${f}"
-        datatype=train
-        f="${datatype}-${f}"
-        echo $f
-        ln -sf $filename CAER/raw-videos/train/$f
-    done
+    mkdir -p DailyDialog/raw-texts
 
-    mkdir -p CAER/raw-videos/val
-    for filename in DEBUG/CAER/validation/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
+    python3 scripts/process-DailyDialog.py
 
-        emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
-        emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
-        echo $emotion
-        f="$(basename -- $filename)"
-        f="${emotion}-${f}"
-        datatype=val
-        f="${datatype}-${f}"
-        echo $f
-        ln -sf $filename CAER/raw-videos/val/$f
-    done
-
-    mkdir -p CAER/raw-videos/test
-    for filename in DEBUG/CAER/test/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-
-        emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
-        emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
-        echo $emotion
-        f="$(basename -- $filename)"
-        f="${emotion}-${f}"
-        datatype=test
-        f="${datatype}-${f}"
-        echo $f
-        ln -sf $filename CAER/raw-videos/test/$f
-    done
-
-    mkdir -p CAER/raw-audios/train
-    for filename in DEBUG/CAER/train/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
-        emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
-        echo $emotion
-        f="$(basename -- $filename)"
-        f="${emotion}-${f}"
-        datatype=train
-        f="${datatype}-${f}"
-        f="$(basename -- "$f" .avi).mp3"
-        echo $f
-        ffmpeg -y -i $filename -q:a 0 -map a CAER/raw-audios/train/$f
-    done
-
-    mkdir -p CAER/raw-audios/val
-    for filename in DEBUG/CAER/validation/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
-        emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
-        echo $emotion
-        f="$(basename -- $filename)"
-        f="${emotion}-${f}"
-        datatype=val
-        f="${datatype}-${f}"
-        f="$(basename -- "$f" .avi).mp3"
-        echo $f
-        ffmpeg -y -i $filename -q:a 0 -map a CAER/raw-audios/val/$f
-    done
-
-    mkdir -p CAER/raw-audios/test
-    for filename in DEBUG/CAER/test/*/*.avi; do
-        filename=$(readlink -f $filename)
-        echo $filename
-        emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
-        emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
-        echo $emotion
-        f="$(basename -- $filename)"
-        f="${emotion}-${f}"
-        datatype=test
-        f="${datatype}-${f}"
-        f="$(basename -- "$f" .avi).mp3"
-        echo $f
-        ffmpeg -y -i $filename -q:a 0 -map a CAER/raw-audios/test/$f
-    done
-
-    python3 scripts/CAER-label.py
-    rm $FILE
-
+    rm "ijcnlp_dailydialog.zip"
 fi
+# FILE=EmotiW_2018.zip
+# if test -f "$FILE"; then
+#     rm -rf AFEW
+#     echo "$FILE exists."
+#     mkdir -p AFEW
+#     unzip -o $FILE -d AFEW
 
-echo DONE
+#     cd AFEW
+#     mkdir -p Train
+#     FILE_=Train_AFEW.zip
+#     unzip -o $FILE_ -d Train
+#     rm $FILE_
+
+#     mkdir -p Val
+#     FILE_=Val_AFEW.zip
+#     unzip -o $FILE_ -d Val
+#     rm $FILE_
+
+#     cd Test
+#     FILE_=OneDrive-2018-06-22.zip
+#     unzip -o $FILE_
+#     rm $FILE_
+
+#     FILE_=LBPTOP.zip
+#     unzip -o $FILE_
+#     rm $FILE_
+
+#     FILE_=Test_2017_Faces_Distribute.zip
+#     unzip -o $FILE_
+#     rm $FILE_
+
+#     FILE_=Test_2017_points_distribute.zip
+#     unzip -o $FILE_
+#     rm $FILE_
+
+#     FILE_=Test_vid_Distribute.rar
+#     unrar x -o+ $FILE_
+#     rm $FILE_
+
+#     cd ../..
+
+#     rm -rf DEBUG/AFEW
+#     mv -f AFEW DEBUG/
+
+#     mkdir -p AFEW/raw-videos/train
+#     for filename in DEBUG/AFEW/Train/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+#         f="$(basename -- $filename)"
+#         ln -sf $filename AFEW/raw-videos/train/$f
+#     done
+
+#     mkdir -p AFEW/raw-videos/val
+#     for filename in DEBUG/AFEW/Val/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+#         f="$(basename -- $filename)"
+#         ln -sf $filename AFEW/raw-videos/val/$f
+#     done
+
+#     mkdir -p AFEW/raw-videos/test
+#     for filename in DEBUG/AFEW/Test/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+#         f="$(basename -- $filename)"
+#         ln -sf $filename AFEW/raw-videos/test/$f
+#     done
+
+#     mkdir -p AFEW/raw-audios/train
+#     for filename in DEBUG/AFEW/Train/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+#         f="$(basename -- "$filename" .avi).mp3"
+#         ffmpeg -y -i $filename -q:a 0 -map a AFEW/raw-audios/train/$f
+#     done
+
+#     mkdir -p AFEW/raw-audios/val
+#     for filename in DEBUG/AFEW/Val/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+#         f="$(basename -- "$filename" .avi).mp3"
+#         ffmpeg -y -i $filename -q:a 0 -map a AFEW/raw-audios/val/$f
+#     done
+
+#     mkdir -p AFEW/raw-audios/test
+#     for filename in DEBUG/AFEW/Test/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+#         f="$(basename -- "$filename" .avi).mp3"
+#         ffmpeg -y -i $filename -q:a 0 -map a AFEW/raw-audios/test/$f
+#     done
+
+#     python3 scripts/AFEW-label.py
+
+#     rm $FILE
+
+# fi
+
+# FILE=CAER.zip
+# if test -f "$FILE"; then
+#     rm -rf CAER
+#     echo "$FILE exists."
+#     unzip $FILE
+
+#     rm -rf DEBUG/CAER
+#     mv -f CAER DEBUG/
+
+#     mkdir -p CAER/raw-videos/train
+#     for filename in DEBUG/CAER/train/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+
+#         emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
+#         emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
+#         echo $emotion
+#         f="$(basename -- $filename)"
+#         f="${emotion}-${f}"
+#         datatype=train
+#         f="${datatype}-${f}"
+#         echo $f
+#         ln -sf $filename CAER/raw-videos/train/$f
+#     done
+
+#     mkdir -p CAER/raw-videos/val
+#     for filename in DEBUG/CAER/validation/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+
+#         emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
+#         emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
+#         echo $emotion
+#         f="$(basename -- $filename)"
+#         f="${emotion}-${f}"
+#         datatype=val
+#         f="${datatype}-${f}"
+#         echo $f
+#         ln -sf $filename CAER/raw-videos/val/$f
+#     done
+
+#     mkdir -p CAER/raw-videos/test
+#     for filename in DEBUG/CAER/test/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+
+#         emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
+#         emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
+#         echo $emotion
+#         f="$(basename -- $filename)"
+#         f="${emotion}-${f}"
+#         datatype=test
+#         f="${datatype}-${f}"
+#         echo $f
+#         ln -sf $filename CAER/raw-videos/test/$f
+#     done
+
+#     mkdir -p CAER/raw-audios/train
+#     for filename in DEBUG/CAER/train/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+#         emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
+#         emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
+#         echo $emotion
+#         f="$(basename -- $filename)"
+#         f="${emotion}-${f}"
+#         datatype=train
+#         f="${datatype}-${f}"
+#         f="$(basename -- "$f" .avi).mp3"
+#         echo $f
+#         ffmpeg -y -i $filename -q:a 0 -map a CAER/raw-audios/train/$f
+#     done
+
+#     mkdir -p CAER/raw-audios/val
+#     for filename in DEBUG/CAER/validation/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+#         emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
+#         emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
+#         echo $emotion
+#         f="$(basename -- $filename)"
+#         f="${emotion}-${f}"
+#         datatype=val
+#         f="${datatype}-${f}"
+#         f="$(basename -- "$f" .avi).mp3"
+#         echo $f
+#         ffmpeg -y -i $filename -q:a 0 -map a CAER/raw-audios/val/$f
+#     done
+
+#     mkdir -p CAER/raw-audios/test
+#     for filename in DEBUG/CAER/test/*/*.avi; do
+#         filename=$(readlink -f $filename)
+#         echo $filename
+#         emotion="$(echo "$filename" | rev | cut -d '/' -f 2 | rev)"
+#         emotion="$(echo "$emotion" | tr '[:upper:]' '[:lower:]')"
+#         echo $emotion
+#         f="$(basename -- $filename)"
+#         f="${emotion}-${f}"
+#         datatype=test
+#         f="${datatype}-${f}"
+#         f="$(basename -- "$f" .avi).mp3"
+#         echo $f
+#         ffmpeg -y -i $filename -q:a 0 -map a CAER/raw-audios/test/$f
+#     done
+
+#     python3 scripts/CAER-label.py
+#     rm $FILE
+
+# fi
+
+# echo DONE
