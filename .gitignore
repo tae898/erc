@@ -137,6 +137,7 @@ data/
 
 # Checkpoints
 runs/
+best_weights/
 checkpoints*
 
 # Pytorch models
