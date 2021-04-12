@@ -97,7 +97,7 @@ class AudioDataset(data.Dataset):
 		melspec = self.audio2melspec(y)
 		image = self.melspec2img(melspec)
 		image = self.image_transform(image=image)['image']
-		return image, label		
+		return image, label, audio_id
 
 	def __len__(self):
 		return len(self.csv)

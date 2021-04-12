@@ -134,6 +134,7 @@ dmypy.json
 
 # Dataset
 data/
+Datasets/MELD/
 
 # Checkpoints
 runs/
