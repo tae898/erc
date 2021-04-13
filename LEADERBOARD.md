@@ -11,26 +11,24 @@ As for DailyDialog, the neutral class, which accounts for 80% of the data, is no
 
 |  base model | method | train (f1_weighted) | val (f1_weighted) | test (f1_weighted) | train (cse) | val (cse) | test (cse) |
 |-------------- | -------------- | -------------- | -------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.large | 01-utt-SPEAKER-BS32 | 75.828 | 62.51 | 65.292 | 0.8262 | 1.12646 | 1.0548 | 
-| roberta.large | all-utt-SPEAKER-BS1 | 77.66 | 63.005 | 64.865 | 0.80001 | 1.13455 | 1.07002 | 
-| roberta.large | all-utt-SPEAKER-BS4 | 80.067 | 64.755 | 64.731 | 0.75938 | 1.09908 | 1.07431 | 
+| roberta.large | 3-4-upper | 77.455 | 64.525 | 65.84 | 0.80606 | 1.10779 | 1.04602 | 
 | COSMIC | SOTA |   |   | 65.21 |
 ## IEMOCAP 
 
 |  base model | method | train (f1_weighted) | val (f1_weighted) | test (f1_weighted) | train (cse) | val (cse) | test (cse) |
 |-------------- | -------------- | -------------- | -------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.large | 01-utt-SPEAKER-BS16 | 73.992 | 55.639 | 53.051 | 0.71408 | 1.16846 | 1.24647 | 
-| roberta.large | all-utt-SPEAKER-BS1 | 81.225 | 65.412 | 67.421 | 0.50056 | 0.89793 | 0.85201 | 
+| roberta.large | 32-1-upper | 82.853 | 64.472 | 68.044 | 0.45922 | 0.93426 | 0.85083 | 
+| roberta.large | 32-1-upper-10-SPEAKERS | 78.64 | 64.857 | 66.465 | 0.55932 | 0.89895 | 0.87319 | 
+| roberta.large | 8-1-upper | 76.901 | 64.094 | 66.138 | 0.60966 | 0.9247 | 0.8906 | 
 | CESTa | SOTA |   |   | 67.1 |
 ## EmoryNLP 
 
 |  base model | method | train (f1_weighted) | val (f1_weighted) | test (f1_weighted) | train (cse) | val (cse) | test (cse) |
 |-------------- | -------------- | -------------- | -------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.large | all-utt-SPEAKER-BS1 | 51.055 | 38.016 | 35.008 | 1.28932 | 1.58423 | 1.62383 | 
 | COSMIC | SOTA |   |   | 38.11 |
 ## DailyDialog 
 
 |  base model | method | train (f1_micro) | val (f1_micro) | test (f1_micro) | train (cse) | val (cse) | test (cse) |
 |-------------- | -------------- | -------------- | -------------- | -------------- | -------------- | -------------- | -------------- | 
-| roberta.large | all-utt-SPEAKER-BS4 | 69.538 | 58.016 | 55.522 | 0.23034 | 0.23084 | 0.37066 | 
+| roberta.large | 3-4-upper | 60.335 | 57.029 | 53.362 | 0.29179 | 0.23114 | 0.36888 | 
 | CESTa | SOTA |   |   | 63.12 |

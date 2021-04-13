@@ -385,14 +385,14 @@ def evaluate_all_seeds(base_dir):
 def leaderboard():
     with open('scripts/sota.json', 'r') as stream:
         sota = json.load(stream)
-    results_paths = glob(os.path.join(MODEL_DIR, '*/*/*/results.json'))
+    results_paths = glob(os.path.join(MODEL_DIR, '*/*/five-seeds/*/results.json'))
     print(results_paths)
 
     leaderboard = {DATASET: [] for DATASET in DATASETS_SUPPORTED}
     for path in results_paths:
         BASE_MODEL = path.split('/')[1]
         DATASET = path.split('/')[2]
-        METHOD = path.split('/')[3]
+        METHOD = path.split('/')[-2]
 
         with open(path, 'r') as stream:
             results = json.load(stream)
