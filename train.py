@@ -1,8 +1,11 @@
+import sys
+sys.path.append("./libs/")
+
 from workers.trainer import Trainer
 from utils.random_seed import set_seed
 from utils.getter import get_instance
 from tqdm import tqdm
-from torch.utils.data import DataLoadier
+from torch.utils.data import DataLoader
 from torch.utils import data
 import yaml
 import torch.nn as nn
@@ -10,9 +13,6 @@ import torch
 import os
 import pprint
 import argparse
-import sys
-sys.path.append("./libs/")
-
 
 def train(config):
     assert config is not None, "Do not have config file!"

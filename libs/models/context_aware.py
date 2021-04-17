@@ -1,0 +1,30 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+from .fusion import *
+from .former import *
+
+class ContextAwareModel(nn.Module):
+    def __init__(self, num_classes, AUDIO_FEAT_DIM=1280, TEXT_FEAT_DIM=1024):
+        super().__init__()
+        self.AUDIO_FEAT_DIM = AUDIO_FEAT_DIM
+        self.TEXT_FEAT_DIM = TEXT_FEAT_DIM
+        self.fusion_model = FusionModel(num_classes=num_classes, AUDIO_FEAT_DIM=AUDIO_FEAT_DIM, TEXT_FEAT_DIM=TEXT_FEAT_DIM, use_concat=False, single_utt=False)
+        self.transformer = CTransformer(emb=1000, heads=4, depth=1, seq_length=512, num_tokens=10000, num_classes=7)
+        self.classifier = nn.Sequential(
+            nn.Linear(1000, 512),
+            nn.Dropout(0.2),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(512, num_classes),
+        )
+        self.fc = nn.Linear(1000, num_classes)
+
+    def forward(self, inp):
+        fused = self.fusion_model(inp)
+        encoded = self.transformer(fused)
+        x = self.classifier(encoded)
+        # x = self.fc(encoded)
+        return x

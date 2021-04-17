@@ -6,7 +6,7 @@ import os
 import json
 
 class ContextAwareDataset(data.Dataset):
-	def __init__(self, csv_path, audio_feat_dir, text_feat_dir, ordered_json_list, num_utt=2, dataset='train'):
+	def __init__(self, csv_path, audio_feat_dir, text_feat_dir, ordered_json_list, num_utt, dataset):
 		self.csv = pd.read_csv(csv_path, dtype={'audio_id': 'string'})
 		self.audio_feat_dir = audio_feat_dir
 		self.text_feat_dir = text_feat_dir
@@ -30,8 +30,14 @@ class ContextAwareDataset(data.Dataset):
 				audio_feats.append(np.zeros(shape=(1, 1280)))
 				text_feats.append(np.zeros(shape=(1, 1024)))
 			else:
-				audio_feat = np.load(os.path.join(self.audio_feat_dir, utter_list[utter_pos] + '.npy'), allow_pickle=True)
-				text_feat = np.load(os.path.join(self.text_feat_dir, utter_list[utter_pos] + '.npy'), allow_pickle=True).item()['features']
+				filename = utter_list[utter_pos] + '.npy'
+				if (filename not in os.listdir(self.audio_feat_dir)) or (filename not in os.listdir(self.text_feat_dir)):
+					audio_feats.append(np.zeros(shape=(1, 1280)))
+					text_feats.append(np.zeros(shape=(1, 1024)))
+					continue
+
+				audio_feat = np.load(os.path.join(self.audio_feat_dir, filename), allow_pickle=True)
+				text_feat = np.load(os.path.join(self.text_feat_dir, filename), allow_pickle=True).item()['features']
 				audio_feats.append(audio_feat)
 				text_feats.append(text_feat)
 			utter_pos -= 1

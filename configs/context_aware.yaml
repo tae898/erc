@@ -1,13 +1,13 @@
-id:                             single_utterance_multimodal_fusion
+id:                             context_aware_multimodal_fusion
 pretrained:                     Null
 model:
-    name:                       FusionModel
+    name:                       ContextAwareModel
     args:
         num_classes:            7
 optimizer:
     name:                       Adam
     args:
-        lr:                     0.00003
+        lr:                     0.0001
 loss:
     name:                       FocalLoss
     args:                       
@@ -25,31 +25,37 @@ scheduler:
         last_epoch:             -1
 dataset:            
     train:
-        name:                   AudioTextFeatureVectorDataset
+        name:                   ContextAwareDataset
         args:    
             csv_path:           data/raw-audios-wav/train.csv
             audio_feat_dir:     Datasets/MELD/audio-features/train/
             text_feat_dir:      Datasets/MELD/text-features/train/
+            ordered_json_list:  Datasets/MELD/utterance-ordered.json
+            num_utt:            2
+            dataset:            train
         loader:
             name: DataLoader
             args:
-                batch_size:     16
+                batch_size:     8
                 shuffle:        True
                 drop_last:      True
     val:
-        name:                   AudioTextFeatureVectorDataset
+        name:                   ContextAwareDataset
         args:
             csv_path:           data/raw-audios-wav/val.csv
             audio_feat_dir:     Datasets/MELD/audio-features/val/
             text_feat_dir:      Datasets/MELD/text-features/val/
+            ordered_json_list:  Datasets/MELD/utterance-ordered.json
+            num_utt:            2
+            dataset:            val
         loader:
             name: DataLoader
             args:
-                batch_size:     16
+                batch_size:     8
                 shuffle:        True
                 drop_last:      True
  
 trainer: 
-    nepochs: 3
+    nepochs: 20
     val_step: 1
     log_step: 1
