@@ -5,20 +5,21 @@ import torch.nn.functional as F
 from utils import getter
 
 class FusionModel(nn.Module):
-    def __init__(self, num_classes, AUDIO_FEAT_DIM=1280, TEXT_FEAT_DIM=1024, use_concat=False, single_utt=True):
+    def __init__(self, num_classes, AUDIO_FEAT_DIM=1280, TEXT_FEAT_DIM=1024, EMB_DIM=512, use_concat=False, single_utt=True):
         super().__init__()
         self.AUDIO_FEAT_DIM = AUDIO_FEAT_DIM
         self.TEXT_FEAT_DIM = TEXT_FEAT_DIM
-        self.mbp = MBP(AUDIO_FEAT_DIM, TEXT_FEAT_DIM)
+        self.EMB_DIM = EMB_DIM
+        self.mbp = MBP(AUDIO_FEAT_DIM, TEXT_FEAT_DIM, OUTPUT_DIM=EMB_DIM)
         self.classifier = nn.Sequential(
-            nn.Linear(AUDIO_FEAT_DIM + TEXT_FEAT_DIM, 512) if use_concat else nn.Linear(1000, 512),
+            nn.Linear(AUDIO_FEAT_DIM + TEXT_FEAT_DIM, 512) if use_concat else nn.Linear(EMB_DIM, 512),
             nn.Dropout(0.2),
             nn.BatchNorm1d(512),
             nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(512, num_classes),
         )
-        self.fc = nn.Linear(1000, num_classes)
+        self.fc = nn.Linear(EMB_DIM, num_classes)
         dev_id = (
             "cuda:0"
             if torch.cuda.is_available() else "cpu"
@@ -38,11 +39,11 @@ class FusionModel(nn.Module):
         else:
             audio_feats, text_feats = inp
             batch_size, num_utt, _ = audio_feats.shape
-            res = torch.zeros(size=(batch_size, num_utt, 1000), device=self.device)
+            res = torch.zeros(size=(batch_size, num_utt, self.EMB_DIM), device=self.device)
             for i in range(batch_size):
                 audio_feat = audio_feats[i].float()
                 text_feat = text_feats[i].float()
-                fused = self.mbp(audio_feat, text_feat)
+                fused = torch.cat([audio_feat, text_feat], dim=1) if self.use_concat else self.mbp(audio_feat, text_feat)
                 res[i] = fused
             return res
 
@@ -51,7 +52,7 @@ class MBP(nn.Module):
     """
         Multi-modal Factorized Bilinear Pooling - https://arxiv.org/pdf/1708.01471.pdf
     """
-    def __init__(self, AUDIO_FEAT_DIM, TEXT_FEAT_DIM, SUM_POOLING_WINDOW=3, OUTPUT_DIM=1000):
+    def __init__(self, AUDIO_FEAT_DIM, TEXT_FEAT_DIM, SUM_POOLING_WINDOW=3, OUTPUT_DIM=512):
         super().__init__()
         self.AUDIO_FEAT_DIM = AUDIO_FEAT_DIM
         self.TEXT_FEAT_DIM = TEXT_FEAT_DIM

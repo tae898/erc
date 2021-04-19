@@ -47,7 +47,7 @@ class CTransformer(nn.Module):
     Transformer for classifying sequences
     """
 
-    def __init__(self, emb, heads, depth, seq_length, num_tokens, num_classes, max_pool=False, dropout=0.2, wide=False):
+    def __init__(self, emb, heads, depth, seq_length, num_tokens, num_classes, max_pool=True, dropout=0.0, wide=False):
         """
         :param emb: Embedding dimension
         :param heads: nr. of attention heads

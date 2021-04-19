@@ -4,6 +4,10 @@ model:
     name:                       ContextAwareModel
     args:
         num_classes:            7
+        AUDIO_FEAT_DIM:         1280
+        TEXT_FEAT_DIM:          1024
+        EMB_DIM:                2304
+        use_concat:             True
 optimizer:
     name:                       Adam
     args:
@@ -20,8 +24,8 @@ metric:
 scheduler:
     name:                       StepLR
     args:
-        step_size:              2
-        gamma:                  0.2
+        step_size:              3
+        gamma:                  0.1
         last_epoch:             -1
 dataset:            
     train:
@@ -56,6 +60,6 @@ dataset:
                 drop_last:      True
  
 trainer: 
-    nepochs: 20
+    nepochs: 3
     val_step: 1
     log_step: 1
