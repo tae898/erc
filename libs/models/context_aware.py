@@ -19,7 +19,6 @@ class ContextAwareModel(nn.Module):
             nn.Dropout(0.2),
             nn.BatchNorm1d(512),
             nn.ReLU(),
-            # nn.Dropout(0.2),
             nn.Linear(512, num_classes),
         )
         self.fc = nn.Linear(EMB_DIM, num_classes)
@@ -28,5 +27,4 @@ class ContextAwareModel(nn.Module):
         fused = self.fusion_model(inp)
         encoded = self.transformer(fused)
         x = self.classifier(encoded)
-        # x = self.fc(encoded)
         return x

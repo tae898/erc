@@ -87,7 +87,6 @@ class CTransformer(nn.Module):
         x = tokens + positions
         x = self.do(x)
         x = self.tblocks(x)
-        # x = x.max(dim=1)[0] if self.max_pool else x.mean(dim=1) # pool over the time dimension
         x = x[:, -1, :] # Take the last vector
         return x
 
