@@ -1,5 +1,5 @@
 | Task | Model | Method/Configuration | Train | Validation | Test |  
-| --- | --- | --- | --- | --- | --- | --- |  
+| --- | --- | --- | --- | --- | --- |  
 | Audio | [BaseTimmModel](libs/models/baseline.py) | [EfficientNet B2 (NoisyStudent pretrained)](https://pastebin.com/TQGUPUdi) | 0.3988 | 0.3767 | **0.3954** |  
 | Audio | [BaseTimmModel](libs/models/baseline.py) | [SEResnext50](https://pastebin.com/DmFbzYXm) | 0.4060 | 0.3834 | **0.4163** |  
 | Audio | [BaseTimmModel](libs/models/baseline.py) | [EfficientNet B2 (Adversarial pretrained)](https://pastebin.com/w18ZFitq) | 0.4954 | 0.3877 | **0.4197** |  
