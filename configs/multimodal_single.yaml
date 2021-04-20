@@ -4,6 +4,11 @@ model:
     name:                       FusionModel
     args:
         num_classes:            7
+        AUDIO_FEAT_DIM:         1280
+        TEXT_FEAT_DIM:          1024
+        EMB_DIM:                256
+        use_concat:             False
+        single_utt:             True
 optimizer:
     name:                       Adam
     args:
@@ -50,6 +55,6 @@ dataset:
                 drop_last:      True
  
 trainer: 
-    nepochs: 3
+    nepochs: 4
     val_step: 1
     log_step: 1

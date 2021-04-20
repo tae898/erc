@@ -3,7 +3,7 @@ import numpy as np
 import random
 import os
 
-SEED = 20
+SEED = 42
 
 
 def set_seed(seed=SEED):

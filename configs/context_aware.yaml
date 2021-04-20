@@ -6,17 +6,17 @@ model:
         num_classes:            7
         AUDIO_FEAT_DIM:         1280
         TEXT_FEAT_DIM:          1024
-        EMB_DIM:                2304
-        use_concat:             True
+        EMB_DIM:                256
+        use_concat:             False
 optimizer:
     name:                       Adam
     args:
-        lr:                     0.0001
+        lr:                     0.00003
 loss:
     name:                       FocalLoss
     args:                       
         alpha:                  0.75
-        gamma:                  2
+        gamma:                  3
         reduce:                 True
 metric:
     -   name:                   F1Weighted
@@ -24,8 +24,8 @@ metric:
 scheduler:
     name:                       StepLR
     args:
-        step_size:              3
-        gamma:                  0.1
+        step_size:              1
+        gamma:                  0.2
         last_epoch:             -1
 dataset:            
     train:
@@ -35,7 +35,7 @@ dataset:
             audio_feat_dir:     Datasets/MELD/audio-features/train/
             text_feat_dir:      Datasets/MELD/text-features/train/
             ordered_json_list:  Datasets/MELD/utterance-ordered.json
-            num_utt:            2
+            num_utt:            5
             dataset:            train
         loader:
             name: DataLoader
@@ -50,7 +50,7 @@ dataset:
             audio_feat_dir:     Datasets/MELD/audio-features/val/
             text_feat_dir:      Datasets/MELD/text-features/val/
             ordered_json_list:  Datasets/MELD/utterance-ordered.json
-            num_utt:            2
+            num_utt:            5
             dataset:            val
         loader:
             name: DataLoader
@@ -60,6 +60,6 @@ dataset:
                 drop_last:      True
  
 trainer: 
-    nepochs: 3
+    nepochs: 10
     val_step: 1
     log_step: 1

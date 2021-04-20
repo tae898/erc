@@ -13,7 +13,7 @@ class ContextAwareModel(nn.Module):
         self.EMB_DIM = EMB_DIM
         self.use_concat = use_concat
         self.fusion_model = FusionModel(num_classes=num_classes, AUDIO_FEAT_DIM=AUDIO_FEAT_DIM, TEXT_FEAT_DIM=TEXT_FEAT_DIM, EMB_DIM=EMB_DIM, use_concat=use_concat, single_utt=False)
-        self.transformer = CTransformer(emb=EMB_DIM, heads=4, depth=1, seq_length=128, num_tokens=10000, num_classes=7)
+        self.transformer = CTransformer(emb=EMB_DIM, heads=2, depth=10, seq_length=128, num_tokens=10000, num_classes=7)
         self.classifier = nn.Sequential(
             nn.Linear(EMB_DIM, 512),
             nn.Dropout(0.2),
