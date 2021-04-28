@@ -1,0 +1,3 @@
+[submodule "multimodal-datasets"]
+	path = multimodal-datasets
+	url = https://github.com/tae898/multimodal-datasets.git
