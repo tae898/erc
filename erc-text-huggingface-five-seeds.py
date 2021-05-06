@@ -338,20 +338,18 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
                  f"num_past_utterances: {num_past_utterances}, "
                  f"num_future_utterances: {num_future_utterances}")
     CURRENT_TIME = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    OUTPUT_DIR = f"huggingface-results/{DATASET}/{model_checkpoint}/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}"
+    OUTPUT_DIR = f"huggingface-results/{DATASET}/{model_checkpoint}/SEEDS/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}"
 
     EVALUATION_STRATEGY = 'epoch'
     LOGGING_STRATEGY = 'epoch'
     SAVE_STRATEGY = 'no'
-
-    ONLY_UPTO = 100
 
     ROOT_DIR = './multimodal-datasets/'
 
     PER_DEVICE_TRAIN_BATCH_SIZE = BATCH_SIZE
     PER_DEVICE_EVAL_BATCH_SIZE = BATCH_SIZE*2
     LOAD_BEST_MODEL_AT_END = False
-    SEED = 0
+    SEED = 42
     FP16 = True
 
     if DATASET in ['MELD', 'EmoryNLP', 'DailyDialog']:
@@ -379,7 +377,7 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
     ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train', speaker_mode=speaker_mode,
                               num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
                               model_checkpoint=model_checkpoint,
-                              ROOT_DIR=ROOT_DIR, ONLY_UPTO=ONLY_UPTO, SEED=SEED)
+                              ROOT_DIR=ROOT_DIR, SEED=SEED)
 
     ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', speaker_mode=speaker_mode,
                             num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
@@ -406,12 +404,14 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
         }
 
     best_run = trainer.hyperparameter_search(
-        direction="minimize", hp_space=my_hp_space, n_trials=1)
+        direction="minimize", hp_space=my_hp_space, n_trials=10)
 
     logging.info(f"best hyperparameters found at {best_run}")
 
     with open(os.path.join(OUTPUT_DIR, 'hp.json'), 'w') as stream:
         json.dump(best_run.hyperparameters, stream, indent=4)
+
+    del args, trainer, tokenizer
 
     LEARNING_RATE = best_run.hyperparameters['learning_rate']
     WEIGHT_DECAY = best_run.hyperparameters['weight_decay']
@@ -422,7 +422,7 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
 
     for SEED in [0, 1, 2, 3, 4]:
         CURRENT_TIME = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        OUTPUT_DIR = f"huggingface-results/{DATASET}/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}-seed-{SEED}"
+        OUTPUT_DIR = f"huggingface-results/{DATASET}/{model_checkpoint}/SEEDS/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}-seed-{SEED}"
 
         SAVE_STRATEGY = 'epoch'
         LOAD_BEST_MODEL_AT_END = True
@@ -488,6 +488,8 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
         with open(os.path.join(OUTPUT_DIR, 'test-results.json'), 'w') as stream:
             json.dump(test_results.metrics, stream, indent=4)
         test_results.metrics
+
+        del model
 
 
 if __name__ == "__main__":

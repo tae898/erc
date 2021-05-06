@@ -334,14 +334,9 @@ def main(model_checkpoint):
 
             return {'f1_weighted': f1_weighted, 'f1_micro': f1_micro, 'f1_macro': f1_macro}
 
-        sm_pu_fu = [('upper', 32, 32),
-                    ('upper', 16, 16),
-                    ('upper', 8, 8),
-                    ('upper', 4, 4), 
-                    ('upper', 32, 0),
-                    ('upper', 16, 0),
-                    ('upper', 8, 0), 
-                    ('upper', 4, 0)]
+        sm_pu_fu = [
+            ('upper', 8, 8),
+            ('upper', 4, 4)]
 
         for speaker_mode, num_past_utterances, num_future_utterances in sm_pu_fu:
 
@@ -358,7 +353,7 @@ def main(model_checkpoint):
             ONLY_UPTO = 100
 
             if model_checkpoint == 'roberta-base':
-                BATCH_SIZE = 8
+                BATCH_SIZE = 16
             elif model_checkpoint == 'roberta-large':
                 BATCH_SIZE = 16
             else:
@@ -454,6 +449,7 @@ def main(model_checkpoint):
             val_results = trainer.evaluate()
             with open(os.path.join(OUTPUT_DIR, 'val-results.json'), 'w') as stream:
                 json.dump(val_results, stream, indent=4)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

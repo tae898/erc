@@ -1,6 +1,6 @@
 DATASET: MELD
-model_checkpoint: roberta-base
+model_checkpoint: roberta-large
 speaker_mode: 'upper'
 num_past_utterances: 2
 num_future_utterances: 0
-BATCH_SIZE: 16
+BATCH_SIZE: 32
