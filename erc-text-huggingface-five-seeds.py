@@ -344,6 +344,7 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
     LOGGING_STRATEGY = 'epoch'
     SAVE_STRATEGY = 'no'
 
+    ONLY_UPTO = 100
     ROOT_DIR = './multimodal-datasets/'
 
     PER_DEVICE_TRAIN_BATCH_SIZE = BATCH_SIZE
@@ -376,7 +377,7 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
 
     ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train', speaker_mode=speaker_mode,
                               num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                              model_checkpoint=model_checkpoint,
+                              model_checkpoint=model_checkpoint, ONLY_UPTO=ONLY_UPTO,
                               ROOT_DIR=ROOT_DIR, SEED=SEED)
 
     ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', speaker_mode=speaker_mode,
@@ -404,19 +405,21 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
         }
 
     best_run = trainer.hyperparameter_search(
-        direction="minimize", hp_space=my_hp_space, n_trials=10)
+        direction="minimize", hp_space=my_hp_space, n_trials=3)
 
-    logging.info(f"best hyperparameters found at {best_run}")
+    logging.info(f"c found at {best_run}")
 
     with open(os.path.join(OUTPUT_DIR, 'hp.json'), 'w') as stream:
         json.dump(best_run.hyperparameters, stream, indent=4)
-
-    del args, trainer, tokenizer
 
     LEARNING_RATE = best_run.hyperparameters['learning_rate']
     WEIGHT_DECAY = best_run.hyperparameters['weight_decay']
     WARMUP_RATIO = best_run.hyperparameters['warmup_ratio']
     NUM_TRAIN_EPOCHS = best_run.hyperparameters['num_train_epochs']
+
+    logging.info(f"best hyper parameters: LEARNING_RATE: {LEARNING_RATE}, WEIGHT_DECAY: {WEIGHT_DECAY}, WARMUP_RATIO: {WARMUP_RATIO}, NUM_TRAIN_EPOCHS: {NUM_TRAIN_EPOCHS}")
+
+    del args, trainer, tokenizer
 
     ###############################################
 
