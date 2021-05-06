@@ -313,7 +313,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
         raise NotImplementedError
 
 
-def main(DATASET, model_checkpoint, speaker_mode, num_past_utterances, num_future_utterances):
+def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterances, num_future_utterances):
 
     if DATASET == 'DailyDialog':
         LABELS_FOR_EVAL = [1, 2, 3, 4, 5, 6]
@@ -338,20 +338,13 @@ def main(DATASET, model_checkpoint, speaker_mode, num_past_utterances, num_futur
                  f"num_past_utterances: {num_past_utterances}, "
                  f"num_future_utterances: {num_future_utterances}")
     CURRENT_TIME = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    OUTPUT_DIR = f"huggingface-results/{DATASET}/{model_checkpoint}/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}"
+    OUTPUT_DIR = f"huggingface-results/{DATASET}/{model_checkpoint}/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}"
 
     EVALUATION_STRATEGY = 'epoch'
     LOGGING_STRATEGY = 'epoch'
     SAVE_STRATEGY = 'no'
 
     ONLY_UPTO = 100
-
-    if model_checkpoint == 'roberta-base':
-        BATCH_SIZE = 8
-    elif model_checkpoint == 'roberta-large':
-        BATCH_SIZE = 16
-    else:
-        raise ValueError
 
     ROOT_DIR = './multimodal-datasets/'
 
@@ -454,7 +447,7 @@ def main(DATASET, model_checkpoint, speaker_mode, num_past_utterances, num_futur
 
     for SEED in [0, 1, 2, 3, 4]:
         CURRENT_TIME = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        OUTPUT_DIR = f"huggingface-results/{DATASET}/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}-seed-{SEED}"
+        OUTPUT_DIR = f"huggingface-results/{DATASET}/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}-seed-{SEED}-"
 
         SAVE_STRATEGY = 'epoch'
         LOAD_BEST_MODEL_AT_END = True
