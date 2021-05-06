@@ -1,0 +1,9 @@
+DATASET: MELD
+model_checkpoint: roberta-base
+LEARNING_RATE: 0.01
+WEIGHT_DECAY: 0.01
+WARMUP_RATIO: 0.01
+NUM_TRAIN_EPOCHS: 3
+speaker_mode: 'upper'
+num_past_utterances: 2
+num_future_utterances: 2
