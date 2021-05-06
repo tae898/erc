@@ -406,48 +406,23 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
         }
 
     best_run = trainer.hyperparameter_search(
-        direction="minimize", hp_space=my_hp_space, n_trials=10)
+        direction="minimize", hp_space=my_hp_space, n_trials=1)
 
     logging.info(f"best hyperparameters found at {best_run}")
-
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_checkpoint, num_labels=NUM_CLASSES)
-
-    logging.info(
-        f"training a model with the given hyper parameters ...")
-
-    trainer = Trainer(
-        model=model,
-        args=args,
-        train_dataset=ds_train,
-        eval_dataset=ds_val,
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics
-    )
 
     with open(os.path.join(OUTPUT_DIR, 'hp.json'), 'w') as stream:
         json.dump(best_run.hyperparameters, stream, indent=4)
 
-    for n, v in best_run.hyperparameters.items():
-        logging.info(f"{n}: {v}")
-        setattr(trainer.args, n, v)
-
     LEARNING_RATE = best_run.hyperparameters['learning_rate']
     WEIGHT_DECAY = best_run.hyperparameters['weight_decay']
     WARMUP_RATIO = best_run.hyperparameters['warmup_ratio']
-    NUM_TRAIN_EPOCHS = best_run.hyperparameters['num_train_epochs'] 
-
-    trainer.train()
-
-    val_results = trainer.evaluate()
-    with open(os.path.join(OUTPUT_DIR, 'val-results.json'), 'w') as stream:
-        json.dump(val_results, stream, indent=4)
+    NUM_TRAIN_EPOCHS = best_run.hyperparameters['num_train_epochs']
 
     ###############################################
 
     for SEED in [0, 1, 2, 3, 4]:
         CURRENT_TIME = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        OUTPUT_DIR = f"huggingface-results/{DATASET}/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}-seed-{SEED}-"
+        OUTPUT_DIR = f"huggingface-results/{DATASET}/{CURRENT_TIME}-speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}-seed-{SEED}"
 
         SAVE_STRATEGY = 'epoch'
         LOAD_BEST_MODEL_AT_END = True
@@ -499,6 +474,8 @@ def main(DATASET, BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterance
             tokenizer=tokenizer,
             compute_metrics=compute_metrics
         )
+
+        trainer.train()
 
         logging.info(f"eval ...")
         val_results = trainer.evaluate()
