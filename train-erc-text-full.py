@@ -1,7 +1,7 @@
 import logging
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 import json
-from utils import ErcTextDataset, compute_metrics, get_num_classes, compute_metrics
+from utils import ErcTextDataset, get_num_classes, compute_metrics
 import os
 import argparse
 import yaml
