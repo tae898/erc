@@ -190,31 +190,15 @@ class ErcTextDataset(torch.utils.data.Dataset):
                     idx+1, idx+num_future_utterances+1, 1)]
 
                 offset = 0
-                # if len(indexes_past) < len(indexes_future):
-                #     for _ in range(len(indexes_future)-len(indexes_past)):
-                #         indexes_past.append(None)
-                # elif len(indexes_past) > len(indexes_future):
-                #     for _ in range(len(indexes_past) - len(indexes_future)):
-                #         indexes_future.append(None)
+                if len(indexes_past) < len(indexes_future):
+                    for _ in range(len(indexes_future)-len(indexes_past)):
+                        indexes_past.append(None)
+                elif len(indexes_past) > len(indexes_future):
+                    for _ in range(len(indexes_past) - len(indexes_future)):
+                        indexes_future.append(None)
 
-                # for i, j in zip(indexes_past, indexes_future):
-                #     if i is not None and i >= 0:
-                #         indexes.insert(0, i)
-                #         offset += 1
-                #         if sum([num_tokens[idx_] for idx_ in indexes]) > max_model_input_size:
-                #             del indexes[0]
-                #             offset -= 1
-                #             num_truncated += 1
-                #             break
-                #     if j is not None and j < len(ues):
-                #         indexes.append(j)
-                #         if sum([num_tokens[idx_] for idx_ in indexes]) > max_model_input_size:
-                #             del indexes[-1]
-                #             num_truncated += 1
-                #             break
-
-                for i in indexes_past:
-                    if i >= 0:
+                for i, j in zip(indexes_past, indexes_future):
+                    if i is not None and i >= 0:
                         indexes.insert(0, i)
                         offset += 1
                         if sum([num_tokens[idx_] for idx_ in indexes]) > max_model_input_size:
@@ -222,9 +206,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
                             offset -= 1
                             num_truncated += 1
                             break
-
-                for j in indexes_future:
-                    if j < len(ues):
+                    if j is not None and j < len(ues):
                         indexes.append(j)
                         if sum([num_tokens[idx_] for idx_ in indexes]) > max_model_input_size:
                             del indexes[-1]
