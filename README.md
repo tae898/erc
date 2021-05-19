@@ -28,7 +28,7 @@ Contributions are what make the open source community such an amazing place to b
 1. Open a Pull Request
 
 ## Authors
-* Taewoon Kim (t.kim@vu.nl)
+* [Taewoon Kim](https://taewoonkim.com/)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
