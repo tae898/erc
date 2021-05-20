@@ -1,5 +1,5 @@
 import logging
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
+from transformers import RobertaTokenizer, RobertaForSequenceClassification, TrainingArguments, Trainer
 import json
 from utils import ErcTextDataset, get_num_classes, compute_metrics
 import os
@@ -14,8 +14,8 @@ logging.basicConfig(
 )
 
 
-def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint, speaker_mode,
-         num_past_utterances, num_future_utterances, NUM_TRAIN_EPOCHS, WEIGHT_DECAY, WARMUP_RATIO, **kwargs):
+def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
+         num_past_utterances, num_future_utterances, NUM_TRAIN_EPOCHS, WEIGHT_DECAY, WARMUP_RATIO, ADD_BOU_EOU, ADD_SPEAKER_TOKENS, **kwargs):
 
     NUM_CLASSES = get_num_classes(DATASET)
 
@@ -25,8 +25,6 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint, speaker_mode,
     LEARNING_RATE = hp_best['learning_rate']
 
     logging.info(f"(LOADED) best hyper parameters: {hp_best}")
-
-    OUTPUT_DIR = OUTPUT_DIR.replace('-seed-42', f'-seed-{SEED}')
 
     EVALUATION_STRATEGY = 'epoch'
     LOGGING_STRATEGY = 'epoch'
@@ -42,7 +40,7 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint, speaker_mode,
     GREATER_IS_BETTER = True
 
     args = TrainingArguments(
-        output_dir=OUTPUT_DIR,
+        output_dir=os.path.join(OUTPUT_DIR, str(SEED)),
         evaluation_strategy=EVALUATION_STRATEGY,
         logging_strategy=LOGGING_STRATEGY,
         save_strategy=SAVE_STRATEGY,
@@ -59,26 +57,34 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint, speaker_mode,
         greater_is_better=GREATER_IS_BETTER
     )
 
-    ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train', speaker_mode=speaker_mode,
+    if ADD_SPEAKER_TOKENS:
+        ADD_SPEAKER_TOKENS = os.path.join(OUTPUT_DIR, 'tokenizer', 'added_tokens.json')
+
+    ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train', 
                               num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                              model_checkpoint=model_checkpoint,
+                              model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'),
+                              ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                               ROOT_DIR=ROOT_DIR, SEED=SEED)
 
-    ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', speaker_mode=speaker_mode,
+    ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', 
                             num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                            model_checkpoint=model_checkpoint,
+                            model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'),
+                            ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                             ROOT_DIR=ROOT_DIR, SEED=SEED)
 
-    ds_test = ErcTextDataset(DATASET=DATASET, SPLIT='test', speaker_mode=speaker_mode,
+    ds_test = ErcTextDataset(DATASET=DATASET, SPLIT='test',
                              num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                             model_checkpoint=model_checkpoint,
+                             model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'),
+                             ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                              ROOT_DIR=ROOT_DIR, SEED=SEED)
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_checkpoint, use_fast=True)
+    tokenizer = RobertaTokenizer.from_pretrained(
+        os.path.join(OUTPUT_DIR, 'tokenizer'), use_fast=True)
 
-    model = AutoModelForSequenceClassification.from_pretrained(
+    model = RobertaForSequenceClassification.from_pretrained(
         model_checkpoint, num_labels=NUM_CLASSES)
+
+    model.resize_token_embeddings(len(tokenizer))
 
     logging.info(f"training a full model with full data ...")
 
@@ -95,13 +101,13 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint, speaker_mode,
 
     logging.info(f"eval ...")
     val_results = trainer.evaluate()
-    with open(os.path.join(OUTPUT_DIR, 'val-results.json'), 'w') as stream:
+    with open(os.path.join(os.path.join(OUTPUT_DIR, str(SEED)), 'val-results.json'), 'w') as stream:
         json.dump(val_results, stream, indent=4)
     logging.info(f"eval results: {val_results}")
 
     logging.info(f"test ...")
     test_results = trainer.predict(ds_test)
-    with open(os.path.join(OUTPUT_DIR, 'test-results.json'), 'w') as stream:
+    with open(os.path.join(os.path.join(OUTPUT_DIR, str(SEED)), 'test-results.json'), 'w') as stream:
         json.dump(test_results.metrics, stream, indent=4)
     logging.info(f"test results: {test_results.metrics}")
 

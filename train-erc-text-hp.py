@@ -1,10 +1,11 @@
 import logging
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
+from transformers import RobertaTokenizer, RobertaForSequenceClassification, TrainingArguments, Trainer
 import json
 from utils import ErcTextDataset, get_num_classes
 import os
 import argparse
 import yaml
+import shutil
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,10 +15,10 @@ logging.basicConfig(
 
 
 def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR, DATASET,
-         BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterances, num_future_utterances,
-         HP_N_TRIALS, **kwargs):
+         BATCH_SIZE, model_checkpoint, num_past_utterances, num_future_utterances,
+         HP_N_TRIALS, ADD_BOU_EOU, ADD_SPEAKER_TOKENS, **kwargs):
 
-    logging.info(f"automatic hyperparameter tuning with speaker_mode: {speaker_mode}, "
+    logging.info(f"automatic hyperparameter tuning with"
                  f"num_past_utterances: {num_past_utterances}, "
                  f"num_future_utterances: {num_future_utterances}")
     EVALUATION_STRATEGY = 'epoch'
@@ -35,7 +36,7 @@ def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR,
     NUM_CLASSES = get_num_classes(DATASET)
 
     args = TrainingArguments(
-        output_dir=OUTPUT_DIR,
+        output_dir=os.path.join(OUTPUT_DIR, str(SEED)),
         evaluation_strategy=EVALUATION_STRATEGY,
         per_device_train_batch_size=PER_DEVICE_TRAIN_BATCH_SIZE,
         per_device_eval_batch_size=PER_DEVICE_EVAL_BATCH_SIZE,
@@ -49,22 +50,33 @@ def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR,
         num_train_epochs=NUM_TRAIN_EPOCHS
     )
 
-    def model_init():
-        return AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=NUM_CLASSES)
+    tokenizer = RobertaTokenizer.from_pretrained(
+        os.path.join(OUTPUT_DIR, 'tokenizer'), use_fast=True)
 
-    ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train', speaker_mode=speaker_mode,
+    if ADD_SPEAKER_TOKENS:
+        ADD_SPEAKER_TOKENS = os.path.join(OUTPUT_DIR, 'tokenizer', 'added_tokens.json')
+
+    ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train',
                               num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                              model_checkpoint=model_checkpoint, ONLY_UPTO=HP_ONLY_UPTO,
+                              model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'), ONLY_UPTO=HP_ONLY_UPTO,
+                              ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                               ROOT_DIR=ROOT_DIR, SEED=SEED)
 
-    ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', speaker_mode=speaker_mode,
+    ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', 
                             num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                            model_checkpoint=model_checkpoint, ONLY_UPTO=HP_ONLY_UPTO,
+                            model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'), ONLY_UPTO=HP_ONLY_UPTO,
+                            ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                             ROOT_DIR=ROOT_DIR, SEED=SEED)
 
+    logging.info(f"loading the pretrained model ...")
+    model = RobertaForSequenceClassification.from_pretrained(model_checkpoint, num_labels=NUM_CLASSES)
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_checkpoint, use_fast=True)
+    logging.info(f"Adding the special token ids to the model ...")
+    model.resize_token_embeddings(len(tokenizer))
+    model.save_pretrained(os.path.join(OUTPUT_DIR, 'TEMP'))
+
+    def model_init():
+        return RobertaForSequenceClassification.from_pretrained(os.path.join(OUTPUT_DIR, 'TEMP'), num_labels=NUM_CLASSES)
 
     trainer = Trainer(
         model_init=model_init,
@@ -87,6 +99,7 @@ def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR,
     with open(os.path.join(OUTPUT_DIR, 'hp.json'), 'w') as stream:
         json.dump(best_run.hyperparameters, stream, indent=4)
 
+    shutil.rmtree(os.path.join(OUTPUT_DIR, 'TEMP'))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
