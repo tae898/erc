@@ -1,6 +1,8 @@
 # Multimodal Emotion Recognition in Coversation (ERC)
 
-This branch (EmoBERTa) only uses the text modality to correctly classify the emotion of the utterances.The experiments were carried out on two datasets (i.e. MELD and IEMOCAP) 
+This branch is what was submitted to EMNLP2021.
+
+At the moment, we only use the text modality to correctly classify the emotion of the utterances.The experiments were carried out on two datasets (i.e. MELD and IEMOCAP) 
 
 ## Prerequisites
 
