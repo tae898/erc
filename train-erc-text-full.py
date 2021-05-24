@@ -1,5 +1,5 @@
 import logging
-from transformers import RobertaTokenizer, RobertaForSequenceClassification, TrainingArguments, Trainer
+from transformers import RobertaTokenizerFast, RobertaForSequenceClassification, TrainingArguments, Trainer
 import json
 from utils import ErcTextDataset, get_num_classes, compute_metrics
 import os
@@ -15,7 +15,9 @@ logging.basicConfig(
 
 
 def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
-         num_past_utterances, num_future_utterances, NUM_TRAIN_EPOCHS, WEIGHT_DECAY, WARMUP_RATIO, ADD_BOU_EOU, ADD_SPEAKER_TOKENS, **kwargs):
+         num_past_utterances, num_future_utterances, NUM_TRAIN_EPOCHS, WEIGHT_DECAY,
+         WARMUP_RATIO, ADD_BOU_EOU, ADD_SPEAKER_TOKENS, REPLACE_NAMES_IN_UTTERANCES,
+         **kwargs):
 
     NUM_CLASSES = get_num_classes(DATASET)
 
@@ -36,7 +38,7 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
     FP16 = True
     LOAD_BEST_MODEL_AT_END = True
 
-    METRIC_FOR_BEST_MODEL = 'eval_f1_micro' if DATASET == 'DailyDialog' else 'eval_f1_weighted'
+    METRIC_FOR_BEST_MODEL = 'eval_f1_weighted'
     GREATER_IS_BETTER = True
 
     args = TrainingArguments(
@@ -57,33 +59,38 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
         greater_is_better=GREATER_IS_BETTER
     )
 
-    if ADD_SPEAKER_TOKENS:
-        ADD_SPEAKER_TOKENS = os.path.join(OUTPUT_DIR, 'tokenizer', 'added_tokens.json')
-
-    ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train', 
+    logging.info(f"creating a pytorch training dataset object ...")
+    ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train',
                               num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                              model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'),
+                              model_checkpoint=os.path.join(
+                                  OUTPUT_DIR, 'tokenizer'),
                               ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
+                              REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
                               ROOT_DIR=ROOT_DIR, SEED=SEED)
 
-    ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', 
+    logging.info(f"creating a pytorch validation dataset object ...")
+    ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val',
                             num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                            model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'),
+                            model_checkpoint=os.path.join(
+                                OUTPUT_DIR, 'tokenizer'),
                             ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
+                            REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
                             ROOT_DIR=ROOT_DIR, SEED=SEED)
 
+    logging.info(f"creating a pytorch test dataset object ...")
     ds_test = ErcTextDataset(DATASET=DATASET, SPLIT='test',
                              num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                             model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'),
+                             model_checkpoint=os.path.join(
+                                 OUTPUT_DIR, 'tokenizer'),
                              ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
+                             REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
                              ROOT_DIR=ROOT_DIR, SEED=SEED)
 
-    tokenizer = RobertaTokenizer.from_pretrained(
+    tokenizer = RobertaTokenizerFast.from_pretrained(
         os.path.join(OUTPUT_DIR, 'tokenizer'), use_fast=True)
 
     model = RobertaForSequenceClassification.from_pretrained(
         model_checkpoint, num_labels=NUM_CLASSES)
-
     model.resize_token_embeddings(len(tokenizer))
 
     logging.info(f"training a full model with full data ...")
@@ -117,11 +124,12 @@ if __name__ == "__main__":
         description='erc RoBERTa text huggingface training')
     parser.add_argument('--OUTPUT-DIR', type=str)
     parser.add_argument('--SEED', type=int)
+    parser.add_argument('--training-config', type=str)
 
     args = parser.parse_args()
     args = vars(args)
 
-    with open('./train-erc-text.yaml', 'r') as stream:
+    with open(args['training_config'], 'r') as stream:
         args_ = yaml.load(stream)
 
     for key, val in args_.items():

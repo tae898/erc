@@ -27,17 +27,22 @@ def main(**kwargs):
         yaml.dump(kwargs, stream)
 
     save_special_tokenzier(DATASET=kwargs['DATASET'], ADD_BOU_EOU=kwargs['ADD_BOU_EOU'],
-                           ADD_SPEAKER_TOKENS=kwargs['ADD_SPEAKER_TOKENS'], SPLITS=[
-                               'train'],
+                           ADD_SPEAKER_TOKENS=kwargs['ADD_SPEAKER_TOKENS'],
+                           SPLITS=kwargs['SPEAKER_SPLITS'],
                            base_tokenizer=kwargs['model_checkpoint'],
                            save_at=os.path.join(OUTPUT_DIR, 'tokenizer'))
 
     subprocess.call(
-        ["python3", "train-erc-text-hp.py", "--OUTPUT-DIR", OUTPUT_DIR])
+        ["python3", "train-erc-text-hp.py", "--OUTPUT-DIR", OUTPUT_DIR,
+         "--training-config", kwargs['training_config']])
 
     for SEED in kwargs['SEEDS']:
         subprocess.call(["python3", "train-erc-text-full.py",
-                         "--OUTPUT-DIR", OUTPUT_DIR, "--SEED", str(SEED)])
+                         "--OUTPUT-DIR", OUTPUT_DIR, "--SEED", str(SEED),
+                         "--training-config", kwargs['training_config']])
+
+    subprocess.call(
+        ["python3", "train-erc-text-remove.py", "--OUTPUT-DIR", OUTPUT_DIR])
 
 
 if __name__ == "__main__":
@@ -46,10 +51,13 @@ if __name__ == "__main__":
     parser.add_argument('--training-config', type=str)
 
     args = parser.parse_args()
-    training_config_path = vars(args)['training_config']
+    args = vars(args)
 
-    with open(training_config_path, 'r') as stream:
-        args = yaml.load(stream)
+    with open(args['training_config'], 'r') as stream:
+        args_ = yaml.load(stream)
+
+    for key, val in args_.items():
+        args[key] = val
 
     logging.info(f"arguments given to {__file__}: {args}")
 

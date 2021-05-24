@@ -7,7 +7,7 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score
 import numpy as np
 import random
-from transformers import RobertaTokenizer
+from transformers import RobertaTokenizerFast
 from glob import glob
 
 
@@ -94,7 +94,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
                  num_past_utterances=0, num_future_utterances=0,
                  model_checkpoint='roberta-base',
                  ROOT_DIR='multimodal-datasets/', ADD_BOU_EOU=False,
-                 ADD_SPEAKER_TOKENS=False,
+                 ADD_SPEAKER_TOKENS=False, REPLACE_NAMES_IN_UTTERANCES=False,
                  ONLY_UPTO=False, SEED=0):
 
         self.DATASET = DATASET
@@ -104,21 +104,23 @@ class ErcTextDataset(torch.utils.data.Dataset):
         self.num_future_utterances = num_future_utterances
         self.model_checkpoint = model_checkpoint
         self.emotion2id = get_emotion2id(self.DATASET)
+        self.id2emotion = {val: key for key, val in self.emotion2id.items()}
         self.ONLY_UPTO = ONLY_UPTO
         self.SEED = SEED
         self.ADD_BOU_EOU = ADD_BOU_EOU
         self.ADD_SPEAKER_TOKENS = ADD_SPEAKER_TOKENS
+        self.REPLACE_NAMES_IN_UTTERANCES = REPLACE_NAMES_IN_UTTERANCES
 
-        if self.ADD_SPEAKER_TOKENS:
-            with open(self.ADD_SPEAKER_TOKENS, 'r') as stream:
+        if self.ADD_BOU_EOU or self.ADD_SPEAKER_TOKENS:
+            with open(os.path.join(self.model_checkpoint, 'added_tokens.json'), 'r') as stream:
                 self.added_tokens = json.load(stream)
         else:
             self.added_tokens = []
 
+
         self._load_emotions()
         self._load_utterance_ordered()
         self._string2tokens()
-        self.id2emotion = {val: key for key, val in self.emotion2id.items()}
 
     def _load_emotions(self):
         with open(os.path.join(self.ROOT_DIR, self.DATASET, 'emotions.json'), 'r') as stream:
@@ -148,6 +150,16 @@ class ErcTextDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.inputs_)
 
+    def _replace_names_to_tokens(self, utterance):
+        for token, token_id in self.added_tokens.items():
+            if self.ADD_BOU_EOU and token in ['<u>', '</u>']:
+                continue
+            token_stripped = token.split('<')[-1].split('>')[0]
+
+            utterance = utterance.replace(token_stripped, token)
+
+        return utterance
+
     def _load_utterance_speaker_emotion(self, uttid):
         text_path = os.path.join(
             self.ROOT_DIR, self.DATASET, 'raw-texts', self.SPLIT, uttid + '.json')
@@ -156,6 +168,11 @@ class ErcTextDataset(torch.utils.data.Dataset):
             text = json.load(stream)
 
         utterance = text['Utterance'].strip()
+
+        if self.REPLACE_NAMES_IN_UTTERANCES:
+            assert self.ADD_SPEAKER_TOKENS, f"ADD_SPEAKER_TOKENS has to be true!"
+            utterance = self._replace_names_to_tokens(utterance)
+
         emotion = text['Emotion']
 
         if self.DATASET == 'MELD':
@@ -167,32 +184,15 @@ class ErcTextDataset(torch.utils.data.Dataset):
         else:
             raise ValueError(f"{self.DATASET} not supported!!!!!!")
 
-        if self.added_tokens:
-            speaker = self._assign_name(speaker)
-            utterance = f"<{speaker}>" + utterance
-
-        return {'Utterance': utterance, 'Emotion': emotion}
-
-    def _assign_name(self, speaker):
         speaker = speaker.strip()
         speaker = speaker.title()
 
-        if f"<{speaker}>" in list(self.added_tokens.keys()):
-            return speaker
-        else:
-            logging.info(
-                f"{speaker} is not found in the vocab. It'll default to either "
-                f"Stranger or Stranger1")
+        if self.ADD_SPEAKER_TOKENS:
+            if f"<{speaker}>" not in list(self.added_tokens.keys()):
+                raise ValueError(f"{speaker} not found!!")
+            utterance = f"<{speaker}>" + utterance
 
-            if self.DATASET == 'MELD':
-                return 'Stranger'
-            elif self.DATASET == 'IEMOCAP':
-                if speaker == 'Elizabeth':
-                    return 'Stranger'
-                elif speaker == 'William':
-                    return 'Stranger1'
-                else:
-                    raise ValueError("something is wrong")
+        return {'Utterance': utterance, 'Emotion': emotion}
 
     def _augment_utterance(self, utterance):
         if self.ADD_BOU_EOU:
@@ -207,15 +207,19 @@ class ErcTextDataset(torch.utils.data.Dataset):
                 'num_future_utterances': num_future_utterances}
 
         logging.debug(f"arguments given: {args}")
-        tokenizer = RobertaTokenizer.from_pretrained(
+        tokenizer = RobertaTokenizerFast.from_pretrained(
             self.model_checkpoint, use_fast=True)
         max_model_input_size = 512
         num_truncated = 0
 
         inputs = []
+        self.uttids = []
         for diaid in tqdm(diaids):
             ues = [self._load_utterance_speaker_emotion(uttid)
                    for uttid in self.utterance_ordered[diaid]]
+            uttids_ = [uttid for uttid in self.utterance_ordered[diaid]]
+
+            assert len(ues) == len(uttids_)
 
             if self.ADD_BOU_EOU:
                 pad_BOUEOU = 2
@@ -225,7 +229,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
             num_tokens = [len(tokenizer(ue['Utterance'])['input_ids']) + pad_BOUEOU
                           for ue in ues]
 
-            for idx, ue in enumerate(ues):
+            for idx, (ue, uttid) in enumerate(zip(ues, uttids_)):
                 if ue['Emotion'] not in list(self.emotion2id.keys()):
                     continue
 
@@ -305,6 +309,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
                           'attention_mask': attention_mask, 'label': label}
 
                 inputs.append(input_)
+                self.uttids.append(uttid)
 
         logging.info(f"number of truncated utterances: {num_truncated}")
         return inputs
@@ -327,19 +332,18 @@ class ErcTextDataset(torch.utils.data.Dataset):
                                           num_past_utterances=self.num_past_utterances,
                                           num_future_utterances=self.num_future_utterances)
 
+        assert len(self.inputs_) == len(self.uttids)
+
     def __getitem__(self, index):
 
         return self.inputs_[index]
 
-    def create_utterance():
-        raise NotImplementedError
-
 
 def save_special_tokenzier(DATASET='MELD', ROOT_DIR='multimodal-datasets/',
                            ADD_BOU_EOU=False, ADD_SPEAKER_TOKENS=False, SPLITS=['train'],
-                           base_tokenizer='roberta-large', save_at='./'):
+                           base_tokenizer='roberta-base', save_at='./'):
 
-    tokenizer = RobertaTokenizer.from_pretrained(base_tokenizer)
+    tokenizer = RobertaTokenizerFast.from_pretrained(base_tokenizer)
 
     special_tokens_dict = {'additional_special_tokens': []}
     if ADD_BOU_EOU:
@@ -349,11 +353,11 @@ def save_special_tokenzier(DATASET='MELD', ROOT_DIR='multimodal-datasets/',
         logging.info(f"BOU: <u> and EOU: </u> added.")
 
     if ADD_SPEAKER_TOKENS:
-        special_tokens_dict['additional_special_tokens'].append('<Stranger>')
-        logging.info(f"stranger: <Stranger> added.")
+        # special_tokens_dict['additional_special_tokens'].append('<Stranger>')
+        # logging.info(f"stranger: <Stranger> added.")
 
-        special_tokens_dict['additional_special_tokens'].append('<Stranger1>')
-        logging.info(f"stranger: <Stranger1> added.")
+        # special_tokens_dict['additional_special_tokens'].append('<Stranger1>')
+        # logging.info(f"stranger: <Stranger1> added.")
 
         speakers = []
 
@@ -380,12 +384,13 @@ def save_special_tokenzier(DATASET='MELD', ROOT_DIR='multimodal-datasets/',
         speakers = sorted(list(set(speakers)))
 
         speakers = [f"<{speaker}>"for speaker in speakers]
+        logging.info(f"{len(speakers)} speaker-specific tokens added.")
 
         for speaker in speakers:
             special_tokens_dict['additional_special_tokens'].append(speaker)
 
-        num_added_tokens = tokenizer.add_special_tokens(special_tokens_dict)
+    num_added_tokens = tokenizer.add_special_tokens(special_tokens_dict)
 
-        logging.info(f"{num_added_tokens} speaker-specific tokens added.")
+    logging.info(f"In total of {num_added_tokens} special tokens added.")
 
-        tokenizer.save_pretrained(save_at)
+    tokenizer.save_pretrained(save_at)
