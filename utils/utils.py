@@ -93,7 +93,8 @@ class ErcTextDataset(torch.utils.data.Dataset):
     def __init__(self, DATASET='MELD', SPLIT='train',
                  num_past_utterances=0, num_future_utterances=0,
                  model_checkpoint='roberta-base',
-                 ROOT_DIR='multimodal-datasets/', ADD_BOU_EOU=False,
+                 ROOT_DIR='multimodal-datasets/', ADD_BOU=False,
+                 ADD_EOU=False,
                  ADD_SPEAKER_TOKENS=False, REPLACE_NAMES_IN_UTTERANCES=False,
                  ONLY_UPTO=False, SEED=0):
 
@@ -107,16 +108,16 @@ class ErcTextDataset(torch.utils.data.Dataset):
         self.id2emotion = {val: key for key, val in self.emotion2id.items()}
         self.ONLY_UPTO = ONLY_UPTO
         self.SEED = SEED
-        self.ADD_BOU_EOU = ADD_BOU_EOU
+        self.ADD_BOU = ADD_BOU
+        self.ADD_EOU = ADD_EOU
         self.ADD_SPEAKER_TOKENS = ADD_SPEAKER_TOKENS
         self.REPLACE_NAMES_IN_UTTERANCES = REPLACE_NAMES_IN_UTTERANCES
 
-        if self.ADD_BOU_EOU or self.ADD_SPEAKER_TOKENS:
+        if self.ADD_BOU or self.ADD_EOU or self.ADD_SPEAKER_TOKENS:
             with open(os.path.join(self.model_checkpoint, 'added_tokens.json'), 'r') as stream:
                 self.added_tokens = json.load(stream)
         else:
             self.added_tokens = []
-
 
         self._load_emotions()
         self._load_utterance_ordered()
@@ -152,7 +153,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
 
     def _replace_names_to_tokens(self, utterance):
         for token, token_id in self.added_tokens.items():
-            if self.ADD_BOU_EOU and token in ['<u>', '</u>']:
+            if (self.ADD_BOU or self.ADD_EOU) and token in ['<u>', '</u>']:
                 continue
             token_stripped = token.split('<')[-1].split('>')[0]
 
@@ -195,10 +196,17 @@ class ErcTextDataset(torch.utils.data.Dataset):
         return {'Utterance': utterance, 'Emotion': emotion}
 
     def _augment_utterance(self, utterance):
-        if self.ADD_BOU_EOU:
-            return '<u>' + utterance + '</u>'
+        if self.ADD_BOU:
+            to_prepend = '<u>'
         else:
-            return utterance
+            to_prepend = ''
+
+        if self.ADD_EOU:
+            to_append = '</u>'
+        else:
+            to_append = ''
+
+        return to_prepend + utterance + to_append
 
     def _create_input(self, diaids, num_past_utterances, num_future_utterances):
 
@@ -221,12 +229,13 @@ class ErcTextDataset(torch.utils.data.Dataset):
 
             assert len(ues) == len(uttids_)
 
-            if self.ADD_BOU_EOU:
-                pad_BOUEOU = 2
-            else:
-                pad_BOUEOU = 0
+            pad_BOU_EOU = 0
+            if self.ADD_BOU:
+                pad_BOU_EOU += 1
+            elif self.ADD_EOU:
+                pad_BOU_EOU += 1
 
-            num_tokens = [len(tokenizer(ue['Utterance'])['input_ids']) + pad_BOUEOU
+            num_tokens = [len(tokenizer(ue['Utterance'])['input_ids']) + pad_BOU_EOU
                           for ue in ues]
 
             for idx, (ue, uttid) in enumerate(zip(ues, uttids_)):
@@ -340,17 +349,19 @@ class ErcTextDataset(torch.utils.data.Dataset):
 
 
 def save_special_tokenzier(DATASET='MELD', ROOT_DIR='multimodal-datasets/',
-                           ADD_BOU_EOU=False, ADD_SPEAKER_TOKENS=False, SPLITS=['train'],
+                           ADD_BOU=False, ADD_EOU=False,
+                           ADD_SPEAKER_TOKENS=False, SPLITS=['train'],
                            base_tokenizer='roberta-base', save_at='./'):
 
     tokenizer = RobertaTokenizerFast.from_pretrained(base_tokenizer)
 
     special_tokens_dict = {'additional_special_tokens': []}
-    if ADD_BOU_EOU:
+    if ADD_BOU:
         special_tokens_dict['additional_special_tokens'].append('<u>')
+        logging.info(f"BOU: <u> added")
+    if ADD_EOU:
         special_tokens_dict['additional_special_tokens'].append('</u>')
-
-        logging.info(f"BOU: <u> and EOU: </u> added.")
+        logging.info(f"EOU: </u> added.")
 
     if ADD_SPEAKER_TOKENS:
         # special_tokens_dict['additional_special_tokens'].append('<Stranger>')
