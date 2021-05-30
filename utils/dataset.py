@@ -2,13 +2,12 @@ import torch
 import json
 import os
 import logging
-from torch._C import Value
 from tqdm import tqdm
-from sklearn.metrics import f1_score
-import numpy as np
 import random
 from transformers import RobertaTokenizerFast
 from glob import glob
+from .common import get_emotion2id, set_seed, get_IEMOCAP_names
+from .audio import load_audio
 
 
 logging.basicConfig(
@@ -18,74 +17,81 @@ logging.basicConfig(
 )
 
 
-def get_num_classes(DATASET):
-    if DATASET == 'MELD':
-        NUM_CLASSES = 7
-    elif DATASET == 'IEMOCAP':
-        NUM_CLASSES = 6
-    else:
-        raise ValueError
+class ErcAudioDataset(torch.utils.data.Dataset):
 
-    return NUM_CLASSES
+    def __init__(self, DATASET='MELD', SPLIT='train',
+                 num_past_utterances=0, num_future_utterances=0,
+                 model_checkpoint='roberta-base',
+                 ROOT_DIR='multimodal-datasets/', ADD_BOU_EOU=False,
+                 ADD_SPEAKER_TOKENS=False, ONLY_UPTO=False, SEED=0):
 
+        self.DATASET = DATASET
+        self.ROOT_DIR = ROOT_DIR
+        self.SPLIT = SPLIT
+        self.num_past_utterances = num_past_utterances
+        self.num_future_utterances = num_future_utterances
+        self.model_checkpoint = model_checkpoint
+        self.emotion2id = get_emotion2id(self.DATASET)
+        self.id2emotion = {val: key for key, val in self.emotion2id.items()}
+        self.ONLY_UPTO = ONLY_UPTO
+        self.SEED = SEED
+        self.ADD_BOU_EOU = ADD_BOU_EOU
+        self.ADD_SPEAKER_TOKENS = ADD_SPEAKER_TOKENS
 
-def compute_metrics(eval_predictions):
-    predictions, label_ids = eval_predictions
-    preds = np.argmax(predictions, axis=1)
+        self._add_basic_tokens()
 
-    f1_weighted = f1_score(label_ids, preds, average='weighted')
-    f1_micro = f1_score(label_ids, preds, average='micro')
-    f1_macro = f1_score(label_ids, preds, average='macro')
+        if self.ADD_BOU_EOU:
+            self._add_BOU_EOU_tokens()
+        if self.ADD_SPEAKER_TOKENS:
+            self._add_ADD_SPEAKER_TOKENS()
 
-    return {'f1_weighted': f1_weighted, 'f1_micro': f1_micro, 'f1_macro': f1_macro}
+        self._load_emotions()
+        self._load_utterance_ordered()
 
+    def __len__(self):
+        return len(self.inputs_)
 
-def set_seed(seed):
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
+    def __getitem__(self, index):
 
+        return self.inputs_[index]
 
-def get_emotion2id(DATASET):
+    def _add_basic_tokens(self):
+        self.tokens = {"<s>": 0, "</s>": 2, "<pad>": 1}
 
-    emotions = {}
-    # MELD has 7 classes
-    emotions['MELD'] = ['neutral',
-                        'joy',
-                        'surprise',
-                        'anger',
-                        'sadness',
-                        'disgust',
-                        'fear']
+    def _add_BOU_EOU_tokens(self):
+        self.tokens["<u>"] = 3
+        self.tokens["</u>"] = 4
 
-    # IEMOCAP originally has 11 classes but we'll only use 6 of them.
-    emotions['IEMOCAP'] = ['neutral',
-                           'frustration',
-                           'sadness',
-                           'anger',
-                           'excited',
-                           'happiness']
-
-    emotion2id = {DATASET: {emotion: idx for idx, emotion in enumerate(
-        emotions_)} for DATASET, emotions_ in emotions.items()}
-
-    return emotion2id[DATASET]
+    def _add_ADD_SPEAKER_TOKENS(self):
+        pass
 
 
-def get_IEMOCAP_names():
+    def _load_emotions(self):
+        with open(os.path.join(self.ROOT_DIR, self.DATASET, 'emotions.json'), 'r') as stream:
+            self.emotions = json.load(stream)[self.SPLIT]
 
-    # https: // www.ssa.gov/oact/babynames/decades/century.html
-    names_dict = {'Ses01': {'Female': 'Mary', 'Male': 'James'},
-                  'Ses02': {'Female': 'Patricia', 'Male': 'John'},
-                  'Ses03': {'Female': 'Jennifer', 'Male': 'Robert'},
-                  'Ses04': {'Female': 'Linda', 'Male': 'Michael'},
-                  'Ses05': {'Female': 'Elizabeth', 'Male': 'William'}}
+    def _load_utterance_ordered(self):
+        with open(os.path.join(self.ROOT_DIR, self.DATASET, 'utterance-ordered.json'), 'r') as stream:
+            utterance_ordered = json.load(stream)[self.SPLIT]
 
-    return names_dict
+        logging.debug(f"sanity check on if the audio files exist ...")
+        count = 0
+        self.utterance_ordered = {}
+        for diaid, uttids in utterance_ordered.items():
+            self.utterance_ordered[diaid] = []
+            for uttid in uttids:
+                audio_path = os.path.join(
+                    self.ROOT_DIR, self.DATASET, 'raw-audios',
+                    self.SPLIT, uttid + '.wav')
+                try:
+                    y = load_audio(self.DATASET, self.SPLIT, uttid)
+                    self.utterance_ordered[diaid].append(uttid)
+                except Exception as e:
+                    count += 1
+        if count != 0:
+            logging.warning(f"number of not existing audio files: {count}")
+        else:
+            logging.info(f"every audio file exists fine!")
 
 
 class ErcTextDataset(torch.utils.data.Dataset):
@@ -117,10 +123,16 @@ class ErcTextDataset(torch.utils.data.Dataset):
         else:
             self.added_tokens = []
 
-
         self._load_emotions()
         self._load_utterance_ordered()
         self._string2tokens()
+
+    def __len__(self):
+        return len(self.inputs_)
+
+    def __getitem__(self, index):
+
+        return self.inputs_[index]
 
     def _load_emotions(self):
         with open(os.path.join(self.ROOT_DIR, self.DATASET, 'emotions.json'), 'r') as stream:
@@ -133,7 +145,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
         logging.debug(f"sanity check on if the text files exist ...")
         count = 0
         self.utterance_ordered = {}
-        for diaid, uttids in utterance_ordered.items():
+        for diaid, uttids in tqdm(utterance_ordered.items()):
             self.utterance_ordered[diaid] = []
             for uttid in uttids:
                 try:
@@ -147,8 +159,25 @@ class ErcTextDataset(torch.utils.data.Dataset):
         else:
             logging.info(f"every text file exists fine!")
 
-    def __len__(self):
-        return len(self.inputs_)
+    def _string2tokens(self):
+        logging.info(f"converting utterances into tokens ...")
+
+        diaids = sorted(list(self.utterance_ordered.keys()))
+
+        set_seed(self.SEED)
+        random.shuffle(diaids)
+
+        if self.ONLY_UPTO:
+            logging.info(
+                f"Using only the first {self.ONLY_UPTO} dialogues ...")
+            diaids = diaids[:self.ONLY_UPTO]
+
+        logging.info(f"creating input utterance data ... ")
+        self.inputs_ = self._create_input(diaids=diaids,
+                                          num_past_utterances=self.num_past_utterances,
+                                          num_future_utterances=self.num_future_utterances)
+
+        assert len(self.inputs_) == len(self.uttids)
 
     def _replace_names_to_tokens(self, utterance):
         for token, token_id in self.added_tokens.items():
@@ -313,84 +342,3 @@ class ErcTextDataset(torch.utils.data.Dataset):
 
         logging.info(f"number of truncated utterances: {num_truncated}")
         return inputs
-
-    def _string2tokens(self):
-        logging.info(f"converting utterances into tokens ...")
-
-        diaids = sorted(list(self.utterance_ordered.keys()))
-
-        set_seed(self.SEED)
-        random.shuffle(diaids)
-
-        if self.ONLY_UPTO:
-            logging.info(
-                f"Using only the first {self.ONLY_UPTO} dialogues ...")
-            diaids = diaids[:self.ONLY_UPTO]
-
-        logging.info(f"creating input utterance data ... ")
-        self.inputs_ = self._create_input(diaids=diaids,
-                                          num_past_utterances=self.num_past_utterances,
-                                          num_future_utterances=self.num_future_utterances)
-
-        assert len(self.inputs_) == len(self.uttids)
-
-    def __getitem__(self, index):
-
-        return self.inputs_[index]
-
-
-def save_special_tokenzier(DATASET='MELD', ROOT_DIR='multimodal-datasets/',
-                           ADD_BOU_EOU=False, ADD_SPEAKER_TOKENS=False, SPLITS=['train'],
-                           base_tokenizer='roberta-base', save_at='./'):
-
-    tokenizer = RobertaTokenizerFast.from_pretrained(base_tokenizer)
-
-    special_tokens_dict = {'additional_special_tokens': []}
-    if ADD_BOU_EOU:
-        special_tokens_dict['additional_special_tokens'].append('<u>')
-        special_tokens_dict['additional_special_tokens'].append('</u>')
-
-        logging.info(f"BOU: <u> and EOU: </u> added.")
-
-    if ADD_SPEAKER_TOKENS:
-        # special_tokens_dict['additional_special_tokens'].append('<Stranger>')
-        # logging.info(f"stranger: <Stranger> added.")
-
-        # special_tokens_dict['additional_special_tokens'].append('<Stranger1>')
-        # logging.info(f"stranger: <Stranger1> added.")
-
-        speakers = []
-
-        for SPLIT in SPLITS:
-            for text_path in glob(os.path.join(ROOT_DIR, DATASET, 'raw-texts', SPLIT, '*.json')):
-                with open(text_path, 'r') as stream:
-                    text = json.load(stream)
-
-                if DATASET == 'MELD':
-                    speaker = text['Speaker']
-
-                elif DATASET == 'IEMOCAP':
-                    sessid = text['SessionID']
-                    speaker = get_IEMOCAP_names()[sessid][text['Speaker']]
-
-                else:
-                    raise ValueError(f"{DATASET} is not supported!!!")
-
-                speaker = speaker.strip()
-                speaker = speaker.title()
-
-                speakers.append(speaker)
-
-        speakers = sorted(list(set(speakers)))
-
-        speakers = [f"<{speaker}>"for speaker in speakers]
-        logging.info(f"{len(speakers)} speaker-specific tokens added.")
-
-        for speaker in speakers:
-            special_tokens_dict['additional_special_tokens'].append(speaker)
-
-    num_added_tokens = tokenizer.add_special_tokens(special_tokens_dict)
-
-    logging.info(f"In total of {num_added_tokens} special tokens added.")
-
-    tokenizer.save_pretrained(save_at)
