@@ -16,7 +16,7 @@ logging.basicConfig(
 
 def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
          num_past_utterances, num_future_utterances, NUM_TRAIN_EPOCHS, WEIGHT_DECAY,
-         WARMUP_RATIO, ADD_BOU_EOU, ADD_SPEAKER_TOKENS, REPLACE_NAMES_IN_UTTERANCES,
+         WARMUP_RATIO, ADD_BOU, ADD_EOU, ADD_SPEAKER_TOKENS, REPLACE_NAMES_IN_UTTERANCES,
          **kwargs):
 
     NUM_CLASSES = get_num_classes(DATASET)
@@ -64,7 +64,7 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
                               num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
                               model_checkpoint=os.path.join(
                                   OUTPUT_DIR, 'tokenizer'),
-                              ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
+                              ADD_BOU=ADD_BOU, ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                               REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
                               ROOT_DIR=ROOT_DIR, SEED=SEED)
 
@@ -73,7 +73,7 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
                             num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
                             model_checkpoint=os.path.join(
                                 OUTPUT_DIR, 'tokenizer'),
-                            ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
+                            ADD_BOU=ADD_BOU, ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                             REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
                             ROOT_DIR=ROOT_DIR, SEED=SEED)
 
@@ -82,7 +82,7 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
                              num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
                              model_checkpoint=os.path.join(
                                  OUTPUT_DIR, 'tokenizer'),
-                             ADD_BOU_EOU=ADD_BOU_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
+                             ADD_BOU=ADD_BOU, ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                              REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
                              ROOT_DIR=ROOT_DIR, SEED=SEED)
 
