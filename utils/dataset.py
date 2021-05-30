@@ -262,7 +262,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
             pad_BOU_EOU = 0
             if self.ADD_BOU:
                 pad_BOU_EOU += 1
-            elif self.ADD_EOU:
+            if self.ADD_EOU:
                 pad_BOU_EOU += 1
 
             num_tokens = [len(tokenizer(ue['Utterance'])['input_ids']) + pad_BOU_EOU
