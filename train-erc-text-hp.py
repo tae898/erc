@@ -62,6 +62,9 @@ def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR,
                               REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
                               ROOT_DIR=ROOT_DIR, SEED=SEED)
 
+    for i in range(10):
+        print(tokenizer.decode(ds_train[i]['input_ids']))
+
     logging.info(f"creating a pytorch validation dataset object ...")
     ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', 
                             num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,

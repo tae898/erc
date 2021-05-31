@@ -17,279 +17,6 @@ logging.basicConfig(
 )
 
 
-class ErcAudioDataset(torch.utils.data.Dataset):
-
-    def __init__(self, DATASET='MELD', SPLIT='train',
-                 num_past_utterances=0, num_future_utterances=0,
-                 model_checkpoint='roberta-base',
-                 ROOT_DIR='multimodal-datasets/', ADD_BOU=False, ADD_EOU=False,
-                 ADD_SPEAKER_TOKENS=False, ONLY_UPTO=False, SEED=0,
-                 SPEAKER_SPLITS=['train', 'val', 'test'], spectrogram=None,
-                 **kwargs):
-
-        self.DATASET = DATASET
-        self.ROOT_DIR = ROOT_DIR
-        self.SPLIT = SPLIT
-        self.num_past_utterances = num_past_utterances
-        self.num_future_utterances = num_future_utterances
-        self.model_checkpoint = model_checkpoint
-        self.emotion2id = get_emotion2id(self.DATASET)
-        self.id2emotion = {val: key for key, val in self.emotion2id.items()}
-        self.ONLY_UPTO = ONLY_UPTO
-        self.SEED = SEED
-        self.ADD_BOU = ADD_BOU
-        self.ADD_EOU = ADD_EOU
-        self.ADD_SPEAKER_TOKENS = ADD_SPEAKER_TOKENS
-        self.SPEAKER_SPLITS = SPEAKER_SPLITS
-        self.spectrogram = spectrogram
-
-        self.added_tokens = {"<s>": 0, "<pad>": 1, "</s>": 2}
-
-        tokens_ = save_special_tokenzier(DATASET='MELD', ROOT_DIR='multimodal-datasets/',
-                                         ADD_BOU=self.ADD_BOU, ADD_EOU=self.ADD_EOU,
-                                         ADD_SPEAKER_TOKENS=self.ADD_SPEAKER_TOKENS,
-                                         SPLITS=self.SPEAKER_SPLITS,
-                                         base_tokenizer='roberta-base', save_at=None)
-
-        for token in tokens_:
-            self.added_tokens[token] = len(self.added_tokens)
-
-        self._load_emotions()
-        self._load_utterance_ordered()
-        self._calculate_tokens()
-
-    def __len__(self):
-        return len(self.inputs_)
-
-    def __getitem__(self, index):
-        return self.inputs_[index]
-
-    def _load_emotions(self):
-        with open(os.path.join(self.ROOT_DIR, self.DATASET, 'emotions.json'), 'r') as stream:
-            self.emotions = json.load(stream)[self.SPLIT]
-
-    def _load_utterance_ordered(self):
-        with open(os.path.join(self.ROOT_DIR, self.DATASET, 'utterance-ordered.json'), 'r') as stream:
-            utterance_ordered = json.load(stream)[self.SPLIT]
-
-        logging.debug(f"sanity check on if the audio files exist ...")
-        count = 0
-        self.utterance_ordered = {}
-        for diaid, uttids in tqdm(utterance_ordered.items()):
-            self.utterance_ordered[diaid] = []
-            for uttid in uttids:
-                try:
-                    y = load_audio(self.DATASET, self.SPLIT, uttid,
-                                   self.spectrogram['sr'])
-                    with open(os.path.join(self.ROOT_DIR, self.DATASET, 'raw-texts', self.SPLIT, uttid + '.json'), 'r') as stream:
-                        foo = json.load(stream)
-
-                    self.utterance_ordered[diaid].append(uttid)
-                except Exception as e:
-                    count += 1
-        if count != 0:
-            logging.warning(f"number of not existing audio files: {count}")
-        else:
-            logging.info(f"every audio file exists fine!")
-
-    def _calculate_tokens(self):
-
-        logging.info(f"calculating tokens ...")
-
-        diaids = sorted(list(self.utterance_ordered.keys()))
-
-        set_seed(self.SEED)
-        random.shuffle(diaids)
-
-        if self.ONLY_UPTO:
-            logging.info(
-                f"Using only the first {self.ONLY_UPTO} dialogues ...")
-            diaids = diaids[:self.ONLY_UPTO]
-
-        logging.info(f"creating input utterance data ... ")
-        self._create_tokens(diaids=diaids,
-                            num_past_utterances=self.num_past_utterances,
-                            num_future_utterances=self.num_future_utterances)
-
-    def _load_utterance_speaker_emotion(self, uttid):
-        text_path = os.path.join(
-            self.ROOT_DIR, self.DATASET, 'raw-texts', self.SPLIT, uttid + '.json')
-
-        with open(text_path, 'r') as stream:
-            text = json.load(stream)
-
-        utterance = text['Utterance'].strip()
-
-        emotion = text['Emotion']
-
-        if self.DATASET == 'MELD':
-            speaker = text['Speaker']
-        elif self.DATASET == 'IEMOCAP':
-            sessid = text['SessionID']
-            speaker = get_IEMOCAP_names()[sessid][text['Speaker']]
-
-        else:
-            raise ValueError(f"{self.DATASET} not supported!!!!!!")
-
-        speaker = speaker.strip()
-        speaker = speaker.title()
-
-        if self.ADD_SPEAKER_TOKENS:
-            if f"<{speaker}>" not in list(self.added_tokens.keys()):
-                raise ValueError(f"{speaker} not found!!")
-            # utterance = f"<{speaker}>" + utterance
-            # <pad> is a placeholder for name, both of which should be one token long
-            utterance = "<pad>" + utterance
-
-        return {'Utterance': utterance, 'Speaker': speaker, 'Emotion': emotion}
-
-    def _create_tokens(self, diaids, num_past_utterances, num_future_utterances):
-
-        args = {'diaids': diaids,
-                'num_past_utterances': num_past_utterances,
-                'num_future_utterances': num_future_utterances}
-
-        logging.debug(f"arguments given: {args}")
-        tokenizer = RobertaTokenizerFast.from_pretrained(
-            self.model_checkpoint, use_fast=True)
-        max_model_input_size = 512
-        if num_past_utterances == 0 and num_future_utterances == 0:
-            pass
-        elif num_past_utterances > 0 and num_future_utterances == 0:
-            max_model_input_size -= 2
-
-        elif num_past_utterances == 0 and num_future_utterances > 0:
-            max_model_input_size -= 2
-
-        elif num_past_utterances > 0 and num_future_utterances > 0:
-            max_model_input_size -= 4
-        else:
-            raise ValueError
-
-        num_truncated = 0
-
-        self.inputs_text, self.tokens_length, self.uttids, self.uttids_used = [], [], [], []
-        for diaid in tqdm(diaids):
-            uses = [self._load_utterance_speaker_emotion(uttid)
-                    for uttid in self.utterance_ordered[diaid]]
-            uttids_ = [uttid for uttid in self.utterance_ordered[diaid]]
-
-            assert len(uses) == len(uttids_)
-
-            pad_BOU_EOU = 0
-            if self.ADD_BOU:
-                pad_BOU_EOU += 1
-            if self.ADD_EOU:
-                pad_BOU_EOU += 1
-
-            num_tokens = [len(tokenizer.encode(use['Utterance'], add_special_tokens=False)) + pad_BOU_EOU
-                          for use in uses]
-
-            for idx, (use, uttid) in enumerate(zip(uses, uttids_)):
-                if use['Emotion'] not in list(self.emotion2id.keys()):
-                    continue
-
-                label = self.emotion2id[use['Emotion']]
-
-                indexes = [idx]
-                indexes_past = [i for i in range(
-                    idx-1, idx-num_past_utterances-1, -1)]
-                indexes_future = [i for i in range(
-                    idx+1, idx+num_future_utterances+1, 1)]
-
-                offset = 0
-                if len(indexes_past) < len(indexes_future):
-                    for _ in range(len(indexes_future)-len(indexes_past)):
-                        indexes_past.append(None)
-                elif len(indexes_past) > len(indexes_future):
-                    for _ in range(len(indexes_past) - len(indexes_future)):
-                        indexes_future.append(None)
-
-                for i, j in zip(indexes_past, indexes_future):
-                    if i is not None and i >= 0:
-                        indexes.insert(0, i)
-                        offset += 1
-                        if sum([num_tokens[idx_] for idx_ in indexes]) > max_model_input_size:
-                            del indexes[0]
-                            offset -= 1
-                            num_truncated += 1
-                            break
-                    if j is not None and j < len(uses):
-                        indexes.append(j)
-                        if sum([num_tokens[idx_] for idx_ in indexes]) > max_model_input_size:
-                            del indexes[-1]
-                            num_truncated += 1
-                            break
-
-                utterances = [uses[idx_]['Utterance'] for idx_ in indexes]
-                uttids_used = [uttids_[idx_] for idx_ in indexes]
-
-                assert len(utterances) == len(uttids_used)
-
-                if num_past_utterances == 0 and num_future_utterances == 0:
-                    assert len(utterances) == 1
-                    final_utterance = utterances[0]
-
-                elif num_past_utterances > 0 and num_future_utterances == 0:
-                    if len(utterances) == 1:
-                        final_utterance = '</s></s>' + utterances[-1]
-                    else:
-                        final_utterance = ''.join(
-                            [utt for utt in utterances[:-1]]) + '</s></s>' + utterances[-1]
-
-                elif num_past_utterances == 0 and num_future_utterances > 0:
-                    if len(utterances) == 1:
-                        final_utterance = utterances[0] + '</s></s>'
-                    else:
-                        final_utterance = utterances[0] + \
-                            '</s></s>' + \
-                            ''.join([utt for utt in utterances[1:]])
-
-                elif num_past_utterances > 0 and num_future_utterances > 0:
-                    if len(utterances) == 1:
-                        final_utterance = '</s></s>' + \
-                            utterances[0] + '</s></s>'
-                    else:
-                        final_utterance = ''.join([utt for utt in utterances[:offset]]) + '</s></s>' + \
-                            utterances[offset] + '</s></s>' + \
-                            ''.join([utt for utt in utterances[offset+1:]])
-
-                input_ids_attention_mask = tokenizer(final_utterance)
-                input_ids = input_ids_attention_mask['input_ids']
-                attention_mask = input_ids_attention_mask['attention_mask']
-
-                if num_past_utterances == 0 and num_future_utterances == 0:
-                    assert len(input_ids) == sum(
-                        [num_tokens[idx_] for idx_ in indexes]) + 2
-
-                elif num_past_utterances > 0 and num_future_utterances == 0:
-                    assert len(input_ids) == sum(
-                        [num_tokens[idx_] for idx_ in indexes]) + 4
-
-                elif num_past_utterances == 0 and num_future_utterances > 0:
-                    assert len(input_ids) == sum(
-                        [num_tokens[idx_] for idx_ in indexes]) + 4
-
-                elif num_past_utterances > 0 and num_future_utterances > 0:
-                    assert len(input_ids) == sum(
-                        [num_tokens[idx_] for idx_ in indexes]) + 6
-
-                input_t = {'input_ids': input_ids,
-                           'attention_mask': attention_mask, 'label': label}
-
-                assert len([num_tokens[idx_]
-                            for idx_ in indexes]) == len(uttids_used)
-                self.tokens_length.append(
-                    [num_tokens[idx_] for idx_ in indexes])
-                self.inputs_text.append(input_t)
-                self.uttids.append(uttid)
-                self.uttids_used.append(uttids_used)
-
-        logging.info(f"number of truncated utterances: {num_truncated}")
-        assert len(self.inputs_text) == len(
-            self.tokens_length) == len(self.uttids)
-
-
 class ErcTextDataset(torch.utils.data.Dataset):
 
     def __init__(self, DATASET='MELD', SPLIT='train',
@@ -320,6 +47,8 @@ class ErcTextDataset(torch.utils.data.Dataset):
                 self.added_tokens = json.load(stream)
         else:
             self.added_tokens = []
+
+        self.tokenizer = RobertaTokenizerFast.from_pretrained(self.model_checkpoint)
 
         self._load_emotions()
         self._load_utterance_ordered()
@@ -370,9 +99,9 @@ class ErcTextDataset(torch.utils.data.Dataset):
             diaids = diaids[:self.ONLY_UPTO]
 
         logging.info(f"creating input utterance data ... ")
-        self._create_input(diaids=diaids,
-                           num_past_utterances=self.num_past_utterances,
-                           num_future_utterances=self.num_future_utterances)
+        self._create_tokens(diaids=diaids,
+                            num_past_utterances=self.num_past_utterances,
+                            num_future_utterances=self.num_future_utterances)
 
     def _replace_names_to_tokens(self, utterance):
         for token, token_id in self.added_tokens.items():
@@ -416,9 +145,6 @@ class ErcTextDataset(torch.utils.data.Dataset):
                 raise ValueError(f"{speaker} not found!!")
             utterance = f"<{speaker}>" + utterance
 
-        return {'Utterance': utterance, 'Emotion': emotion}
-
-    def _augment_utterance(self, utterance):
         if self.ADD_BOU:
             to_prepend = '<u>'
         else:
@@ -429,17 +155,17 @@ class ErcTextDataset(torch.utils.data.Dataset):
         else:
             to_append = ''
 
-        return to_prepend + utterance + to_append
+        utterance = to_prepend + utterance + to_append
 
-    def _create_input(self, diaids, num_past_utterances, num_future_utterances):
+        return {'Utterance': utterance, 'Emotion': emotion}
+
+    def _create_tokens(self, diaids, num_past_utterances, num_future_utterances):
 
         args = {'diaids': diaids,
                 'num_past_utterances': num_past_utterances,
                 'num_future_utterances': num_future_utterances}
 
         logging.debug(f"arguments given: {args}")
-        tokenizer = RobertaTokenizerFast.from_pretrained(
-            self.model_checkpoint, use_fast=True)
         max_model_input_size = 512
         if num_past_utterances == 0 and num_future_utterances == 0:
             pass
@@ -464,13 +190,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
 
             assert len(uses) == len(uttids_)
 
-            pad_BOU_EOU = 0
-            if self.ADD_BOU:
-                pad_BOU_EOU += 1
-            if self.ADD_EOU:
-                pad_BOU_EOU += 1
-
-            num_tokens = [len(tokenizer.encode(use['Utterance'], add_special_tokens=False)) + pad_BOU_EOU
+            num_tokens = [len(self.tokenizer.encode(use['Utterance'], add_special_tokens=False))
                           for use in uses]
 
             for idx, (use, uttid) in enumerate(zip(uses, uttids_)):
