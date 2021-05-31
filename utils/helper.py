@@ -52,6 +52,13 @@ def get_tokenizer_model_ds(DATASET, kwargs, model_checkpoint, SPLIT='train'):
 
     SEED = int(model_checkpoint.split('/')[-3])
 
+    if kwargs['ADD_BOU_EOU']:
+        kwargs['ADD_BOU'] = True
+        kwargs['ADD_EOU'] = True
+    else:
+        kwargs['ADD_BOU'] = False
+        kwargs['ADD_EOU'] = False
+
     ds = ErcTextDataset(DATASET=DATASET, SPLIT=SPLIT,
                         num_past_utterances=kwargs['num_past_utterances'], num_future_utterances=kwargs['num_future_utterances'],
                         model_checkpoint=f"{'/'.join(model_checkpoint.split('/')[:-3])}/tokenizer",
