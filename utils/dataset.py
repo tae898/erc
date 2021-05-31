@@ -42,12 +42,6 @@ class ErcTextDataset(torch.utils.data.Dataset):
         self.ADD_SPEAKER_TOKENS = ADD_SPEAKER_TOKENS
         self.REPLACE_NAMES_IN_UTTERANCES = REPLACE_NAMES_IN_UTTERANCES
 
-        if self.ADD_BOU or self.ADD_EOU or self.ADD_SPEAKER_TOKENS:
-            with open(os.path.join(self.model_checkpoint, 'added_tokens.json'), 'r') as stream:
-                self.added_tokens = json.load(stream)
-        else:
-            self.added_tokens = []
-
         self.tokenizer = RobertaTokenizerFast.from_pretrained(self.model_checkpoint)
 
         self._load_emotions()
@@ -104,7 +98,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
                             num_future_utterances=self.num_future_utterances)
 
     def _replace_names_to_tokens(self, utterance):
-        for token, token_id in self.added_tokens.items():
+        for token in self.tokenizer.additional_special_tokens:
             if (self.ADD_BOU or self.ADD_EOU) and token in ['<u>', '</u>']:
                 continue
             token_stripped = token.split('<')[-1].split('>')[0]
@@ -141,7 +135,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
         speaker = speaker.title()
 
         if self.ADD_SPEAKER_TOKENS:
-            if f"<{speaker}>" not in list(self.added_tokens.keys()):
+            if f"<{speaker}>" not in self.tokenizer.additional_special_tokens:
                 raise ValueError(f"{speaker} not found!!")
             utterance = f"<{speaker}>" + utterance
 
@@ -168,15 +162,19 @@ class ErcTextDataset(torch.utils.data.Dataset):
         logging.debug(f"arguments given: {args}")
         max_model_input_size = 512
         if num_past_utterances == 0 and num_future_utterances == 0:
-            pass
+            max_model_input_size -= 2
         elif num_past_utterances > 0 and num_future_utterances == 0:
+            max_model_input_size -= 2
             max_model_input_size -= 2
 
         elif num_past_utterances == 0 and num_future_utterances > 0:
             max_model_input_size -= 2
+            max_model_input_size -= 2
 
         elif num_past_utterances > 0 and num_future_utterances > 0:
-            max_model_input_size -= 4
+            max_model_input_size -= 2
+            max_model_input_size -= 2
+            max_model_input_size -= 2
         else:
             raise ValueError
 
@@ -262,8 +260,9 @@ class ErcTextDataset(torch.utils.data.Dataset):
                             utterances[offset] + '</s></s>' + \
                             ''.join([utt for utt in utterances[offset+1:]])
 
-                input_ids_attention_mask = tokenizer(final_utterance)
+                input_ids_attention_mask = self.tokenizer(final_utterance)
                 input_ids = input_ids_attention_mask['input_ids']
+
                 attention_mask = input_ids_attention_mask['attention_mask']
 
                 if num_past_utterances == 0 and num_future_utterances == 0:
@@ -316,9 +315,6 @@ def save_special_tokenzier(DATASET='MELD', ROOT_DIR='multimodal-datasets/',
     if ADD_SPEAKER_TOKENS:
         # special_tokens_dict['additional_special_tokens'].append('<Stranger>')
         # logging.info(f"stranger: <Stranger> added.")
-
-        # special_tokens_dict['additional_special_tokens'].append('<Stranger1>')
-        # logging.info(f"stranger: <Stranger1> added.")
 
         speakers = []
 
