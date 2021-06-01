@@ -25,7 +25,7 @@ def read_json(path):
 
 def read_yaml(path):
     with open(path, 'r') as stream:
-        foo = yaml.load(stream)
+        foo = yaml.safe_load(stream)
     return foo
 
 
@@ -148,7 +148,7 @@ def parse_path(path):
     return kwargs
 
 
-def print_what_you_want(seed_results, what_you_want=['NUM_TRAIN_EPOCHS', 'ADD_BOU_EOU', 'ADD_SPEAKER_TOKENS', 'REPLACE_NAMES_IN_UTTERANCES', 'SPEAKER_SPLITS',
+def print_what_you_want(seed_results, what_you_want=['NUM_TRAIN_EPOCHS', 'ADD_BOU_EOU', 'ADD_BOU', 'ADD_EOU', 'ADD_SPEAKER_TOKENS', 'REPLACE_NAMES_IN_UTTERANCES', 'SPEAKER_SPLITS',
                                                      'model_checkpoint', 'num_past_utterances',
                                                      'num_future_utterances', 'path'],
                         metric='f1_weighted'):
