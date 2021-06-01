@@ -2,7 +2,6 @@ import logging
 import datetime
 import yaml
 import subprocess
-from utils import save_special_tokenzier
 import os
 import argparse
 
@@ -25,13 +24,6 @@ def main(**kwargs):
     os.makedirs(OUTPUT_DIR)
     with open(os.path.join(OUTPUT_DIR, 'kwargs.yaml'), 'w') as stream:
         yaml.dump(kwargs, stream)
-
-    save_special_tokenzier(DATASET=kwargs['DATASET'], ADD_BOU=kwargs['ADD_BOU'],
-                           ADD_EOU=kwargs['ADD_EOU'],
-                           ADD_SPEAKER_TOKENS=kwargs['ADD_SPEAKER_TOKENS'],
-                           SPLITS=kwargs['SPEAKER_SPLITS'],
-                           base_tokenizer=kwargs['model_checkpoint'],
-                           save_at=os.path.join(OUTPUT_DIR, 'tokenizer'))
 
     subprocess.call(
         ["python3", "train-erc-text-hp.py", "--OUTPUT-DIR", OUTPUT_DIR,

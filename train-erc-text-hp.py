@@ -1,7 +1,7 @@
 import logging
 from transformers import RobertaTokenizerFast, RobertaForSequenceClassification, TrainingArguments, Trainer
 import json
-from utils import ErcTextDataset, get_num_classes
+from src import ErcTextDataset, get_num_classes
 import os
 import argparse
 import yaml
@@ -17,7 +17,7 @@ logging.basicConfig(
 def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR, DATASET,
          BATCH_SIZE, model_checkpoint, num_past_utterances, num_future_utterances,
          HP_N_TRIALS, ADD_BOU, ADD_EOU, ADD_SPEAKER_TOKENS, REPLACE_NAMES_IN_UTTERANCES,
-         **kwargs):
+         ROOT_DIR, SPEAKER_SPLITS, **kwargs):
 
     logging.info(f"automatic hyperparameter tuning with"
                  f"num_past_utterances: {num_past_utterances}, "
@@ -25,8 +25,6 @@ def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR,
     EVALUATION_STRATEGY = 'epoch'
     LOGGING_STRATEGY = 'epoch'
     SAVE_STRATEGY = 'no'
-
-    ROOT_DIR = './multimodal-datasets/'
 
     PER_DEVICE_TRAIN_BATCH_SIZE = BATCH_SIZE
     PER_DEVICE_EVAL_BATCH_SIZE = BATCH_SIZE*2
@@ -51,16 +49,19 @@ def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR,
         num_train_epochs=NUM_TRAIN_EPOCHS
     )
 
-    tokenizer = RobertaTokenizerFast.from_pretrained(
-        os.path.join(OUTPUT_DIR, 'tokenizer'), use_fast=True)
+    tokenizer = ErcTextDataset.get_special_tokenzier(
+        DATASET=DATASET, ROOT_DIR=ROOT_DIR, ADD_BOU=ADD_BOU,
+        ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
+        SPEAKER_SPLITS=SPEAKER_SPLITS,
+        base_tokenizer=model_checkpoint)
 
     logging.info(f"creating a pytorch training dataset object ...")
     ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train',
                               num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                              model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'), ONLY_UPTO=HP_ONLY_UPTO,
+                              model_checkpoint=model_checkpoint, ONLY_UPTO=HP_ONLY_UPTO,
                               ADD_BOU=ADD_BOU, ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                               REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
-                              ROOT_DIR=ROOT_DIR, SEED=SEED)
+                              ROOT_DIR=ROOT_DIR, SPEAKER_SPLITS=SPEAKER_SPLITS, SEED=SEED)
 
     for i in range(10):
         print(tokenizer.decode(ds_train[i]['input_ids']))
@@ -68,20 +69,20 @@ def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR,
     logging.info(f"creating a pytorch validation dataset object ...")
     ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', 
                             num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                            model_checkpoint=os.path.join(OUTPUT_DIR, 'tokenizer'), ONLY_UPTO=HP_ONLY_UPTO,
+                            model_checkpoint=model_checkpoint, ONLY_UPTO=HP_ONLY_UPTO,
                             ADD_BOU=ADD_BOU, ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
                             REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
-                            ROOT_DIR=ROOT_DIR, SEED=SEED)
+                            ROOT_DIR=ROOT_DIR, SPEAKER_SPLITS=SPEAKER_SPLITS, SEED=SEED)
 
-    logging.info(f"loading the pretrained model ...")
-    model = RobertaForSequenceClassification.from_pretrained(model_checkpoint, num_labels=NUM_CLASSES)
-
-    logging.info(f"Adding the special token ids to the model ...")
-    model.resize_token_embeddings(len(tokenizer))
-    model.save_pretrained(os.path.join(OUTPUT_DIR, 'TEMP'))
 
     def model_init():
-        return RobertaForSequenceClassification.from_pretrained(os.path.join(OUTPUT_DIR, 'TEMP'), num_labels=NUM_CLASSES)
+        logging.info(f"loading the pretrained model ...")
+        model = RobertaForSequenceClassification.from_pretrained(model_checkpoint, num_labels=NUM_CLASSES)
+
+        logging.info(f"Adding the special token ids to the model ...")
+        model.resize_token_embeddings(len(tokenizer))
+
+        return model
 
     trainer = Trainer(
         model_init=model_init,
@@ -103,8 +104,6 @@ def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR,
 
     with open(os.path.join(OUTPUT_DIR, 'hp.json'), 'w') as stream:
         json.dump(best_run.hyperparameters, stream, indent=4)
-
-    shutil.rmtree(os.path.join(OUTPUT_DIR, 'TEMP'))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

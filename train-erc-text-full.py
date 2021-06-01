@@ -1,7 +1,7 @@
 import logging
 from transformers import RobertaTokenizerFast, RobertaForSequenceClassification, TrainingArguments, Trainer
 import json
-from utils import ErcTextDataset, get_num_classes, compute_metrics
+from src import ErcTextDataset, get_num_classes, compute_metrics
 import os
 import argparse
 import yaml
@@ -17,7 +17,7 @@ logging.basicConfig(
 def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
          num_past_utterances, num_future_utterances, NUM_TRAIN_EPOCHS, WEIGHT_DECAY,
          WARMUP_RATIO, ADD_BOU, ADD_EOU, ADD_SPEAKER_TOKENS, REPLACE_NAMES_IN_UTTERANCES,
-         **kwargs):
+         ROOT_DIR, SPEAKER_SPLITS, **kwargs):
 
     NUM_CLASSES = get_num_classes(DATASET)
 
@@ -31,7 +31,6 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
     EVALUATION_STRATEGY = 'epoch'
     LOGGING_STRATEGY = 'epoch'
     SAVE_STRATEGY = 'epoch'
-    ROOT_DIR = './multimodal-datasets/'
 
     PER_DEVICE_TRAIN_BATCH_SIZE = BATCH_SIZE
     PER_DEVICE_EVAL_BATCH_SIZE = BATCH_SIZE*2
@@ -62,32 +61,32 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint,
     logging.info(f"creating a pytorch training dataset object ...")
     ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train',
                               num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                              model_checkpoint=os.path.join(
-                                  OUTPUT_DIR, 'tokenizer'),
+                              model_checkpoint=model_checkpoint,
                               ADD_BOU=ADD_BOU, ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
-                              REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
+                              REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES, SPEAKER_SPLITS=SPEAKER_SPLITS,
                               ROOT_DIR=ROOT_DIR, SEED=SEED)
 
     logging.info(f"creating a pytorch validation dataset object ...")
     ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val',
                             num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                            model_checkpoint=os.path.join(
-                                OUTPUT_DIR, 'tokenizer'),
+                            model_checkpoint=model_checkpoint,
                             ADD_BOU=ADD_BOU, ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
-                            REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
+                            REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES, SPEAKER_SPLITS=SPEAKER_SPLITS,
                             ROOT_DIR=ROOT_DIR, SEED=SEED)
 
     logging.info(f"creating a pytorch test dataset object ...")
     ds_test = ErcTextDataset(DATASET=DATASET, SPLIT='test',
                              num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                             model_checkpoint=os.path.join(
-                                 OUTPUT_DIR, 'tokenizer'),
+                             model_checkpoint=model_checkpoint,
                              ADD_BOU=ADD_BOU, ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
-                             REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES,
+                             REPLACE_NAMES_IN_UTTERANCES=REPLACE_NAMES_IN_UTTERANCES, SPEAKER_SPLITS=SPEAKER_SPLITS,
                              ROOT_DIR=ROOT_DIR, SEED=SEED)
 
-    tokenizer = RobertaTokenizerFast.from_pretrained(
-        os.path.join(OUTPUT_DIR, 'tokenizer'), use_fast=True)
+    tokenizer = ErcTextDataset.get_special_tokenzier(
+        DATASET=DATASET, ROOT_DIR=ROOT_DIR, ADD_BOU=ADD_BOU,
+        ADD_EOU=ADD_EOU, ADD_SPEAKER_TOKENS=ADD_SPEAKER_TOKENS,
+        SPEAKER_SPLITS=SPEAKER_SPLITS,
+        base_tokenizer=model_checkpoint)
 
     model = RobertaForSequenceClassification.from_pretrained(
         model_checkpoint, num_labels=NUM_CLASSES)
