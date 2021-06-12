@@ -14,8 +14,8 @@ SEEDS:
 - 2
 - 3
 - 4
-ADD_BOU: true
-ADD_EOU: true
+ADD_BOU: false
+ADD_EOU: false
 ADD_SPEAKER_TOKENS: true
 REPLACE_NAMES_IN_UTTERANCES: false # having this true had a very bad effect. So weird.
 SPEAKER_SPLITS:

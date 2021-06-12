@@ -1,9 +1,9 @@
-DATASET: MELD
+DATASET: IEMOCAP
 model_checkpoint: roberta-large
 num_past_utterances: 0
-num_future_utterances: 1000
-BATCH_SIZE: 4
-HP_ONLY_UPTO: 103
+num_future_utterances: 0
+BATCH_SIZE: 16
+HP_ONLY_UPTO: 10
 NUM_TRAIN_EPOCHS: 5
 WEIGHT_DECAY: 0.01
 WARMUP_RATIO: 0.2

@@ -4,3 +4,5 @@ python3 train-erc-text.py --training-config train-erc-text-2.yaml
 python3 train-erc-text.py --training-config train-erc-text-3.yaml
 python3 train-erc-text.py --training-config train-erc-text-4.yaml
 python3 train-erc-text.py --training-config train-erc-text-5.yaml
+python3 train-erc-text.py --training-config train-erc-text-6.yaml
+python3 train-erc-text.py --training-config train-erc-text-7.yaml
