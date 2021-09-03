@@ -1,5 +1,8 @@
 # Emotion Recognition in Coversation (ERC)
 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on?p=emoberta-speaker-aware-emotion-recognition-in)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on-meld)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on-meld?p=emoberta-speaker-aware-emotion-recognition-in)
+
 At the moment, we only use the text modality to correctly classify the emotion of the utterances.The experiments were carried out on two datasets (i.e. MELD and IEMOCAP) 
 
 ## Prerequisites
@@ -20,7 +23,7 @@ python train-erc-text.py
 
 This will subsequently call `train-erc-text-hp.py` and `train-erc-text-full.py`.
 
-## Results on the test split
+## Results on the test split (weighted f1 scores)
 
 | Model    |                                          |      MELD      |     IEMOCAP    |
 |----------|------------------------------------------|:--------------:|:--------------:|
@@ -28,7 +31,7 @@ This will subsequently call `train-erc-text-hp.py` and `train-erc-text-full.py`.
 |          | Only past utterances                     |      64.55     |    **68.57**   |
 |          | Only future utterances                   |      64.23     |      66.56     |
 |          | Both past and future utterances          |    **65.61**   |      67.42     |
-|          | $\to$ *without speaker names*            |      65.07     |      64.02     |
+|          | → *without speaker names*            |      65.07     |      64.02     |
 
 Above numbers are the mean values of five random seed runs. 
 
