@@ -1,0 +1,6 @@
+{
+    "learning_rate": 4.109718463975063e-06,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.2,
+    "num_train_epochs": 5
+}

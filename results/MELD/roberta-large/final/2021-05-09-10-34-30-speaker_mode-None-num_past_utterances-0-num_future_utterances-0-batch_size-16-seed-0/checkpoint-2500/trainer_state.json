@@ -1,0 +1,80 @@
+{
+  "best_metric": 0.6252998120530255,
+  "best_model_checkpoint": "results/MELD/roberta-large/SEEDS/2021-05-09-10-34-30-speaker_mode-None-num_past_utterances-0-num_future_utterances-0-batch_size-16-seed-0/checkpoint-1875",
+  "epoch": 4.0,
+  "global_step": 2500,
+  "is_hyper_param_search": false,
+  "is_local_process_zero": true,
+  "is_world_process_zero": true,
+  "log_history": [
+    {
+      "epoch": 1.0,
+      "learning_rate": 8.828624329237281e-06,
+      "loss": 1.4614,
+      "step": 625
+    },
+    {
+      "epoch": 1.0,
+      "eval_f1_macro": 0.383040562371193,
+      "eval_f1_micro": 0.6077547339945897,
+      "eval_f1_weighted": 0.5658057940388997,
+      "eval_loss": 1.1897395849227905,
+      "eval_runtime": 2.27,
+      "eval_samples_per_second": 488.54,
+      "step": 625
+    },
+    {
+      "epoch": 2.0,
+      "learning_rate": 6.707044573221053e-06,
+      "loss": 1.0559,
+      "step": 1250
+    },
+    {
+      "epoch": 2.0,
+      "eval_f1_macro": 0.44348441533516725,
+      "eval_f1_micro": 0.6384129846708747,
+      "eval_f1_weighted": 0.6064904682044923,
+      "eval_loss": 1.0930149555206299,
+      "eval_runtime": 2.2748,
+      "eval_samples_per_second": 487.507,
+      "step": 1250
+    },
+    {
+      "epoch": 3.0,
+      "learning_rate": 4.478494409338459e-06,
+      "loss": 0.8678,
+      "step": 1875
+    },
+    {
+      "epoch": 3.0,
+      "eval_f1_macro": 0.4793687796169443,
+      "eval_f1_micro": 0.6447249774571686,
+      "eval_f1_weighted": 0.6252998120530255,
+      "eval_loss": 1.0701242685317993,
+      "eval_runtime": 2.2734,
+      "eval_samples_per_second": 487.814,
+      "step": 1875
+    },
+    {
+      "epoch": 4.0,
+      "learning_rate": 2.2499442454558665e-06,
+      "loss": 0.7104,
+      "step": 2500
+    },
+    {
+      "epoch": 4.0,
+      "eval_f1_macro": 0.4833771189635274,
+      "eval_f1_micro": 0.6321009918845807,
+      "eval_f1_weighted": 0.6229561632941097,
+      "eval_loss": 1.1275599002838135,
+      "eval_runtime": 2.2762,
+      "eval_samples_per_second": 487.217,
+      "step": 2500
+    }
+  ],
+  "max_steps": 3125,
+  "num_train_epochs": 5,
+  "total_flos": 704387695560498.0,
+  "trial_name": null,
+  "trial_params": null
+}

@@ -1,0 +1,64 @@
+{
+  "best_metric": 0.5394790350750929,
+  "best_model_checkpoint": "results/IEMOCAP/roberta-large/SEEDS/2021-05-09-11-49-51-speaker_mode-upper-num_past_utterances-0-num_future_utterances-0-batch_size-16-seed-4/checkpoint-897",
+  "epoch": 3.0,
+  "global_step": 897,
+  "is_hyper_param_search": false,
+  "is_local_process_zero": true,
+  "is_world_process_zero": true,
+  "log_history": [
+    {
+      "epoch": 1.0,
+      "learning_rate": 1.1798940186365139e-05,
+      "loss": 1.6691,
+      "step": 299
+    },
+    {
+      "epoch": 1.0,
+      "eval_f1_macro": 0.36332213877462505,
+      "eval_f1_micro": 0.403061224489796,
+      "eval_f1_weighted": 0.37748853755529405,
+      "eval_loss": 1.4512298107147217,
+      "eval_runtime": 2.9432,
+      "eval_samples_per_second": 332.977,
+      "step": 299
+    },
+    {
+      "epoch": 2.0,
+      "learning_rate": 9.019189871272335e-06,
+      "loss": 1.2506,
+      "step": 598
+    },
+    {
+      "epoch": 2.0,
+      "eval_f1_macro": 0.4832279615022603,
+      "eval_f1_micro": 0.5285714285714286,
+      "eval_f1_weighted": 0.5162882907874674,
+      "eval_loss": 1.2409913539886475,
+      "eval_runtime": 2.9412,
+      "eval_samples_per_second": 333.197,
+      "step": 598
+    },
+    {
+      "epoch": 3.0,
+      "learning_rate": 6.0294584172696435e-06,
+      "loss": 0.9216,
+      "step": 897
+    },
+    {
+      "epoch": 3.0,
+      "eval_f1_macro": 0.4975555176942228,
+      "eval_f1_micro": 0.55,
+      "eval_f1_weighted": 0.5394790350750929,
+      "eval_loss": 1.2101179361343384,
+      "eval_runtime": 2.948,
+      "eval_samples_per_second": 332.427,
+      "step": 897
+    }
+  ],
+  "max_steps": 1495,
+  "num_train_epochs": 5,
+  "total_flos": 517010467471992.0,
+  "trial_name": null,
+  "trial_params": null
+}

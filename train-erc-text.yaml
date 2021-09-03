@@ -1,6 +1,6 @@
-DATASET: IEMOCAP
+DATASET: MELD
 model_checkpoint: roberta-large
-speaker_mode: null
+speaker_mode: upper
 num_past_utterances: 1000
 num_future_utterances: 1000
 BATCH_SIZE: 4

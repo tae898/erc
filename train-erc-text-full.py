@@ -1,3 +1,4 @@
+"""Full training script"""
 import logging
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 import json
@@ -5,7 +6,6 @@ from utils import ErcTextDataset, get_num_classes, compute_metrics
 import os
 import argparse
 import yaml
-import numpy as np
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,8 +14,10 @@ logging.basicConfig(
 )
 
 
-def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint, speaker_mode,
-         num_past_utterances, num_future_utterances, NUM_TRAIN_EPOCHS, WEIGHT_DECAY, WARMUP_RATIO, **kwargs):
+def main(OUTPUT_DIR: str, SEED: int, DATASET: str, BATCH_SIZE: int, model_checkpoint: str,
+         speaker_mode: str, num_past_utterances: int, num_future_utterances: int,
+         NUM_TRAIN_EPOCHS: int, WEIGHT_DECAY: float, WARMUP_RATIO: float, **kwargs):
+    """Perform full training with the given parameters."""
 
     NUM_CLASSES = get_num_classes(DATASET)
 
@@ -38,7 +40,7 @@ def main(OUTPUT_DIR, SEED, DATASET, BATCH_SIZE, model_checkpoint, speaker_mode,
     FP16 = True
     LOAD_BEST_MODEL_AT_END = True
 
-    METRIC_FOR_BEST_MODEL = 'eval_f1_micro' if DATASET == 'DailyDialog' else 'eval_f1_weighted'
+    METRIC_FOR_BEST_MODEL = 'eval_f1_weighted'
     GREATER_IS_BETTER = True
 
     args = TrainingArguments(

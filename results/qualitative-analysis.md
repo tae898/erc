@@ -2,7 +2,7 @@
 
 ## MELD
 
-model_checkpoint= '/home/tk/repos/erc/results/MELD/roberta-large/SEEDS/2021-05-08-19-57-31-speaker_mode-upper-num_past_utterances-1000-num_future_utterances-1000-batch_size-4-seed-4/checkpoint-9992/'
+model_checkpoint= `2021-05-08-19-57-31-speaker_mode-upper-num_past_utterances-1000-num_future_utterances-1000-batch_size-4-seed-4/checkpoint-9992/`
 
 ### true samples
 
@@ -61,7 +61,7 @@ idx,last `<s>` focus on the speaker, first speaker attends interlocutors
 
 ## IEMOCAP
 
-model_checkpoint = '/home/tk/repos/erc/results/IEMOCAP/roberta-large/SEEDS/2021-05-09-12-19-54-speaker_mode-upper-num_past_utterances-1000-num_future_utterances-0-batch_size-4-seed-4/checkpoint-5975/'
+model_checkpoint = `2021-05-09-12-19-54-speaker_mode-upper-num_past_utterances-1000-num_future_utterances-0-batch_size-4-seed-4/checkpoint-5975/`
 
 
 ### true samples

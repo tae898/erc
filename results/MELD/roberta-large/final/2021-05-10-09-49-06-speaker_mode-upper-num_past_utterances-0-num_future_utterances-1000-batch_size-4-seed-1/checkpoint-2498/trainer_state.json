@@ -1,0 +1,32 @@
+{
+  "best_metric": 0.5463658653991691,
+  "best_model_checkpoint": "results/MELD/roberta-large/SEEDS/2021-05-10-09-49-06-speaker_mode-upper-num_past_utterances-0-num_future_utterances-1000-batch_size-4-seed-1/checkpoint-2498",
+  "epoch": 1.0,
+  "global_step": 2498,
+  "is_hyper_param_search": false,
+  "is_local_process_zero": true,
+  "is_world_process_zero": true,
+  "log_history": [
+    {
+      "epoch": 1.0,
+      "learning_rate": 6.935758083929106e-06,
+      "loss": 1.4045,
+      "step": 2498
+    },
+    {
+      "epoch": 1.0,
+      "eval_f1_macro": 0.3427902374632977,
+      "eval_f1_micro": 0.6050495942290351,
+      "eval_f1_weighted": 0.5463658653991691,
+      "eval_loss": 1.3380920886993408,
+      "eval_runtime": 12.0547,
+      "eval_samples_per_second": 91.997,
+      "step": 2498
+    }
+  ],
+  "max_steps": 12490,
+  "num_train_epochs": 5,
+  "total_flos": 4340192130815130.0,
+  "trial_name": null,
+  "trial_params": null
+}

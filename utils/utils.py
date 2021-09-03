@@ -1,3 +1,4 @@
+"""utility and helper functions / classes."""
 import torch
 import json
 import os
@@ -15,7 +16,8 @@ logging.basicConfig(
 )
 
 
-def get_num_classes(DATASET):
+def get_num_classes(DATASET: str) -> int:
+    """Get the number of classes to be classified by dataset."""
     if DATASET == 'MELD':
         NUM_CLASSES = 7
     elif DATASET == 'IEMOCAP':
@@ -26,7 +28,8 @@ def get_num_classes(DATASET):
     return NUM_CLASSES
 
 
-def compute_metrics(eval_predictions):
+def compute_metrics(eval_predictions) -> dict:
+    """Return f1_weighted, f1_micro, and f1_macro scores."""
     predictions, label_ids = eval_predictions
     preds = np.argmax(predictions, axis=1)
 
@@ -37,7 +40,11 @@ def compute_metrics(eval_predictions):
     return {'f1_weighted': f1_weighted, 'f1_micro': f1_micro, 'f1_macro': f1_macro}
 
 
-def set_seed(seed):
+def set_seed(seed: int) -> None:
+    """Set random seed to a fixed value.
+
+    Set everything to be deterministic
+    """
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
@@ -47,8 +54,8 @@ def set_seed(seed):
     torch.backends.cudnn.benchmark = True
 
 
-def get_emotion2id(DATASET):
-
+def get_emotion2id(DATASET: str) -> dict:
+    """Get a dict that converts string class to numbers."""
     emotions = {}
     # MELD has 7 classes
     emotions['MELD'] = ['neutral',
@@ -80,6 +87,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
                  model_checkpoint='roberta-base',
                  ROOT_DIR='multimodal-datasets/',
                  ONLY_UPTO=False, SEED=0):
+        """Initialize emotion recognition in conversation text modality dataset class."""
 
         self.DATASET = DATASET
         self.ROOT_DIR = ROOT_DIR
@@ -98,10 +106,12 @@ class ErcTextDataset(torch.utils.data.Dataset):
         self.id2emotion = {val: key for key, val in self.emotion2id.items()}
 
     def _load_emotions(self):
+        """Load the supervised labels"""
         with open(os.path.join(self.ROOT_DIR, self.DATASET, 'emotions.json'), 'r') as stream:
             self.emotions = json.load(stream)[self.SPLIT]
 
     def _load_utterance_ordered(self):
+        """Load the ids of the utterances in order."""
         with open(os.path.join(self.ROOT_DIR, self.DATASET, 'utterance-ordered.json'), 'r') as stream:
             utterance_ordered = json.load(stream)[self.SPLIT]
 
@@ -125,7 +135,8 @@ class ErcTextDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.inputs_)
 
-    def _load_utterance_speaker_emotion(self, uttid, speaker_mode):
+    def _load_utterance_speaker_emotion(self, uttid, speaker_mode) -> dict:
+        """Load an speaker-name prepended utterance and emotion label"""
         text_path = os.path.join(
             self.ROOT_DIR, self.DATASET, 'raw-texts', self.SPLIT, uttid + '.json')
 
@@ -157,6 +168,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
         return {'Utterance': utterance, 'Emotion': emotion}
 
     def _create_input(self, diaids, speaker_mode, num_past_utterances, num_future_utterances):
+        """Create an input which will be an input to RoBERTa."""
 
         args = {'diaids': diaids,
                 'speaker_mode': speaker_mode,
@@ -257,6 +269,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
         return inputs
 
     def _string2tokens(self):
+        """Convert string to (BPE) tokens."""
         logging.info(f"converting utterances into tokens ...")
 
         diaids = sorted(list(self.utterance_ordered.keys()))
@@ -277,6 +290,3 @@ class ErcTextDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
 
         return self.inputs_[index]
-
-    def create_utterance():
-        raise NotImplementedError

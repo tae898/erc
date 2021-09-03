@@ -1,3 +1,4 @@
+"""Hyperparameter tuning script"""
 import logging
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 import json
@@ -13,9 +14,10 @@ logging.basicConfig(
 )
 
 
-def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR, DATASET,
-         BATCH_SIZE, model_checkpoint, speaker_mode, num_past_utterances, num_future_utterances,
-         HP_N_TRIALS, **kwargs):
+def main(WEIGHT_DECAY: float, WARMUP_RATIO: float, NUM_TRAIN_EPOCHS: int, HP_ONLY_UPTO: int,
+         OUTPUT_DIR: str, DATASET, BATCH_SIZE: int, model_checkpoint: str, speaker_mode: str,
+         num_past_utterances: int, num_future_utterances: int, HP_N_TRIALS: int, **kwargs):
+    """Perform automatic hyperparameter tuning using optuna. Only learning rate is tuned."""
 
     logging.info(f"automatic hyperparameter tuning with speaker_mode: {speaker_mode}, "
                  f"num_past_utterances: {num_past_utterances}, "
@@ -61,7 +63,6 @@ def main(WEIGHT_DECAY, WARMUP_RATIO, NUM_TRAIN_EPOCHS, HP_ONLY_UPTO, OUTPUT_DIR,
                             num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
                             model_checkpoint=model_checkpoint, ONLY_UPTO=HP_ONLY_UPTO,
                             ROOT_DIR=ROOT_DIR, SEED=SEED)
-
 
     tokenizer = AutoTokenizer.from_pretrained(
         model_checkpoint, use_fast=True)
