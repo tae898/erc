@@ -39,6 +39,9 @@ If you want to see more training test details, check out `./results/`
 
 If you want to download the trained checkpoints and stuff, then [here](https://surfdrive.surf.nl/files/index.php/s/khREwk4MUI7MSnO/download) is where you can download them. It's a pretty big zip file.
 
+## Troubleshooting
+
+The best way to find and solve your problems is to see in the github issue tab. If you can't find what you want, feel free to raise an issue. We are pretty responsive.
 
 ## Contributing
 
