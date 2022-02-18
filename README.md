@@ -1,15 +1,16 @@
 # Emotion Recognition in Coversation (ERC)
+
 [![DOI](https://zenodo.org/badge/328375452.svg)](https://zenodo.org/badge/latestdoi/328375452)<br>
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on?p=emoberta-speaker-aware-emotion-recognition-in)<br>
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on-meld)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on-meld?p=emoberta-speaker-aware-emotion-recognition-in)<br>
 
-At the moment, we only use the text modality to correctly classify the emotion of the utterances.The experiments were carried out on two datasets (i.e. MELD and IEMOCAP) 
+At the moment, we only use the text modality to correctly classify the emotion of the utterances.The experiments were carried out on two datasets (i.e. MELD and IEMOCAP)
 
 ## Prerequisites
 
-* An x86-64 Unix or Unix-like machine
-* Python 3.7 or higher
-* [`multimodal-datasets` repo](https://github.com/tae898/multimodal-datasets) (submodule)
+- An x86-64 Unix or Unix-like machine
+- Python 3.7 or higher
+- [`multimodal-datasets` repo](https://github.com/tae898/multimodal-datasets) (submodule)
 
 ## RoBERTa training
 
@@ -33,9 +34,9 @@ This will subsequently call `train-erc-text-hp.py` and `train-erc-text-full.py`.
 |          | Both past and future utterances          |    **65.61**   |      67.42     |
 |          | → *without speaker names*            |      65.07     |      64.02     |
 
-Above numbers are the mean values of five random seed runs. 
+Above numbers are the mean values of five random seed runs.
 
-If you want to see more training test details, check out `./results/` 
+If you want to see more training test details, check out `./results/`
 
 If you want to download the trained checkpoints and stuff, then [here](https://surfdrive.surf.nl/files/index.php/s/khREwk4MUI7MSnO/download) is where you can download them. It's a pretty big zip file.
 
@@ -49,6 +50,7 @@ Contributions are what make the open source community such an amazing place to b
 
 1. Fork the Project
 1. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+1. Run `make style && quality` in the root repo directory, to ensure code quality.
 1. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 1. Push to the Branch (`git push origin feature/AmazingFeature`)
 1. Open a Pull Request
@@ -56,6 +58,7 @@ Contributions are what make the open source community such an amazing place to b
 ## Cite our paper
 
 Check out the [paper](https://arxiv.org/abs/2108.12009).
+
 ```bibtex
 @misc{kim2021emoberta,
       title={EmoBERTa: Speaker-Aware Emotion Recognition in Conversation with RoBERTa}, 
@@ -68,7 +71,9 @@ Check out the [paper](https://arxiv.org/abs/2108.12009).
 ```
 
 ## Authors
-* [Taewoon Kim](https://taewoonkim.com/)
+
+- [Taewoon Kim](https://taewoonkim.com/)
 
 ## License
+
 [MIT](https://choosealicense.com/licenses/mit/)

@@ -8,7 +8,6 @@ model_checkpoint= `2021-05-08-19-57-31-speaker_mode-upper-num_past_utterances-10
 
 idx,last `<s>` focus on the speaker, first speaker attends interlocutors
 
-
 946,T,T
 
 1684,T,T
@@ -35,7 +34,6 @@ idx,last `<s>` focus on the speaker, first speaker attends interlocutors
 
 idx,last `<s>` focus on the speaker, first speaker attends interlocutors
 
-
 1034,F,T
 
 1411,T,T
@@ -58,11 +56,9 @@ idx,last `<s>` focus on the speaker, first speaker attends interlocutors
 
 **60%**
 
-
 ## IEMOCAP
 
 model_checkpoint = `2021-05-09-12-19-54-speaker_mode-upper-num_past_utterances-1000-num_future_utterances-0-batch_size-4-seed-4/checkpoint-5975/`
-
 
 ### true samples
 

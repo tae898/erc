@@ -1,35 +1,52 @@
 """Hyperparameter tuning script"""
-import logging
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
-import json
-from utils import ErcTextDataset, get_num_classes
-import os
 import argparse
+import json
+import logging
+import os
+
 import yaml
+from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
+                          Trainer, TrainingArguments)
+
+from utils import ErcTextDataset, get_num_classes
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
+    format="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 
-def main(WEIGHT_DECAY: float, WARMUP_RATIO: float, NUM_TRAIN_EPOCHS: int, HP_ONLY_UPTO: int,
-         OUTPUT_DIR: str, DATASET, BATCH_SIZE: int, model_checkpoint: str, speaker_mode: str,
-         num_past_utterances: int, num_future_utterances: int, HP_N_TRIALS: int, **kwargs):
+def main(
+    WEIGHT_DECAY: float,
+    WARMUP_RATIO: float,
+    NUM_TRAIN_EPOCHS: int,
+    HP_ONLY_UPTO: int,
+    OUTPUT_DIR: str,
+    DATASET,
+    BATCH_SIZE: int,
+    model_checkpoint: str,
+    speaker_mode: str,
+    num_past_utterances: int,
+    num_future_utterances: int,
+    HP_N_TRIALS: int,
+    **kwargs,
+):
     """Perform automatic hyperparameter tuning using optuna. Only learning rate is tuned."""
 
-    logging.info(f"automatic hyperparameter tuning with speaker_mode: {speaker_mode}, "
-                 f"num_past_utterances: {num_past_utterances}, "
-                 f"num_future_utterances: {num_future_utterances}")
-    EVALUATION_STRATEGY = 'epoch'
-    LOGGING_STRATEGY = 'epoch'
-    SAVE_STRATEGY = 'no'
+    logging.info(
+        f"automatic hyperparameter tuning with speaker_mode: {speaker_mode}, "
+        f"num_past_utterances: {num_past_utterances}, "
+        f"num_future_utterances: {num_future_utterances}"
+    )
+    EVALUATION_STRATEGY = "epoch"
+    LOGGING_STRATEGY = "epoch"
+    SAVE_STRATEGY = "no"
 
-    ROOT_DIR = './multimodal-datasets/'
+    ROOT_DIR = "./multimodal-datasets/"
 
     PER_DEVICE_TRAIN_BATCH_SIZE = BATCH_SIZE
-    PER_DEVICE_EVAL_BATCH_SIZE = BATCH_SIZE*2
+    PER_DEVICE_EVAL_BATCH_SIZE = BATCH_SIZE * 2
     LOAD_BEST_MODEL_AT_END = False
     SEED = 42
     FP16 = True
@@ -48,24 +65,39 @@ def main(WEIGHT_DECAY: float, WARMUP_RATIO: float, NUM_TRAIN_EPOCHS: int, HP_ONL
         fp16=FP16,
         weight_decay=WEIGHT_DECAY,
         warmup_ratio=WARMUP_RATIO,
-        num_train_epochs=NUM_TRAIN_EPOCHS
+        num_train_epochs=NUM_TRAIN_EPOCHS,
     )
 
     def model_init():
-        return AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=NUM_CLASSES)
+        return AutoModelForSequenceClassification.from_pretrained(
+            model_checkpoint, num_labels=NUM_CLASSES
+        )
 
-    ds_train = ErcTextDataset(DATASET=DATASET, SPLIT='train', speaker_mode=speaker_mode,
-                              num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                              model_checkpoint=model_checkpoint, ONLY_UPTO=HP_ONLY_UPTO,
-                              ROOT_DIR=ROOT_DIR, SEED=SEED)
+    ds_train = ErcTextDataset(
+        DATASET=DATASET,
+        SPLIT="train",
+        speaker_mode=speaker_mode,
+        num_past_utterances=num_past_utterances,
+        num_future_utterances=num_future_utterances,
+        model_checkpoint=model_checkpoint,
+        ONLY_UPTO=HP_ONLY_UPTO,
+        ROOT_DIR=ROOT_DIR,
+        SEED=SEED,
+    )
 
-    ds_val = ErcTextDataset(DATASET=DATASET, SPLIT='val', speaker_mode=speaker_mode,
-                            num_past_utterances=num_past_utterances, num_future_utterances=num_future_utterances,
-                            model_checkpoint=model_checkpoint, ONLY_UPTO=HP_ONLY_UPTO,
-                            ROOT_DIR=ROOT_DIR, SEED=SEED)
+    ds_val = ErcTextDataset(
+        DATASET=DATASET,
+        SPLIT="val",
+        speaker_mode=speaker_mode,
+        num_past_utterances=num_past_utterances,
+        num_future_utterances=num_future_utterances,
+        model_checkpoint=model_checkpoint,
+        ONLY_UPTO=HP_ONLY_UPTO,
+        ROOT_DIR=ROOT_DIR,
+        SEED=SEED,
+    )
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_checkpoint, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_checkpoint, use_fast=True)
 
     trainer = Trainer(
         model_init=model_init,
@@ -81,23 +113,25 @@ def main(WEIGHT_DECAY: float, WARMUP_RATIO: float, NUM_TRAIN_EPOCHS: int, HP_ONL
         }
 
     best_run = trainer.hyperparameter_search(
-        direction="minimize", hp_space=my_hp_space, n_trials=HP_N_TRIALS)
+        direction="minimize", hp_space=my_hp_space, n_trials=HP_N_TRIALS
+    )
 
     logging.info(f"best hyper parameters found at {best_run}")
 
-    with open(os.path.join(OUTPUT_DIR, 'hp.json'), 'w') as stream:
+    with open(os.path.join(OUTPUT_DIR, "hp.json"), "w") as stream:
         json.dump(best_run.hyperparameters, stream, indent=4)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='erc RoBERTa text huggingface training')
-    parser.add_argument('--OUTPUT-DIR', type=str)
+        description="erc RoBERTa text huggingface training"
+    )
+    parser.add_argument("--OUTPUT-DIR", type=str)
 
     args = parser.parse_args()
     args = vars(args)
 
-    with open('./train-erc-text.yaml', 'r') as stream:
+    with open("./train-erc-text.yaml", "r") as stream:
         args_ = yaml.safe_load(stream)
 
     for key, val in args_.items():
