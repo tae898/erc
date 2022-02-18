@@ -36,7 +36,7 @@ def main(DATASET: str, BATCH_SIZE: int, model_checkpoint: str, speaker_mode: str
 
 if __name__ == "__main__":
     with open('./train-erc-text.yaml', 'r') as stream:
-        args = yaml.load(stream)
+        args = yaml.safe_load(stream)
 
     logging.info(f"arguments given to {__file__}: {args}")
 

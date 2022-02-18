@@ -98,7 +98,7 @@ if __name__ == "__main__":
     args = vars(args)
 
     with open('./train-erc-text.yaml', 'r') as stream:
-        args_ = yaml.load(stream)
+        args_ = yaml.safe_load(stream)
 
     for key, val in args_.items():
         args[key] = val

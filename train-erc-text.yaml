@@ -1,14 +1,14 @@
 DATASET: MELD
-model_checkpoint: roberta-large
-speaker_mode: upper
-num_past_utterances: 1000
-num_future_utterances: 1000
-BATCH_SIZE: 4
+model_checkpoint: roberta-base
+speaker_mode: null
+num_past_utterances: 0
+num_future_utterances: 0
+BATCH_SIZE: 1
 HP_ONLY_UPTO: 10
 NUM_TRAIN_EPOCHS: 5
 WEIGHT_DECAY: 0.01
 WARMUP_RATIO: 0.2
-HP_N_TRIALS: 5
+HP_N_TRIALS: 1
 SEEDS:
 - 0
 - 1
