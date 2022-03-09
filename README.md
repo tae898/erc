@@ -1,6 +1,5 @@
 # Emotion Recognition in Coversation (ERC)
 
-[![DOI](https://zenodo.org/badge/328375452.svg)](https://zenodo.org/badge/latestdoi/328375452)<br>
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on?p=emoberta-speaker-aware-emotion-recognition-in)<br>
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on-meld)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on-meld?p=emoberta-speaker-aware-emotion-recognition-in)<br>
 
@@ -55,7 +54,7 @@ Contributions are what make the open source community such an amazing place to b
 1. Push to the Branch (`git push origin feature/AmazingFeature`)
 1. Open a Pull Request
 
-## Cite our paper
+## Cite our work
 
 Check out the [paper](https://arxiv.org/abs/2108.12009).
 
@@ -69,6 +68,7 @@ Check out the [paper](https://arxiv.org/abs/2108.12009).
       primaryClass={cs.CL}
 }
 ```
+[![DOI](https://zenodo.org/badge/328375452.svg)](https://zenodo.org/badge/latestdoi/328375452)<br>
 
 ## Authors
 
