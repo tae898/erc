@@ -30,6 +30,7 @@ def main(
     num_past_utterances: int,
     num_future_utterances: int,
     HP_N_TRIALS: int,
+    SEED: int,
     **kwargs,
 ):
     """Perform automatic hyperparameter tuning using optuna. Only learning rate is tuned."""
@@ -48,7 +49,6 @@ def main(
     PER_DEVICE_TRAIN_BATCH_SIZE = BATCH_SIZE
     PER_DEVICE_EVAL_BATCH_SIZE = BATCH_SIZE * 2
     LOAD_BEST_MODEL_AT_END = False
-    SEED = 42
     FP16 = True
 
     NUM_CLASSES = get_num_classes(DATASET)
@@ -127,6 +127,7 @@ if __name__ == "__main__":
         description="erc RoBERTa text huggingface training"
     )
     parser.add_argument("--OUTPUT-DIR", type=str)
+    parser.add_argument("--SEED", type=int)
 
     args = parser.parse_args()
     args = vars(args)

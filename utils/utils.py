@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import random
+from multiprocessing.sharedctypes import Value
 
 import numpy as np
 import torch
@@ -17,12 +18,18 @@ logging.basicConfig(
 )
 
 
+def create_unified_dataset():
+    """This merges MELD and IEMOCAP"""
+
+
 def get_num_classes(DATASET: str) -> int:
     """Get the number of classes to be classified by dataset."""
     if DATASET == "MELD":
         NUM_CLASSES = 7
     elif DATASET == "IEMOCAP":
         NUM_CLASSES = 6
+    elif DATASET == "MELD_IEMOCAP":
+        NUM_CLASSES = 10
     else:
         raise ValueError
 
@@ -84,6 +91,19 @@ def get_emotion2id(DATASET: str) -> dict:
         for DATASET, emotions_ in emotions.items()
     }
 
+    emotion2id["MELD_IEMOCAP"] = {
+        "neutral": 0,
+        "frustration": 1,
+        "sadness": 2,
+        "anger": 3,
+        "disgust": 4,
+        "excited": 5,
+        "happiness": 6,
+        "joy": 6,
+        "surprise": 7,
+        "fear": 8,
+    }
+
     return emotion2id[DATASET]
 
 
@@ -116,56 +136,72 @@ class ErcTextDataset(torch.utils.data.Dataset):
         self._load_emotions()
         self._load_utterance_ordered()
         self._string2tokens()
-        self.id2emotion = {val: key for key, val in self.emotion2id.items()}
 
     def _load_emotions(self):
         """Load the supervised labels"""
-        with open(
-            os.path.join(self.ROOT_DIR, self.DATASET, "emotions.json"), "r"
-        ) as stream:
-            self.emotions = json.load(stream)[self.SPLIT]
+        if self.DATASET in ["MELD", "IEMOCAP"]:
+            with open(
+                os.path.join(self.ROOT_DIR, self.DATASET, "emotions.json"), "r"
+            ) as stream:
+                self.emotions = json.load(stream)[self.SPLIT]
+
+        elif self.DATASET == "MELD_IEMOCAP":
+            with open(
+                os.path.join(self.ROOT_DIR, "MELD", "emotions.json"), "r"
+            ) as stream:
+                emotions_meld = json.load(stream)[self.SPLIT]
+
+            with open(
+                os.path.join(self.ROOT_DIR, "IEMOCAP", "emotions.json"), "r"
+            ) as stream:
+                emotions_iemocap = json.load(stream)[self.SPLIT]
+
+            self.emotions = {**emotions_meld, **emotions_iemocap}
 
     def _load_utterance_ordered(self):
         """Load the ids of the utterances in order."""
-        with open(
-            os.path.join(self.ROOT_DIR, self.DATASET, "utterance-ordered.json"), "r"
-        ) as stream:
-            utterance_ordered = json.load(stream)[self.SPLIT]
+        if self.DATASET in ["MELD", "IEMOCAP"]:
+            with open(
+                os.path.join(self.ROOT_DIR, self.DATASET, "utterance-ordered.json"), "r"
+            ) as stream:
+                self.utterance_ordered = json.load(stream)[self.SPLIT]
+        elif self.DATASET == "MELD_IEMOCAP":
+            with open(
+                os.path.join(self.ROOT_DIR, "MELD", "utterance-ordered.json"), "r"
+            ) as stream:
+                utterance_ordered_meld = json.load(stream)[self.SPLIT]
+            with open(
+                os.path.join(self.ROOT_DIR, "IEMOCAP", "utterance-ordered.json"), "r"
+            ) as stream:
+                utterance_ordered_iemocap = json.load(stream)[self.SPLIT]
 
-        logging.debug(f"sanity check on if the text files exist ...")
-        count = 0
-        self.utterance_ordered = {}
-        for diaid, uttids in utterance_ordered.items():
-            self.utterance_ordered[diaid] = []
-            for uttid in uttids:
-                try:
-                    with open(
-                        os.path.join(
-                            self.ROOT_DIR,
-                            self.DATASET,
-                            "raw-texts",
-                            self.SPLIT,
-                            uttid + ".json",
-                        ),
-                        "r",
-                    ) as stream:
-                        foo = json.load(stream)
-                    self.utterance_ordered[diaid].append(uttid)
-                except Exception as e:
-                    count += 1
-        if count != 0:
-            logging.warning(f"number of not existing text files: {count}")
-        else:
-            logging.info(f"every text file exists fine!")
+            self.utterance_ordered = {
+                **utterance_ordered_meld,
+                **utterance_ordered_iemocap,
+            }
 
     def __len__(self):
         return len(self.inputs_)
 
     def _load_utterance_speaker_emotion(self, uttid, speaker_mode) -> dict:
         """Load an speaker-name prepended utterance and emotion label"""
-        text_path = os.path.join(
-            self.ROOT_DIR, self.DATASET, "raw-texts", self.SPLIT, uttid + ".json"
-        )
+
+        if self.DATASET in ["MELD", "IEMOCAP"]:
+            text_path = os.path.join(
+                self.ROOT_DIR, self.DATASET, "raw-texts", self.SPLIT, uttid + ".json"
+            )
+
+        elif self.DATASET == "MELD_IEMOCAP":
+            if "dia" in uttid:
+                text_path = os.path.join(
+                    self.ROOT_DIR, "MELD", "raw-texts", self.SPLIT, uttid + ".json"
+                )
+            elif "Ses" in uttid:
+                text_path = os.path.join(
+                    self.ROOT_DIR, "IEMOCAP", "raw-texts", self.SPLIT, uttid + ".json"
+                )
+            else:
+                raise TypeError
 
         with open(text_path, "r") as stream:
             text = json.load(stream)
@@ -186,6 +222,8 @@ class ErcTextDataset(torch.utils.data.Dataset):
                 "Ses05": {"Female": "Elizabeth", "Male": "William"},
             }[sessid][text["Speaker"]]
 
+        elif self.DATASET == "MELD_IEMOCAP":
+            pass
         else:
             raise ValueError(f"{self.DATASET} not supported!!!!!!")
 

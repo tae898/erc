@@ -7,17 +7,18 @@ At the moment, we only use the text modality to correctly classify the emotion o
 
 ## Prerequisites
 
-- An x86-64 Unix or Unix-like machine
-- Python 3.7 or higher
-- [`multimodal-datasets` repo](https://github.com/tae898/multimodal-datasets) (submodule)
+1. An x86-64 Unix or Unix-like machine
+1. Python 3.8 or higher
+1. Running in a virtual environment (e.g., conda, virtualenv, etc.) is highly recommended so that you don't mess up with the system python.
+1. [`multimodal-datasets` repo](https://github.com/tae898/multimodal-datasets) (submodule)
+1. pip install -r requirements.txt
 
 ## RoBERTa training
 
 First configure the hyper parameters and the dataset in `train-erc-text.yaml` and then,
 In this directory run the below commands. I recommend you to run this in a virtualenv.
 
-```bash
-pip install -r requirements.txt
+```sh
 python train-erc-text.py
 ```
 
@@ -25,13 +26,13 @@ This will subsequently call `train-erc-text-hp.py` and `train-erc-text-full.py`.
 
 ## Results on the test split (weighted f1 scores)
 
-| Model    |                                          |      MELD      |     IEMOCAP    |
-|----------|------------------------------------------|:--------------:|:--------------:|
-| EmoBERTa | No past and future utterances            |      63.46     |      56.09     |
-|          | Only past utterances                     |      64.55     |    **68.57**   |
-|          | Only future utterances                   |      64.23     |      66.56     |
-|          | Both past and future utterances          |    **65.61**   |      67.42     |
-|          | → *without speaker names*            |      65.07     |      64.02     |
+| Model    |                                 |   MELD    |  IEMOCAP  |
+| -------- | ------------------------------- | :-------: | :-------: |
+| EmoBERTa | No past and future utterances   |   63.46   |   56.09   |
+|          | Only past utterances            |   64.55   | **68.57** |
+|          | Only future utterances          |   64.23   |   66.56   |
+|          | Both past and future utterances | **65.61** |   67.42   |
+|          | → *without speaker names*       |   65.07   |   64.02   |
 
 Above numbers are the mean values of five random seed runs.
 
@@ -68,6 +69,7 @@ Check out the [paper](https://arxiv.org/abs/2108.12009).
       primaryClass={cs.CL}
 }
 ```
+
 [![DOI](https://zenodo.org/badge/328375452.svg)](https://zenodo.org/badge/latestdoi/328375452)<br>
 
 ## Authors

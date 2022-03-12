@@ -39,7 +39,16 @@ def main(
         f"num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}-seed-{SEED}"
     )
 
-    subprocess.call(["python3", "train-erc-text-hp.py", "--OUTPUT-DIR", OUTPUT_DIR])
+    subprocess.call(
+        [
+            "python3",
+            "train-erc-text-hp.py",
+            "--OUTPUT-DIR",
+            OUTPUT_DIR,
+            "--SEED",
+            str(SEED),
+        ]
+    )
 
     for SEED in tqdm(SEEDS):
         subprocess.call(
