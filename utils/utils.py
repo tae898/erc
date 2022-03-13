@@ -3,7 +3,7 @@ import json
 import logging
 import os
 import random
-from multiprocessing.sharedctypes import Value
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -29,7 +29,7 @@ def get_num_classes(DATASET: str) -> int:
     elif DATASET == "IEMOCAP":
         NUM_CLASSES = 6
     elif DATASET == "MELD_IEMOCAP":
-        NUM_CLASSES = 10
+        NUM_CLASSES = 7
     else:
         raise ValueError
 
@@ -62,49 +62,63 @@ def set_seed(seed: int) -> None:
     torch.backends.cudnn.benchmark = True
 
 
-def get_emotion2id(DATASET: str) -> dict:
+def get_emotion2id(DATASET: str) -> Tuple[dict, dict]:
     """Get a dict that converts string class to numbers."""
-    emotions = {}
-    # MELD has 7 classes
-    emotions["MELD"] = [
-        "neutral",
-        "joy",
-        "surprise",
-        "anger",
-        "sadness",
-        "disgust",
-        "fear",
-    ]
 
-    # IEMOCAP originally has 11 classes but we'll only use 6 of them.
-    emotions["IEMOCAP"] = [
-        "neutral",
-        "frustration",
-        "sadness",
-        "anger",
-        "excited",
-        "happiness",
-    ]
+    if DATASET == "MELD":
+        # MELD has 7 classes
+        emotions = [
+            "neutral",
+            "joy",
+            "surprise",
+            "anger",
+            "sadness",
+            "disgust",
+            "fear",
+        ]
+        emotion2id = {emotion: idx for idx, emotion in enumerate(emotions)}
+        id2emotion = {val: key for key, val in emotion2id.items()}
 
-    emotion2id = {
-        DATASET: {emotion: idx for idx, emotion in enumerate(emotions_)}
-        for DATASET, emotions_ in emotions.items()
-    }
+    elif DATASET == "IEMOCAP":
+        # IEMOCAP originally has 11 classes but we'll only use 6 of them.
+        emotions = [
+            "neutral",
+            "frustration",
+            "sadness",
+            "anger",
+            "excited",
+            "happiness",
+        ]
+        emotion2id = {emotion: idx for idx, emotion in enumerate(emotions)}
+        id2emotion = {val: key for key, val in emotion2id.items()}
 
-    emotion2id["MELD_IEMOCAP"] = {
-        "neutral": 0,
-        "frustration": 1,
-        "sadness": 2,
-        "anger": 3,
-        "disgust": 4,
-        "excited": 5,
-        "happiness": 6,
-        "joy": 6,
-        "surprise": 7,
-        "fear": 8,
-    }
+    elif DATASET == "MELD_IEMOCAP":
+        # IEMOCAP emotions are mapped to MELD emotions, 7 classes.
+        emotions = [
+            "neutral",
+            "joy",
+            "surprise",
+            "anger",
+            "sadness",
+            "disgust",
+            "fear",
+        ]
 
-    return emotion2id[DATASET]
+        emotion2id = {
+            "neutral": 0,
+            "joy": 1,
+            "happiness": 1,
+            "excited": 1,
+            "surprise": 2,
+            "anger": 3,
+            "frustration": 3,
+            "sadness": 4,
+            "disgust": 5,
+            "fear": 6,
+        }
+        id2emotion = {idx: emotion for idx, emotion in enumerate(emotions)}
+
+    return emotion2id, id2emotion
 
 
 class ErcTextDataset(torch.utils.data.Dataset):
@@ -129,7 +143,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
         self.num_past_utterances = num_past_utterances
         self.num_future_utterances = num_future_utterances
         self.model_checkpoint = model_checkpoint
-        self.emotion2id = get_emotion2id(self.DATASET)
+        self.emotion2id, self.id2emotion = get_emotion2id(self.DATASET)
         self.ONLY_UPTO = ONLY_UPTO
         self.SEED = SEED
 
