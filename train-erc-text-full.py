@@ -133,11 +133,12 @@ def main(
         json.dump(val_results, stream, indent=4)
     logging.info(f"eval results: {val_results}")
 
-    logging.info(f"test ...")
-    test_results = trainer.predict(ds_test)
-    with open(os.path.join(OUTPUT_DIR, "test-results.json"), "w") as stream:
-        json.dump(test_results.metrics, stream, indent=4)
-    logging.info(f"test results: {test_results.metrics}")
+    if len(ds_test) != 0:
+        logging.info(f"test ...")
+        test_results = trainer.predict(ds_test)
+        with open(os.path.join(OUTPUT_DIR, "test-results.json"), "w") as stream:
+            json.dump(test_results.metrics, stream, indent=4)
+        logging.info(f"test results: {test_results.metrics}")
 
 
 if __name__ == "__main__":

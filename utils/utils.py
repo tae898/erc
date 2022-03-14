@@ -18,8 +18,76 @@ logging.basicConfig(
 )
 
 
-def create_unified_dataset():
-    """This merges MELD and IEMOCAP"""
+def make_MELD_IEMOCAP():
+
+    SEED = 42
+    ratios = {"train": 0.9, "val": 0.1, "test": 0}
+
+    assert sum(list(ratios.values())) == 1
+
+    utterance_ordered = {}
+
+    with open(f"./multimodal-datasets/MELD/utterance-ordered.json", "r") as stream:
+        utterance_ordered["MELD"] = json.load(stream)
+
+    with open(f"./multimodal-datasets/IEMOCAP/utterance-ordered.json", "r") as stream:
+        utterance_ordered["IEMOCAP"] = json.load(stream)
+
+    diaids_merged = []
+
+    for DATASET in ["MELD", "IEMOCAP"]:
+        for SPLIT in ["train", "val", "test"]:
+            diaids = list(utterance_ordered[DATASET][SPLIT].keys())
+            for diaid in diaids:
+                diaids_merged.append(f"{DATASET}/{SPLIT}/{diaid}")
+
+    random.seed(SEED)
+    random.shuffle(diaids_merged)
+
+    train_idx = int(len(diaids_merged) * ratios["train"])
+    val_idx = int(len(diaids_merged) * (ratios["train"] + ratios["val"]))
+
+    diaids_train = diaids_merged[:train_idx]
+    diaids_val = diaids_merged[train_idx:val_idx]
+    diaids_test = diaids_merged[val_idx:]
+
+    assert len(diaids_merged) == (
+        len(diaids_train) + len(diaids_val) + len(diaids_test)
+    )
+
+    diaids_merged = {"train": diaids_train, "val": diaids_val, "test": diaids_test}
+
+    utterance_ordered_merged = {}
+
+    for SPLIT in ["train", "val", "test"]:
+        utterance_ordered_merged[SPLIT] = {}
+
+        for diaid in tqdm(diaids_merged[SPLIT]):
+
+            d_, s_, d__ = diaid.split("/")
+            utterance_ordered_merged[SPLIT][diaid] = [
+                f"{d_}/{s_}/{d__}/{uttid}" for uttid in utterance_ordered[d_][s_][d__]
+            ]
+
+    assert len(
+        [
+            val___
+            for key, val in utterance_ordered.items()
+            for key_, val_ in val.items()
+            for key__, val__ in val_.items()
+            for val___ in val__
+        ]
+    ) == len(
+        [
+            val__
+            for key, val in utterance_ordered_merged.items()
+            for key_, val_ in val.items()
+            for val__ in val_
+        ]
+    )
+
+    with open("./utterance-ordered-MELD_IEMOCAP.json", "w") as stream:
+        json.dump(utterance_ordered_merged, stream, indent=4)
 
 
 def get_num_classes(DATASET: str) -> int:
@@ -159,40 +227,15 @@ class ErcTextDataset(torch.utils.data.Dataset):
             ) as stream:
                 self.emotions = json.load(stream)[self.SPLIT]
 
-        elif self.DATASET == "MELD_IEMOCAP":
-            with open(
-                os.path.join(self.ROOT_DIR, "MELD", "emotions.json"), "r"
-            ) as stream:
-                emotions_meld = json.load(stream)[self.SPLIT]
-
-            with open(
-                os.path.join(self.ROOT_DIR, "IEMOCAP", "emotions.json"), "r"
-            ) as stream:
-                emotions_iemocap = json.load(stream)[self.SPLIT]
-
-            self.emotions = {**emotions_meld, **emotions_iemocap}
-
     def _load_utterance_ordered(self):
         """Load the ids of the utterances in order."""
         if self.DATASET in ["MELD", "IEMOCAP"]:
-            with open(
-                os.path.join(self.ROOT_DIR, self.DATASET, "utterance-ordered.json"), "r"
-            ) as stream:
-                self.utterance_ordered = json.load(stream)[self.SPLIT]
+            path = os.path.join(self.ROOT_DIR, self.DATASET, "utterance-ordered.json")
         elif self.DATASET == "MELD_IEMOCAP":
-            with open(
-                os.path.join(self.ROOT_DIR, "MELD", "utterance-ordered.json"), "r"
-            ) as stream:
-                utterance_ordered_meld = json.load(stream)[self.SPLIT]
-            with open(
-                os.path.join(self.ROOT_DIR, "IEMOCAP", "utterance-ordered.json"), "r"
-            ) as stream:
-                utterance_ordered_iemocap = json.load(stream)[self.SPLIT]
+            path = "./utterance-ordered-MELD_IEMOCAP.json"
 
-            self.utterance_ordered = {
-                **utterance_ordered_meld,
-                **utterance_ordered_iemocap,
-            }
+        with open(path, "r") as stream:
+            self.utterance_ordered = json.load(stream)[self.SPLIT]
 
     def __len__(self):
         return len(self.inputs_)
@@ -204,18 +247,10 @@ class ErcTextDataset(torch.utils.data.Dataset):
             text_path = os.path.join(
                 self.ROOT_DIR, self.DATASET, "raw-texts", self.SPLIT, uttid + ".json"
             )
-
         elif self.DATASET == "MELD_IEMOCAP":
-            if "dia" in uttid:
-                text_path = os.path.join(
-                    self.ROOT_DIR, "MELD", "raw-texts", self.SPLIT, uttid + ".json"
-                )
-            elif "Ses" in uttid:
-                text_path = os.path.join(
-                    self.ROOT_DIR, "IEMOCAP", "raw-texts", self.SPLIT, uttid + ".json"
-                )
-            else:
-                raise TypeError
+            assert len(uttid.split("/")) == 4
+            d_, s_, d__, u_ = uttid.split("/")
+            text_path = os.path.join(self.ROOT_DIR, d_, "raw-texts", s_, u_ + ".json")
 
         with open(text_path, "r") as stream:
             text = json.load(stream)
@@ -235,9 +270,8 @@ class ErcTextDataset(torch.utils.data.Dataset):
                 "Ses04": {"Female": "Linda", "Male": "Michael"},
                 "Ses05": {"Female": "Elizabeth", "Male": "William"},
             }[sessid][text["Speaker"]]
-
         elif self.DATASET == "MELD_IEMOCAP":
-            pass
+            speaker = ""
         else:
             raise ValueError(f"{self.DATASET} not supported!!!!!!")
 
