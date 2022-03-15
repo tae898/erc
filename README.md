@@ -83,7 +83,11 @@ You can either run the Flask RESTful server app as a docker container or just as
 
 ### Client
 
-Once the app is running, you can send a text to the server. You can do so with a [client.py](client.py).
+Once the app is running, you can send a text to the server. You can do so with a [client.py](client.py). The usage is elow:
+
+```console
+client.py [-h] [--url-emoberta URL_EMOBERTA] --text TEXT
+```
 
 For example:
 
