@@ -1,0 +1,15 @@
+FROM python:3.8.12
+ENV DEBIAN_FRONTEND=noninteractive 
+
+WORKDIR /app
+
+COPY emoberta-large ./emoberta-large
+COPY utils ./utils
+COPY app.py ./
+COPY requirements-deploy.txt ./
+
+RUN apt update
+RUN python3.8 -m pip install --upgrade pip
+RUN python3.8 -m pip install -r requirements-deploy.txt
+
+CMD ["python3.8", "app.py", "--model-type", "emoberta-large", "--device", "cpu"]

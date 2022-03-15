@@ -142,3 +142,7 @@ checkpoints*
 
 # Pytorch models
 *.pt
+
+# pretrained models
+emoberta-base/
+emoberta-large/
