@@ -29,7 +29,6 @@ def run_text(text: str, url_emoberta: str) -> None:
     data = jsonpickle.encode(data)
     response = requests.post(url_emoberta, json=data)
     logging.info(f"got {response} from server!...")
-    print(response.text)
     response = jsonpickle.decode(response.text)
 
     logging.info(f"emoberta results: {response}")
