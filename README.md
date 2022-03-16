@@ -5,6 +5,8 @@
 
 At the moment, we only use the text modality to correctly classify the emotion of the utterances.The experiments were carried out on two datasets (i.e. MELD and IEMOCAP)
 
+[Watch a demo video!](https://youtu.be/qbr7fNd6J28)
+
 ## Prerequisites
 
 1. An x86-64 Unix or Unix-like machine
@@ -41,8 +43,6 @@ If you want to see more training test details, check out `./results/`
 If you want to download the trained checkpoints and stuff, then [here](https://surfdrive.surf.nl/files/index.php/s/khREwk4MUI7MSnO/download) is where you can download them. It's a pretty big zip file.
 
 ## Deployment
-
-[Watch a demo video!](https://youtu.be/qbr7fNd6J28)
 
 ### Huggingface
 
