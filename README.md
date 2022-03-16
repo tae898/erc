@@ -42,6 +42,8 @@ If you want to download the trained checkpoints and stuff, then [here](https://s
 
 ## Deployment
 
+[Watch a demo video!](https://youtu.be/qbr7fNd6J28)
+
 ### Huggingface
 
 We have released our models on huggingface:
