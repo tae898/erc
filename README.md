@@ -145,7 +145,7 @@ Check out the [paper](https://arxiv.org/abs/2108.12009).
 
 ## Authors
 
-- [Taewoon Kim](https://taewoonkim.com/)
+- [Taewoon Kim](https://taewoon.kim/)
 
 ## License
 
