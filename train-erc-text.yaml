@@ -1,13 +1,36 @@
+# Should be MELD, IEMOCAP, or MELD_IEMOCAP
 DATASET: MELD_IEMOCAP
-model_checkpoint: roberta-base
+
+# Either `base` or `large`
+roberta: base
+
+# either null or the checkpoint directory path (e.g., results/MELD_IEMOCAP/roberta-base/SEEDS/2022-04-05-16-20-06-speaker_mode-None-num_past_utterances-0-num_future_utterances-0-batch_size-16-seed-42/checkpoint-8267)
+model_checkpoint: null
+
+# upper, title, or None
 speaker_mode: null
+
+# number of past utterances to consider.
 num_past_utterances: 0
+
+# number of future utterances to consider.
 num_future_utterances: 0
+
+# number of data samples per batch
 BATCH_SIZE: 16
+
+# hyperparameter tuning up to how many dialogues.
 HP_ONLY_UPTO: 20
+
+# maximum number of training epochs.
 NUM_TRAIN_EPOCHS: 15
+
 WEIGHT_DECAY: 0.01
 WARMUP_RATIO: 0.2
+
+# number of trials for hyperparameter tuning
 HP_N_TRIALS: 10
+
+# Random seeds to run. The number of training corresponds to the number of seeds in this list.
 SEEDS:
-- 42
+  - 42

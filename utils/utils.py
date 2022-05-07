@@ -296,7 +296,7 @@ class ErcTextDataset(torch.utils.data.Dataset):
 
         logging.debug(f"arguments given: {args}")
         tokenizer = AutoTokenizer.from_pretrained(self.model_checkpoint, use_fast=True)
-        max_model_input_size = tokenizer.max_model_input_sizes[self.model_checkpoint]
+        max_model_input_size = tokenizer.max_model_input_sizes["roberta-base"]
         num_truncated = 0
 
         inputs = []

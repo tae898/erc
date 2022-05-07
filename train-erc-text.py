@@ -16,15 +16,26 @@ logging.basicConfig(
 def main(
     DATASET: str,
     BATCH_SIZE: int,
-    model_checkpoint: str,
+    roberta: str,
     speaker_mode: str,
     num_past_utterances: int,
     num_future_utterances: int,
     SEEDS: list,
     **kwargs,
 ):
-    """Call `train-erc-text-hp.py and `train-erc-text-full.py`"""
+    """Call `train-erc-text-hp.py and `train-erc-text-full.py`
 
+    Args
+    ----
+    DATASET: MELD, IEMOCAP, or MELD_IEMOCAP
+    BATCH_SIZE: number of data samples per batch
+    roberta: either `base` or `large`
+    speaker_mode: upper, title, or None
+    num_past_utterances: number of past utterances to consider.
+    num_future_utterances: number of future utterances to consider.
+    SEEDS: list of random seeds.
+
+    """
     logging.info(
         f"automatic hyperparameter tuning with speaker_mode: {speaker_mode}, "
         f"num_past_utterances: {num_past_utterances}, "
@@ -33,8 +44,9 @@ def main(
     CURRENT_TIME = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
     SEED = 42  # This seed is only for the hyperparameter tuning.
+
     OUTPUT_DIR = (
-        f"results/{DATASET}/{model_checkpoint}/SEEDS/{CURRENT_TIME}-"
+        f"results/{DATASET}/roberta-{roberta}/SEEDS/{CURRENT_TIME}-"
         f"speaker_mode-{speaker_mode}-num_past_utterances-{num_past_utterances}-"
         f"num_future_utterances-{num_future_utterances}-batch_size-{BATCH_SIZE}-seed-{SEED}"
     )
