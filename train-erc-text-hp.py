@@ -4,6 +4,7 @@ import json
 import logging
 import os
 
+import torch
 import yaml
 from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
                           Trainer, TrainingArguments)
@@ -26,6 +27,7 @@ def main(
     DATASET,
     BATCH_SIZE: int,
     model_checkpoint: str,
+    roberta: str,
     speaker_mode: str,
     num_past_utterances: int,
     num_future_utterances: int,
@@ -46,10 +48,17 @@ def main(
 
     ROOT_DIR = "./multimodal-datasets/"
 
+    if model_checkpoint is None:
+        model_checkpoint = f"roberta-{roberta}"
+
     PER_DEVICE_TRAIN_BATCH_SIZE = BATCH_SIZE
     PER_DEVICE_EVAL_BATCH_SIZE = BATCH_SIZE * 2
     LOAD_BEST_MODEL_AT_END = False
-    FP16 = True
+
+    if torch.cuda.is_available():
+        FP16 = True
+    else:
+        FP16 = False
 
     NUM_CLASSES = get_num_classes(DATASET)
 
