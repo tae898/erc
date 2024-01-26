@@ -1,7 +1,9 @@
 # Emotion Recognition in Coversation (ERC)
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on?p=emoberta-speaker-aware-emotion-recognition-in)<br>
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on-meld)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on-meld?p=emoberta-speaker-aware-emotion-recognition-in)<br>
+[![DOI](https://img.shields.io/badge/Paper-PDF-red.svg)](https://arxiv.org/abs/2108.12009)
+[![DOI](https://zenodo.org/badge/328375452.svg)](https://zenodo.org/badge/latestdoi/328375452)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on?p=emoberta-speaker-aware-emotion-recognition-in)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/emoberta-speaker-aware-emotion-recognition-in/emotion-recognition-in-conversation-on-meld)](https://paperswithcode.com/sota/emotion-recognition-in-conversation-on-meld?p=emoberta-speaker-aware-emotion-recognition-in)
 
 At the moment, we only use the text modality to correctly classify the emotion of the utterances.The experiments were carried out on two datasets (i.e. MELD and IEMOCAP)
 
@@ -34,7 +36,7 @@ This will subsequently call `train-erc-text-hp.py` and `train-erc-text-full.py`.
 |          | Only past utterances            |   64.55   | **68.57** |
 |          | Only future utterances          |   64.23   |   66.56   |
 |          | Both past and future utterances | **65.61** |   67.42   |
-|          | → *without speaker names*       |   65.07   |   64.02   |
+|          | → _without speaker names_       |   65.07   |   64.02   |
 
 Above numbers are the mean values of five random seed runs.
 
@@ -101,13 +103,13 @@ will give you:
 
 ```json
 {
-    "neutral": 0.0049800905,
-    "joy": 0.96399665,
-    "surprise": 0.018937444,
-    "anger": 0.0071516023,
-    "sadness": 0.002021492,
-    "disgust": 0.001495996,
-    "fear": 0.0014167271
+  "neutral": 0.0049800905,
+  "joy": 0.96399665,
+  "surprise": 0.018937444,
+  "anger": 0.0071516023,
+  "sadness": 0.002021492,
+  "disgust": 0.001495996,
+  "fear": 0.0014167271
 }
 ```
 
@@ -132,7 +134,7 @@ Check out the [paper](https://arxiv.org/abs/2108.12009).
 
 ```bibtex
 @misc{kim2021emoberta,
-      title={EmoBERTa: Speaker-Aware Emotion Recognition in Conversation with RoBERTa}, 
+      title={EmoBERTa: Speaker-Aware Emotion Recognition in Conversation with RoBERTa},
       author={Taewoon Kim and Piek Vossen},
       year={2021},
       eprint={2108.12009},
@@ -140,8 +142,6 @@ Check out the [paper](https://arxiv.org/abs/2108.12009).
       primaryClass={cs.CL}
 }
 ```
-
-[![DOI](https://zenodo.org/badge/328375452.svg)](https://zenodo.org/badge/latestdoi/328375452)<br>
 
 ## Authors
 
