@@ -128,9 +128,7 @@ Contributions are what make the open source community such an amazing place to b
 1. Push to the Branch (`git push origin feature/AmazingFeature`)
 1. Open a Pull Request
 
-## Cite our work
-
-Check out the [paper](https://arxiv.org/abs/2108.12009).
+## [Cite our paper](https://arxiv.org/abs/2108.12009)
 
 ```bibtex
 @misc{kim2021emoberta,
